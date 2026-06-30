@@ -18,18 +18,18 @@ class main_info
 	public function module()
 	{
 		return [
-			'filename'	=> '\sebo\bbgatekeeper\acp\main_module',
-			'title'		=> 'ACP_BBGATEKEEPER_TITLE',
-			'modes'		=> [
-				'settings'	=> [
-					'title'	=> 'ACP_BBGATEKEEPER_SETTINGS',
-					'auth'	=> 'acl_a_board',
-					'cat'	=> ['ACP_BBGATEKEEPER_TITLE'],
+			'filename'  => '\sebo\bbgatekeeper\acp\main_module',
+			'title'     => 'ACP_BBGATEKEEPER_TITLE',
+			'modes'     => [
+				'settings'  => [
+					'title' => 'ACP_BBGATEKEEPER_SETTINGS',
+					'auth'  => 'acl_a_board',
+					'cat'   => ['ACP_BBGATEKEEPER_TITLE'],
 				],
-				'logs'	=> [
-					'title'	=> 'ACP_BBGATEKEEPER_LOGS',
-					'auth'	=> 'acl_a_board',
-					'cat'	=> ['ACP_BBGATEKEEPER_TITLE'],
+				'logs'  => [
+					'title' => 'ACP_BBGATEKEEPER_LOGS',
+					'auth'  => 'acl_a_board',
+					'cat'   => ['ACP_BBGATEKEEPER_TITLE'],
 				],
 			],
 		];

@@ -22,7 +22,7 @@ class log_reader
 	* @param string $store_path
 	*/
 	public function __construct(string $store_path)
-	{                
+	{
 		$this->store_path = $store_path;
 	}
 
@@ -33,17 +33,17 @@ class log_reader
 	*/
 	public function tail(int $max_lines, string $status_filter = ''): array
 	{
-	global $request;
-		
-	$phpbb_root = dirname($request->server('SCRIPT_FILENAME', ''), 2);
-    $path = $phpbb_root . '/ext/sebo/bbgatekeeper/store/logs/access.log';
+		global $request;
 
-    if (!is_readable($path))
-    {
-        return [];
-    }
+		$phpbb_root = dirname($request->server('SCRIPT_FILENAME', ''), 2);
+		$path = $phpbb_root . '/ext/sebo/bbgatekeeper/store/logs/access.log';
 
-	$content = file_get_contents($path);
+		if (!is_readable($path))
+		{
+			return [];
+		}
+
+		$content = file_get_contents($path);
 
 	// Check if content is retrieved
 	if ($content === false)
@@ -55,7 +55,7 @@ class log_reader
 		// Normalize line endings and extract lines
 		$content = str_replace(["\r\n", "\r"], "\n", $content);
 		$raw_lines = array_filter(explode("\n", rtrim($content, "\n")));
-		
+
 		// Take the last $max_lines
 		$raw_lines = array_slice($raw_lines, -$max_lines);
 
@@ -71,11 +71,11 @@ class log_reader
 			[$datetime, $ip, $uri, $status, $user_agent] = $parts;
 
 			$entries[] = [
-				'datetime'		=> $datetime,
-				'ip'			=> $ip,
-				'status'		=> $status,
-				'uri'			=> $uri,
-				'user_agent'	=> $user_agent,
+				'datetime'      => $datetime,
+				'ip'            => $ip,
+				'status'        => $status,
+				'uri'           => $uri,
+				'user_agent'    => $user_agent,
 			];
 		}
 
@@ -89,7 +89,7 @@ class log_reader
 	{
 		global $request;
 		$phpbb_root = dirname($request->server('SCRIPT_FILENAME', ''), 2);
-    	$path = $phpbb_root . '/ext/sebo/bbgatekeeper/store/logs/access.log';
+		$path = $phpbb_root . '/ext/sebo/bbgatekeeper/store/logs/access.log';
 		if (!file_exists($path))
 		{
 			return true;

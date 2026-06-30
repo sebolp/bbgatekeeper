@@ -36,14 +36,14 @@ class install_gatekeeper_v10x extends \phpbb\db\migration\migration
 	public function update_schema()
 	{
 		return [
-			'add_tables'		=> [
-				$this->table_prefix . 'sebo_bbgatekeeper_settings'	=> [
-					'COLUMNS'		=> [
-						'bbgatekeeper_setting_id'			=> ['UINT', null, 'auto_increment'],
-						'setting_name'				=> ['VCHAR:200', ''],
-						'setting_value'				=> ['TEXT_UNI', ''],
+			'add_tables'        => [
+				$this->table_prefix . 'sebo_bbgatekeeper_settings'  => [
+					'COLUMNS'       => [
+						'bbgatekeeper_setting_id'           => ['UINT', null, 'auto_increment'],
+						'setting_name'              => ['VCHAR:200', ''],
+						'setting_value'             => ['TEXT_UNI', ''],
 					],
-					'PRIMARY_KEY'	=> 'bbgatekeeper_setting_id',
+					'PRIMARY_KEY'   => 'bbgatekeeper_setting_id',
 				],
 			],
 		];
@@ -70,8 +70,8 @@ class install_gatekeeper_v10x extends \phpbb\db\migration\migration
 
 			['module.add', ['acp', 'ACP_CAT_DOT_MODS', 'ACP_BBGATEKEEPER_TITLE']],
 			['module.add', ['acp', 'ACP_BBGATEKEEPER_TITLE', [
-				'module_basename'	=> '\sebo\bbgatekeeper\acp\main_module',
-				'modes'				=> ['settings', 'logs'],
+				'module_basename'   => '\sebo\bbgatekeeper\acp\main_module',
+				'modes'             => ['settings', 'logs'],
 			]]],
 
 			['custom', [[$this, 'table_sebo_bbgatekeeper_install']]],
@@ -126,15 +126,15 @@ class install_gatekeeper_v10x extends \phpbb\db\migration\migration
 				'setting_value' => json_encode($this->default_bot_domains()),
 			],
 		];
-		
+
 		$sql_ary = [
 			'SELECT' => 'COUNT(s.bbgatekeeper_setting_id) AS total_rows',
 			'FROM'   => [$this->table_prefix . 'sebo_bbgatekeeper_settings' => 's'],
 		];
-		
+
 		$sql = $this->db->sql_build_query('SELECT', $sql_ary);
 		$result = $this->db->sql_query($sql);
-		
+
 		// Fetch the total rows directly to avoid pointer conflicts
 		$total_rows = (int) $this->db->sql_fetchfield('total_rows');
 		$this->db->sql_freeresult($result);
@@ -145,42 +145,41 @@ class install_gatekeeper_v10x extends \phpbb\db\migration\migration
 			$this->db->sql_multi_insert($this->table_prefix . 'sebo_bbgatekeeper_settings', $data);
 		}
 	}
-	
+
 
 	public function revert_data()
-    {
-        return [
-            // Remove modules
-            ['module.remove', ['acp', 'ACP_BBGATEKEEPER_TITLE', [
-                'module_basename'	=> '\sebo\bbgatekeeper\acp\main_module',
-                'modes'				=> ['settings', 'logs'],
-            ]]],
-            ['module.remove', ['acp', 'ACP_CAT_DOT_MODS', 'ACP_BBGATEKEEPER_TITLE']],
+	{
+		return [
+			// Remove modules
+			['module.remove', ['acp', 'ACP_BBGATEKEEPER_TITLE', [
+				'module_basename'   => '\sebo\bbgatekeeper\acp\main_module',
+				'modes'             => ['settings', 'logs'],
+			]]],
+			['module.remove', ['acp', 'ACP_CAT_DOT_MODS', 'ACP_BBGATEKEEPER_TITLE']],
 
-            // Remove configs
-            ['config.remove', ['bbgatekeeper_hcap_site_key']],
-            ['config.remove', ['bbgatekeeper_hcap_site_secret']],
-            ['config.remove', ['bbgatekeeper_hcap_sign_secret']],
+			// Remove configs
+			['config.remove', ['bbgatekeeper_hcap_site_key']],
+			['config.remove', ['bbgatekeeper_hcap_site_secret']],
+			['config.remove', ['bbgatekeeper_hcap_sign_secret']],
 
-            ['config.remove', ['bbgatekeeper_cookie_name']],
-            ['config.remove', ['bbgatekeeper_cookie_ttl']],
-            ['config.remove', ['bbgatekeeper_cookie_samesite']],
+			['config.remove', ['bbgatekeeper_cookie_name']],
+			['config.remove', ['bbgatekeeper_cookie_ttl']],
+			['config.remove', ['bbgatekeeper_cookie_samesite']],
 
-            ['config.remove', ['bbgatekeeper_ip_binding_level']],
-            ['config.remove', ['bbgatekeeper_dry_run']],
+			['config.remove', ['bbgatekeeper_ip_binding_level']],
+			['config.remove', ['bbgatekeeper_dry_run']],
 
-            ['config.remove', ['bbgatekeeper_deploy_ok']],
-            ['config.remove', ['bbgatekeeper_last_deploy_time']],
-        ];
-    }
+			['config.remove', ['bbgatekeeper_deploy_ok']],
+			['config.remove', ['bbgatekeeper_last_deploy_time']],
+		];
+	}
 
 	public function revert_schema()
-    {
-        return [
+	{
+		return [
 			'drop_tables' => [
 					$this->table_prefix . 'sebo_bbgatekeeper_settings',
 				],
-        ];
-    }
-
+		];
+	}
 }

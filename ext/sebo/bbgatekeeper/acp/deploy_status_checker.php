@@ -38,74 +38,74 @@ class deploy_status_checker
 		$this->request = $request;
 	}
 
-    /**
-    * @return array<int, array{key: string, label: string, status: string}>
-    */
-    public function fundamental_checks(): array
-    {
-        return [
-            ['key' => 'config', 'label' => 'BBGATEKEEPER_CHECK_CONFIG', 'status' => $this->get_file_status($this->store_path . 'bbgatekeeper_config.php')],
-            ['key' => 'logger', 'label' => 'BBGATEKEEPER_CHECK_LOGGER', 'status' => $this->get_file_status($this->store_path . 'bbgatekeeper_logger.php')],
-            ['key' => 'ini',    'label' => 'BBGATEKEEPER_CHECK_INI',    'status' => $this->get_ini_status()],
-        ];
-    }
+	/**
+	* @return array<int, array{key: string, label: string, status: string}>
+	*/
+	public function fundamental_checks(): array
+	{
+		return [
+			['key' => 'config', 'label' => 'BBGATEKEEPER_CHECK_CONFIG', 'status' => $this->get_file_status($this->store_path . 'bbgatekeeper_config.php')],
+			['key' => 'logger', 'label' => 'BBGATEKEEPER_CHECK_LOGGER', 'status' => $this->get_file_status($this->store_path . 'bbgatekeeper_logger.php')],
+			['key' => 'ini',    'label' => 'BBGATEKEEPER_CHECK_INI',    'status' => $this->get_ini_status()],
+		];
+	}
 
 	/**
-    * Check if file exists and it is readeable.
-    * 
-    * @return string 'ok', 'bad', o 'no_right_permissions'
-    */
-    private function get_file_status(string $path): string
-    {
-        if (!file_exists($path))
-        {
-            return 'bad';
-        }
+	* Check if file exists and it is readeable.
+	*
+	* @return string 'ok', 'bad', o 'no_right_permissions'
+	*/
+	private function get_file_status(string $path): string
+	{
+		if (!file_exists($path))
+		{
+			return 'bad';
+		}
 
-        return 'ok';
-    }
+		return 'ok';
+	}
 
 	/**
-    * Check .user.ini file
-    * 
-    * @return string 'ok', 'bad', o 'no_rigth_permissions'
-    */
-    public function get_ini_status(): string
-    {
-        $doc_root = $this->request->server('DOCUMENT_ROOT');
-		
+	* Check .user.ini file
+	*
+	* @return string 'ok', 'bad', o 'no_rigth_permissions'
+	*/
+	public function get_ini_status(): string
+	{
+		$doc_root = $this->request->server('DOCUMENT_ROOT');
+
 		if (empty($doc_root))
-        {
-            return 'bad';
-        }
-        
+		{
+			return 'bad';
+		}
+
 		$ini_path = rtrim($doc_root, '/\\') . '/.user.ini';
 
-        if (!file_exists($ini_path))
-        {
+		if (!file_exists($ini_path))
+		{
 			return 'bad';
-        }
+		}
 
-        // if exists
-        return 'ok';
-    }
+		// if exists
+		return 'ok';
+	}
 
-    /**
-    * @return bool true only if every fundamental check status is 'ok'
-    */
-    public function all_ok(): bool
-    {
-        foreach ($this->fundamental_checks() as $check)
-        {
-            // Controlla che lo status sia esattamente 'ok'
-            if ($check['status'] !== 'ok')
-            {
-                return false;
-            }
-        }
+	/**
+	* @return bool true only if every fundamental check status is 'ok'
+	*/
+	public function all_ok(): bool
+	{
+		foreach ($this->fundamental_checks() as $check)
+		{
+			// Controlla che lo status sia esattamente 'ok'
+			if ($check['status'] !== 'ok')
+			{
+				return false;
+			}
+		}
 
-        return true;
-    }
+		return true;
+	}
 
 	/**
 	* Checks, via regex, whether .user.ini points auto_prepend_file at
@@ -120,12 +120,12 @@ class deploy_status_checker
 	public function ini_has_prepend_line(): bool
 	{
 		$doc_root = $this->request->server('DOCUMENT_ROOT');
-        
-        if (empty($doc_root))
-        {
-            return false;
-        }
-        
+
+		if (empty($doc_root))
+		{
+			return false;
+		}
+
 		$ini_path = rtrim($doc_root, '/\\') . '/.user.ini';
 
 		if (!is_readable($ini_path))
@@ -139,28 +139,28 @@ class deploy_status_checker
 			return false;
 		}
 
-        // make the dir to check
-        $script_dir = dirname($this->request->server('SCRIPT_FILENAME'));
-        
-        $base_path = realpath($script_dir . '/' . $this->root_path);
-		
+		// make the dir to check
+		$script_dir = dirname($this->request->server('SCRIPT_FILENAME'));
+
+		$base_path = realpath($script_dir . '/' . $this->root_path);
+
 		if ($base_path === false)
-        {
-            return false;
-        }
+		{
+			return false;
+		}
 
-        // Remove points: transform "./../ext/..." to "ext/..."
-        $clean_store_path = preg_replace('#^(\.{1,2}/)+#', '', $this->store_path);
+		// Remove points: transform "./../ext/..." to "ext/..."
+		$clean_store_path = preg_replace('#^(\.{1,2}/)+#', '', $this->store_path);
 
-        $absolute_logger_path = $base_path . '/' . $clean_store_path . 'bbgatekeeper_logger.php';
-        
-        // Normalize slashs
-        $absolute_logger_path = str_replace('\\', '/', $absolute_logger_path);
+		$absolute_logger_path = $base_path . '/' . $clean_store_path . 'bbgatekeeper_logger.php';
 
-        $expected_path = preg_quote($absolute_logger_path, '/');
+		// Normalize slashs
+		$absolute_logger_path = str_replace('\\', '/', $absolute_logger_path);
 
-        return (bool) preg_match('/^\s*auto_prepend_file\s*=\s*"?' . $expected_path . '"?/m', $content);
-    }
+		$expected_path = preg_quote($absolute_logger_path, '/');
+
+		return (bool) preg_match('/^\s*auto_prepend_file\s*=\s*"?' . $expected_path . '"?/m', $content);
+	}
 
 	/**
 	* Mirrors phpBB's own installer check on bbgatekeeper_config.php: warns if group

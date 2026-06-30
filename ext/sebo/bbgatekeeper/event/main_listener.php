@@ -74,8 +74,8 @@ class main_listener implements EventSubscriberInterface
 	public static function getSubscribedEvents()
 	{
 		return [
-			'core.acp_main_notices'	=> 'add_acp_overview_notice',
-			'core.page_header'			=> 'add_index_admin_warning',
+			'core.acp_main_notices' => 'add_acp_overview_notice',
+			'core.page_header'          => 'add_index_admin_warning',
 		];
 	}
 
@@ -121,9 +121,9 @@ class main_listener implements EventSubscriberInterface
 		$this->language->add_lang('common', 'sebo/bbgatekeeper');
 
 		$this->template->assign_vars([
-			'S_BBGATEKEEPER_SHOW_INDEX_WARNING'	=> true,
-			'BBGATEKEEPER_INDEX_WARNING_TEXT'		=> $this->language->lang('BBGATEKEEPER_DEPLOY_WARNING'),
-			'U_BBGATEKEEPER_ACP'					=> append_sid("{$this->user->page['root_script_path']}adm/index.php", 'i=-sebo-bbgatekeeper-acp-main_module&mode=settings', true, $this->user->session_id),
+			'S_BBGATEKEEPER_SHOW_INDEX_WARNING' => true,
+			'BBGATEKEEPER_INDEX_WARNING_TEXT'       => $this->language->lang('BBGATEKEEPER_DEPLOY_WARNING'),
+			'U_BBGATEKEEPER_ACP'                    => append_sid("{$this->user->page['root_script_path']}adm/index.php", 'i=-sebo-bbgatekeeper-acp-main_module&mode=settings', true, $this->user->session_id),
 		]);
 	}
 }

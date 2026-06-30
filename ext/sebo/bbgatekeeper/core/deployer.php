@@ -55,7 +55,7 @@ class deployer
 	public function deploy_logger(): bool
 	{
 		global $user;
-		
+
 		$template_path = __DIR__ . '/templates/logger.php.template';
 		if (!is_readable($template_path))
 		{
@@ -102,7 +102,7 @@ class deployer
 	}
 
 	/**
-	* Translates a duration in seconds into text 
+	* Translates a duration in seconds into text
 	* used in the hCaptcha challenge page to show the real cookie TTL.
 	*/
 	protected function format_duration(int $seconds): string
@@ -143,7 +143,7 @@ class deployer
 	* @return array<string, string>
 	*/
 	/**
-	 * Translates a duration in seconds into text 
+	 * Translates a duration in seconds into text
 	 * used in the hCaptcha challenge page to show the real cookie TTL.
 	 */
 	protected function build_logger_lang_replacements(): array
@@ -157,18 +157,18 @@ class deployer
 		$email_domain = isset($email_parts[1]) ? $email_parts[1] : '';
 
 		$lang_map = [
-			'BB_LOGGER_SITE_KEY_FOR_HTML' 				=> null,
-			'BB_LOGGER_LANG_SECURITY_CHECK' 			=> 'BBGATEKEEPER_TEMPLATE_LOGGER_SECURITY_CHECK',
-			'BB_LOGGER_LANG_SECURITY_CHECK_EXPLAIN' 	=> 'BBGATEKEEPER_TEMPLATE_LOGGER_SECURITY_CHECK_EXPLAIN',
-			'BB_LOGGER_LANG_SECURITY_CHECK_COOKIE' 		=> 'BBGATEKEEPER_TEMPLATE_LOGGER_COOKIE',
-			'BB_LOGGER_LANG_SECURITY_CHECK_CLAUSE' 		=> 'BBGATEKEEPER_TEMPLATE_LOGGER_CLAUSE',
-			'BB_LOGGER_LANG_SECURITY_CHECK_JS' 			=> 'BBGATEKEEPER_TEMPLATE_LOGGER_JS',
+			'BB_LOGGER_SITE_KEY_FOR_HTML'               => null,
+			'BB_LOGGER_LANG_SECURITY_CHECK'             => 'BBGATEKEEPER_TEMPLATE_LOGGER_SECURITY_CHECK',
+			'BB_LOGGER_LANG_SECURITY_CHECK_EXPLAIN'     => 'BBGATEKEEPER_TEMPLATE_LOGGER_SECURITY_CHECK_EXPLAIN',
+			'BB_LOGGER_LANG_SECURITY_CHECK_COOKIE'      => 'BBGATEKEEPER_TEMPLATE_LOGGER_COOKIE',
+			'BB_LOGGER_LANG_SECURITY_CHECK_CLAUSE'      => 'BBGATEKEEPER_TEMPLATE_LOGGER_CLAUSE',
+			'BB_LOGGER_LANG_SECURITY_CHECK_JS'          => 'BBGATEKEEPER_TEMPLATE_LOGGER_JS',
 			'BB_LOGGER_LANG_SECURITY_CHECK_DO_NOT_AGREE' => 'BBGATEKEEPER_TEMPLATE_LOGGER_DO_NOT_AGREE',
-			'BB_LOGGER_LANG_TEMPLATE_ASSISTANCE' 		=> 'BBGATEKEEPER_TEMPLATE_LOGGER_ASSISTANCE',
-			'BB_LOGGER_TEMPLATE_BUTTON' 				=> 'BBGATEKEEPER_TEMPLATE_LOGGER_BUTTON',
+			'BB_LOGGER_LANG_TEMPLATE_ASSISTANCE'        => 'BBGATEKEEPER_TEMPLATE_LOGGER_ASSISTANCE',
+			'BB_LOGGER_TEMPLATE_BUTTON'                 => 'BBGATEKEEPER_TEMPLATE_LOGGER_BUTTON',
 			'BB_LOGGER_TEMPLATE_ERROR_TOO_MANY_REQUESTS' => 'BBGATEKEEPER_TEMPLATE_LOGGER_ERROR_TOO_MANY_REQUESTS',
-			'BB_LOGGER_TEMPLATE_EMAIL_NAME' 			=> $email_user,
-			'BB_LOGGER_TEMPLATE_EMAIL_DOMAIN' 			=> $email_domain,
+			'BB_LOGGER_TEMPLATE_EMAIL_NAME'             => $email_user,
+			'BB_LOGGER_TEMPLATE_EMAIL_DOMAIN'           => $email_domain,
 		];
 
 		$replacements = [];
@@ -208,28 +208,28 @@ class deployer
 	public function write_ini_line(): bool
 	{
 		$doc_root = $this->request->server('DOCUMENT_ROOT');
-        
-        if (empty($doc_root))
-        {
-            return false;
-        }
-        
+
+		if (empty($doc_root))
+		{
+			return false;
+		}
+
 		$ini_path = rtrim($doc_root, '/\\') . '/.user.ini';
 
-        // make the dir to check
-        $script_dir = dirname($this->request->server('SCRIPT_FILENAME'));
-        
-        $base_path = realpath($script_dir . '/' . $this->root_path);
-		
-		if ($base_path === false)
-        {
-            return false;
-        }
+		// make the dir to check
+		$script_dir = dirname($this->request->server('SCRIPT_FILENAME'));
 
-        $clean_store_path = preg_replace('#^(\.{1,2}/)+#', '', $this->store_path);
-		$prepend_path = $base_path . '/' . $clean_store_path . 'bbgatekeeper_logger.php';   
-		$prepend_path = str_replace('\\', '/', $prepend_path);	
-		
+		$base_path = realpath($script_dir . '/' . $this->root_path);
+
+		if ($base_path === false)
+		{
+			return false;
+		}
+
+		$clean_store_path = preg_replace('#^(\.{1,2}/)+#', '', $this->store_path);
+		$prepend_path = $base_path . '/' . $clean_store_path . 'bbgatekeeper_logger.php';
+		$prepend_path = str_replace('\\', '/', $prepend_path);
+
 		$line = 'auto_prepend_file = "' . $prepend_path . '"';
 
 		return $this->update_ini_file(function (array $lines) use ($line)
@@ -265,12 +265,12 @@ class deployer
 	protected function update_ini_file(callable $transform): bool
 	{
 		$doc_root = $this->request->server('DOCUMENT_ROOT');
-		
+
 		if (empty($doc_root))
 		{
 			return false;
 		}
-		
+
 		$ini_path = rtrim($doc_root, '/\\') . '/.user.ini';
 
 		// Se il file non esiste, iniziamo con un array vuoto

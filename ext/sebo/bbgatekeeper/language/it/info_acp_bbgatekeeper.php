@@ -19,7 +19,7 @@ if (empty($lang) || !is_array($lang))
 }
 
 $lang = array_merge($lang, [
-	'ACP_BBGATEKEEPER_TITLE'		=> 'Bad Bot Gatekeeper',
-	'ACP_BBGATEKEEPER_SETTINGS'		=> 'Settings',
-	'ACP_BBGATEKEEPER_LOGS'			=> 'Logs',
+	'ACP_BBGATEKEEPER_TITLE'        => 'Bad Bot Gatekeeper',
+	'ACP_BBGATEKEEPER_SETTINGS'     => 'Settings',
+	'ACP_BBGATEKEEPER_LOGS'         => 'Logs',
 ]);

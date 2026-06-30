@@ -13,7 +13,7 @@ namespace sebo\bbgatekeeper\acp;
 class main_module
 {
 	/** @var string */
-	var $u_action;
+	public $u_action;
 
 	public $tpl_name;
 	public $page_title;
@@ -23,7 +23,7 @@ class main_module
 	* @param string $mode
 	* @return void
 	*/
-	function main($id, $mode)
+	public function main($id, $mode)
 	{
 		global $user;
 
@@ -37,20 +37,20 @@ class main_module
 				$this->tpl_name = 'bbgatekeeper_settings';
 				$this->page_title = 'ACP_BBGATEKEEPER_SETTINGS';
 				$this->settings();
-			break;
+				break;
 
 			case 'logs':
 				$this->tpl_name = 'bbgatekeeper_logs';
 				$this->page_title = 'ACP_BBGATEKEEPER_LOGS';
 				$this->logs();
-			break;
+				break;
 		}
 	}
 
 	/**
 	* @return void
 	*/
-	function settings()
+	public function settings()
 	{
 		global $config, $request, $template, $user, $phpbb_container, $db, $table_prefix;
 
@@ -148,19 +148,19 @@ class main_module
 		}
 
 		/** @var \sebo\bbgatekeeper\acp\deploy_status_checker $checker */
-        $checker = $phpbb_container->get('sebo.bbgatekeeper.acp.deploy_status_checker');
+		$checker = $phpbb_container->get('sebo.bbgatekeeper.acp.deploy_status_checker');
 
-        foreach ($checker->fundamental_checks() as $check)
-        {
-            $template->assign_block_vars('fundamental_checks', [
-                'LABEL'         => $user->lang($check['label']),
-                'STATUS'        => $check['status'],
-                
-                // Booleani comodi per il template Twig
-                'S_OK'          => ($check['status'] === 'ok'),
-                'S_BAD'         => ($check['status'] === 'bad'),
-            ]);
-        }
+		foreach ($checker->fundamental_checks() as $check)
+		{
+			$template->assign_block_vars('fundamental_checks', [
+				'LABEL'         => $user->lang($check['label']),
+				'STATUS'        => $check['status'],
+
+				// Booleani comodi per il template Twig
+				'S_OK'          => ($check['status'] === 'ok'),
+				'S_BAD'         => ($check['status'] === 'bad'),
+			]);
+		}
 
 		/** Retrieve variables */
 		$ua_patterns = [];
@@ -168,11 +168,11 @@ class main_module
 
 		// Build the SQL query using the array method per phpBB standards
 		$sql_array = [
-			'SELECT'	=> 'setting_name, setting_value',
-			'FROM'		=> [
+			'SELECT'    => 'setting_name, setting_value',
+			'FROM'      => [
 				$table_prefix . 'sebo_bbgatekeeper_settings' => 's'
 			],
-			'WHERE'		=> $db->sql_in_set('setting_name', ['ua_patterns', 'bot_domains'])
+			'WHERE'     => $db->sql_in_set('setting_name', ['ua_patterns', 'bot_domains'])
 		];
 
 		// Execute the query
@@ -194,7 +194,7 @@ class main_module
 
 		// Always free the result
 		$db->sql_freeresult($result);
-		
+
 		// Ensure they are arrays in case json_decode fails
 		$ua_patterns = is_array($ua_patterns) ? $ua_patterns : [];
 		$bot_domains = is_array($bot_domains) ? $bot_domains : [];
@@ -203,35 +203,35 @@ class main_module
 		$ip_level = (int) ($config['bbgatekeeper_ip_binding_level'] ?? 1);
 
 		$template->assign_vars([
-			'U_ACTION'			=> $this->u_action,
+			'U_ACTION'          => $this->u_action,
 
-			'HCAP_EXTERNAL_LINK'	=> '<a href="https://www.hcaptcha.com/" target="_blank" rel="noopener noreferrer"> https://www.hcaptcha.com/ <i class="fa fa-external-link" aria-hidden="true"></i></a>',
-			
-			'S_INI_PREPEND_OK'		=> $checker->ini_has_prepend_line(),
-			'S_INI_STATUS'			=> $checker->get_ini_status(),
+			'HCAP_EXTERNAL_LINK'    => '<a href="https://www.hcaptcha.com/" target="_blank" rel="noopener noreferrer"> https://www.hcaptcha.com/ <i class="fa fa-external-link" aria-hidden="true"></i></a>',
 
-			'HCAP_SITE_KEY'			=> (string) ($config['bbgatekeeper_hcap_site_key'] ?? ''),
-			'HCAP_SITE_SECRET'		=> (string) ($config['bbgatekeeper_hcap_site_secret'] ?? ''),
-			'HCAP_SIGN_SECRET'		=> (string) ($config['bbgatekeeper_hcap_sign_secret'] ?? ''),
-			'COOKIE_DOMAIN'			=> (string) ($config['cookie_domain'] ?? ''),
-			'COOKIE_NAME'			=> (string) ($config['bbgatekeeper_cookie_name'] ?? 'sebo_bbgatekeeper_verified_hcap'),
-			'COOKIE_TTL'			=> (int) ($config['bbgatekeeper_cookie_ttl'] ?? 86400),
-			'COOKIE_SAMESITE_LAX'		=> ($samesite === 'Lax'),
-			'COOKIE_SAMESITE_STRICT'	=> ($samesite === 'Strict'),
+			'S_INI_PREPEND_OK'      => $checker->ini_has_prepend_line(),
+			'S_INI_STATUS'          => $checker->get_ini_status(),
 
-			'UA_PATTERNS'			=> implode("\n", (array) $ua_patterns),
-			'BOT_DOMAINS'			=> implode("\n", (array) $bot_domains),
+			'HCAP_SITE_KEY'         => (string) ($config['bbgatekeeper_hcap_site_key'] ?? ''),
+			'HCAP_SITE_SECRET'      => (string) ($config['bbgatekeeper_hcap_site_secret'] ?? ''),
+			'HCAP_SIGN_SECRET'      => (string) ($config['bbgatekeeper_hcap_sign_secret'] ?? ''),
+			'COOKIE_DOMAIN'         => (string) ($config['cookie_domain'] ?? ''),
+			'COOKIE_NAME'           => (string) ($config['bbgatekeeper_cookie_name'] ?? 'sebo_bbgatekeeper_verified_hcap'),
+			'COOKIE_TTL'            => (int) ($config['bbgatekeeper_cookie_ttl'] ?? 86400),
+			'COOKIE_SAMESITE_LAX'       => ($samesite === 'Lax'),
+			'COOKIE_SAMESITE_STRICT'    => ($samesite === 'Strict'),
 
-			'IP_LEVEL_1'			=> ($ip_level === 1),
-			'IP_LEVEL_2'			=> ($ip_level === 2),
-			'IP_LEVEL_3'			=> ($ip_level === 3),
+			'UA_PATTERNS'           => implode("\n", (array) $ua_patterns),
+			'BOT_DOMAINS'           => implode("\n", (array) $bot_domains),
 
-			'DRY_RUN'			=> (bool) ($config['bbgatekeeper_dry_run'] ?? true),
+			'IP_LEVEL_1'            => ($ip_level === 1),
+			'IP_LEVEL_2'            => ($ip_level === 2),
+			'IP_LEVEL_3'            => ($ip_level === 3),
 
-			'DEPLOY_OK'			=> $checker->all_ok(),
-			'LAST_DEPLOY_TIME'		=> !empty($config['bbgatekeeper_last_deploy_time']) ? $user->format_date((int) $config['bbgatekeeper_last_deploy_time']) : '-',
+			'DRY_RUN'           => (bool) ($config['bbgatekeeper_dry_run'] ?? true),
 
-			'SHOW_PERMISSIONS_WARNING'	=> $checker->config_permissions_warning(),
+			'DEPLOY_OK'         => $checker->all_ok(),
+			'LAST_DEPLOY_TIME'      => !empty($config['bbgatekeeper_last_deploy_time']) ? $user->format_date((int) $config['bbgatekeeper_last_deploy_time']) : '-',
+
+			'SHOW_PERMISSIONS_WARNING'  => $checker->config_permissions_warning(),
 		]);
 	}
 
@@ -240,7 +240,7 @@ class main_module
 	* @param \phpbb\config\config              $config
 	* @return void
 	*/
-	function save_settings($request, $config)
+	private function save_settings($request, $config)
 	{
 		global $db, $table_prefix;
 
@@ -260,33 +260,33 @@ class main_module
 		$config->set('bbgatekeeper_cookie_samesite', in_array($samesite, ['Lax', 'Strict'], true) ? $samesite : 'Lax');
 
 		// English comment: Save textareas and ensure UTF-8 support
-	$ua_patterns_json = $this->textarea_to_json($request->variable('ua_patterns', '', true));
-	$bot_domains_json = $this->textarea_to_json($request->variable('bot_domains', '', true));
+		$ua_patterns_json = $this->textarea_to_json($request->variable('ua_patterns', '', true));
+		$bot_domains_json = $this->textarea_to_json($request->variable('bot_domains', '', true));
 
 	// English comment: Define the array with the column to update
-	$sql_ary_ua = [
-		'setting_value'	=> $ua_patterns_json,
-	];
+		$sql_ary_ua = [
+		'setting_value' => $ua_patterns_json,
+		];
 
 	// English comment: Construct the UPDATE query using sql_build_array for the SET clause
-	$sql = 'UPDATE ' . $table_prefix . 'sebo_bbgatekeeper_settings
+		$sql = 'UPDATE ' . $table_prefix . 'sebo_bbgatekeeper_settings
 		SET ' . $db->sql_build_array('UPDATE', $sql_ary_ua) . "
 		WHERE setting_name = 'ua_patterns'";
 
 	// English comment: Execute the update query for UA patterns
-	$db->sql_query($sql);
+		$db->sql_query($sql);
 
 	// English comment: Define the array for the Bot domains update
-	$sql_ary_bot = [
-		'setting_value'	=> $bot_domains_json,
-	];
+		$sql_ary_bot = [
+		'setting_value' => $bot_domains_json,
+		];
 
 	// English comment: Construct and execute the update query for Bot domains
-	$sql = 'UPDATE ' . $table_prefix . 'sebo_bbgatekeeper_settings
+		$sql = 'UPDATE ' . $table_prefix . 'sebo_bbgatekeeper_settings
 		SET ' . $db->sql_build_array('UPDATE', $sql_ary_bot) . "
 		WHERE setting_name = 'bot_domains'";
 
-	$db->sql_query($sql);
+		$db->sql_query($sql);
 
 		$ip_level = $request->variable('ip_binding_level', 2);
 		$config->set('bbgatekeeper_ip_binding_level', (string) (in_array($ip_level, [1, 2, 3], true) ? $ip_level : 2));
@@ -298,7 +298,7 @@ class main_module
 	* @param string $raw
 	* @return string JSON-encoded array
 	*/
-	function textarea_to_json($raw)
+	private function textarea_to_json($raw)
 	{
 		$lines = preg_split('/\r\n|\r|\n/', (string) $raw);
 		$lines = array_values(array_filter(array_map('trim', $lines), function ($line)
@@ -312,7 +312,7 @@ class main_module
 	/**
 	* @return void
 	*/
-	function logs()
+	private function logs()
 	{
 		global $request, $template, $phpbb_container;
 
@@ -334,7 +334,7 @@ class main_module
 
 		// Only that page
 		$lines = array_slice($all_lines, $start, $limit);
-		
+
 		foreach ($lines as $line)
 		{
 			// Add a check to ensure $line is an array before accessing offsets
@@ -357,8 +357,8 @@ class main_module
 		$pagination->generate_template_pagination($this->u_action, 'pagination', 'start', $total_lines, $limit, $start);
 
 		$template->assign_vars([
-			'U_ACTION'	=> $this->u_action,
-			'LOG_EMPTY'	=> empty($lines),
+			'U_ACTION'  => $this->u_action,
+			'LOG_EMPTY' => empty($lines),
 		]);
 	}
 }

@@ -26,7 +26,7 @@ class reset
 	protected $store_path;
 
 	/** @var array<string,bool> for every step of last reset */
-    protected $results = [];
+	protected $results = [];
 
 	/**
 	* @param deployer $deployer
@@ -45,26 +45,26 @@ class reset
 	{
 		$this->results = [];
 
-        $ok_ini = $this->deployer->remove_ini_line();
-        $this->results['remove_ini_line'] = $ok_ini;
+		$ok_ini = $this->deployer->remove_ini_line();
+		$this->results['remove_ini_line'] = $ok_ini;
 
-        if (!$ok_ini)
-        {
-            // non procediamo con la cancellazione dello store per sicurezza
-            $this->results['delete_store_contents'] = false;
-            return false;
-        }
+		if (!$ok_ini)
+		{
+			// non procediamo con la cancellazione dello store per sicurezza
+			$this->results['delete_store_contents'] = false;
+			return false;
+		}
 
-        $ok_store = $this->delete_store_contents($this->store_path);
-        $this->results['delete_store_contents'] = $ok_store;
+		$ok_store = $this->delete_store_contents($this->store_path);
+		$this->results['delete_store_contents'] = $ok_store;
 
-        return $ok_ini && $ok_store;
-    }
+		return $ok_ini && $ok_store;
+	}
 
-    public function get_results(): array
-    {
-        return $this->results;
-    }
+	public function get_results(): array
+	{
+		return $this->results;
+	}
 
 	/**
 	* Deletes everything under $path except .htaccess, but never $path

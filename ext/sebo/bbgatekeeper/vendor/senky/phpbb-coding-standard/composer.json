@@ -1,0 +1,7 @@
+{
+    "name": "senky/phpbb-coding-standard",
+    "description": "phpBB Coding Standard for PHP_CodeSniffer complements Coding Guidelines by providing sniffs with additional checks.",
+    "require": {
+        "squizlabs/php_codesniffer": "3.*"
+    }
+}

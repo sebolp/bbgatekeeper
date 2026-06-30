@@ -27,5 +27,14 @@
         "soft-require": {
             "phpbb/phpbb": ">=3.3.0,<5.0.0@dev"
         }
+    },
+    "config": {
+        "allow-plugins": {
+            "composer/installers": true
+        }
+    },
+    "require-dev": {
+        "squizlabs/php_codesniffer": "3.7",
+        "senky/phpbb-coding-standard": "dev-master"
     }
 }
