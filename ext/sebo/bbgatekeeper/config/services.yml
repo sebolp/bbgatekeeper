@@ -23,16 +23,6 @@ services:
             $store_path: '%core.root_path%ext/sebo/bbgatekeeper/store/bbgatekeeper/'
             $root_path: '%core.root_path%'
 
-    sebo.bbgatekeeper.htaccess_writer:
-        class: sebo\bbgatekeeper\core\htaccess_writer
-        bind:
-            $root_path: '%core.root_path%'
-
-    sebo.bbgatekeeper.robots_writer:
-        class: sebo\bbgatekeeper\core\robots_writer
-        bind:
-            $root_path: '%core.root_path%'
-
     sebo.bbgatekeeper.reset:
         class: sebo\bbgatekeeper\core\reset
         bind:
