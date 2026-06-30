@@ -1,0 +1,9 @@
+# Deny all direct web access to this directory.
+# Written in both legacy (Apache < 2.4) and modern syntax for compatibility.
+<IfModule mod_authz_core.c>
+	Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+	Order allow,deny
+	Deny from all
+</IfModule>

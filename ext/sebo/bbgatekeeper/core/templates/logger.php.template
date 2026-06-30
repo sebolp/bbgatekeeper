@@ -1,0 +1,230 @@
+<?php
+/**
+ * store/bbgatekeeper_logger.php.template — static gatekeeper logic.
+ *
+ * Copied (with a generated header prepended) into store/bbgatekeeper/bbgatekeeper_logger.php
+ * by core/deployer.php. Contains no site-specific values - those live in
+ * store/bbgatekeeper_config.php, generated separately by core/config_exporter.php.
+ *
+ * Runs as auto_prepend_file on every request, BEFORE phpBB (or anything
+ * else) bootstraps. Keep this file dependency-free and fast.
+ *
+ * powered by sebo - Bad Bot Gatekeeper - https://github.com/sebolp 
+ *
+ */
+
+// ====================== FAIL-OPEN GUARD ======================
+// If bbgatekeeper_config.php is missing (e.g. right after a reset, or a partially
+// completed deploy), let every request through unfiltered rather than
+// fatal-erroring the whole site. acp/deploy_status_checker.php detects
+// and reports this state independently from the ACP side.
+
+$bbgatekeeper_config_path = __DIR__ . '/bbgatekeeper_config.php';
+if (!is_readable($bbgatekeeper_config_path))
+{
+	return;
+}
+
+require $bbgatekeeper_config_path;
+
+// ====================== PATHS ======================
+
+define('BBGATEKEEPER_LOG_DIR', __DIR__ . '/../logs');
+define('BBGATEKEEPER_ACCESS_LOG', BBGATEKEEPER_LOG_DIR . '/access.log');
+define('BBGATEKEEPER_MAX_LOG_SIZE', 20 * 1024 * 1024); // 20MB, then truncate
+
+// ====================== UTILITY ======================
+
+function get_real_ip(): string
+{
+	$ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+	$parts = explode(',', $ip);
+	return trim($parts[0]);
+}
+
+function ensure_log_dir(): void
+{
+	if (!is_dir(BBGATEKEEPER_LOG_DIR))
+	{
+		@mkdir(BBGATEKEEPER_LOG_DIR, 0750, true);
+	}
+}
+
+function write_log(string $line): void
+{
+	ensure_log_dir();
+	if (file_exists(BBGATEKEEPER_ACCESS_LOG) && filesize(BBGATEKEEPER_ACCESS_LOG) > BBGATEKEEPER_MAX_LOG_SIZE)
+	{
+		@file_put_contents(BBGATEKEEPER_ACCESS_LOG, '');
+	}
+	@file_put_contents(BBGATEKEEPER_ACCESS_LOG, $line, FILE_APPEND | LOCK_EX);
+}
+
+// ====================== STEP 1: USER-AGENT ======================
+
+function check_user_agent_block(array $patterns): ?string
+{
+	$ua = strtolower($_SERVER['HTTP_USER_AGENT'] ?? '');
+	if ($ua === '')
+	{
+		return 'empty-ua';
+	}
+	foreach ($patterns as $pattern)
+	{
+		if (strpos($ua, $pattern) !== false)
+		{
+			return 'ua:' . $pattern;
+		}
+	}
+	return null;
+}
+
+// ====================== EXECUTION ======================
+
+$ip = get_real_ip();
+$uri = $_SERVER['REQUEST_URI'] ?? '-';
+$ua_raw = $_SERVER['HTTP_USER_AGENT'] ?? '-';
+$now_str = date('Y-m-d H:i:s');
+
+$is_bot_whitelist = is_search_engine_bot($ip);
+
+$reason = check_user_agent_block(BLOCKED_UA_PATTERNS);
+
+// ====================== STEP 2: hCAPTCHA VALIDATION ======================
+
+$hc_challenge_failed = false;
+
+if (!$is_bot_whitelist && $reason === null)
+{
+	$bypass_challenge = false;
+	if (preg_match('/\.(jpg|jpeg|png|gif|css|js|webp)$/i', $uri))
+	{
+		$bypass_challenge = true;
+	}
+
+	if (!$bypass_challenge && !verify_hcap_token($_COOKIE[HCAP_COOKIE_NAME] ?? null, $ip))
+	{
+		$reason = 'hcaptcha-required';
+		$hc_challenge_failed = true;
+	}
+}
+
+if ($hc_challenge_failed && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['h-captcha-response']))
+{
+	$verify_url = 'https://hcaptcha.com/siteverify';
+
+	$context = stream_context_create([
+		'http' => [
+			'method'  => 'POST',
+			'header'  => "Content-Type: application/x-www-form-urlencoded\r\n",
+			'content' => http_build_query([
+				'secret'   => HCAP_SITE_SECRET,
+				'response' => $_POST['h-captcha-response'],
+			]),
+			'timeout' => 5,
+		],
+	]);
+
+	$response = @file_get_contents($verify_url, false, $context);
+
+	if ($response !== false)
+	{
+		$data = json_decode($response);
+		if ($data && isset($data->success) && $data->success)
+		{
+			set_hcap_cookie($ip);
+			header('Location: ' . $_SERVER['REQUEST_URI']);
+			exit;
+		}
+	}
+}
+
+// ====================== LOGGING ======================
+
+if ($reason === 'hcaptcha-required')
+{
+	$status = 'BLOCKED-CHALLENGE: hCaptcha';
+}
+else if ($reason !== null)
+{
+	$status = 'BLOCKED:' . $reason;
+}
+else
+{
+	$status = 'PASSED';
+}
+
+write_log("{$now_str}|{$ip}|{$status}|{$uri}|{$ua_raw}\n");
+
+// ====================== ENFORCEMENT ======================
+
+if ($reason !== null && !DRY_RUN)
+{
+	if ($hc_challenge_failed)
+	{
+		http_response_code(503);
+		echo
+		<<<HTML
+			<!DOCTYPE html>
+			<html lang="it">
+			<head>
+				<meta charset="UTF-8">
+				<meta name="viewport" content="width=device-width, initial-scale=1.0">
+				<title>{{BB_LOGGER_LANG_SECURITY_CHECK}}</title>
+				<script src="https://js.hcaptcha.com/1/api.js" async defer></script>
+				<style>
+					body { font-family: sans-serif; text-align: center; padding: 1.25rem; line-height: 1.6; }
+					.bot-container { position: relative; display: inline-block; margin-bottom: 1.25rem; }
+					.bot-icon { font-size: 2.5rem; }
+					.ban-icon { position: absolute; top: -30%; left: 50%; color: red; font-size: 4.375rem; pointer-events: none; }
+					input[type="submit"] { padding: 0.25rem 1.25rem; font-size: 1rem; cursor: pointer; }
+				</style>
+			</head>
+			<body>
+				<h2>🤔 {{BB_LOGGER_LANG_SECURITY_CHECK}}</h2>
+				<p>{{BB_LOGGER_LANG_SECURITY_CHECK_EXPLAIN}}</p>
+
+				<div class="bot-container">
+					<span class="bot-icon">🤖</span>
+					<span class="ban-icon">&#8416;</span>
+				</div>
+
+				<form action="" method="POST">
+					<div class="h-captcha" data-sitekey="{{BB_LOGGER_SITE_KEY_FOR_HTML}}"></div>
+					<br />
+					<input type="submit" value="{{BB_LOGGER_TEMPLATE_BUTTON}}" />
+				</form>
+
+				<p>{{BB_LOGGER_LANG_SECURITY_CHECK_COOKIE}}</p>
+				<p>{{BB_LOGGER_LANG_SECURITY_CHECK_CLAUSE}}</p>
+				<p>{{BB_LOGGER_LANG_SECURITY_CHECK_JS}}</p>
+				<p style="font-weight:bold;">{{BB_LOGGER_LANG_SECURITY_CHECK_DO_NOT_AGREE}}</p>
+
+				<p style="color:#AA0000;"><a href="https://github.com/sebolp" target="_blank">sebo - bbgatekeeper</a></p>
+				<p>{{BB_LOGGER_LANG_TEMPLATE_ASSISTANCE}}
+					<span id="email-area">
+						<a href="#" style="text-decoration:none !important;" onclick="showEmail(event);">📧</a>
+					</span>
+				</p>
+
+				<script>
+					function showEmail(event) {
+						event.preventDefault();
+						var user = "{{BB_LOGGER_TEMPLATE_EMAIL_NAME}}";
+						var domain = "{{BB_LOGGER_TEMPLATE_EMAIL_DOMAIN}}";
+						var area = document.getElementById('email-area');
+						area.innerHTML = '<a href="mailto:' + user + '@' + domain + '">' + user + '@' + domain + '</a>';
+					}
+				</script>
+			</body>
+			</html>
+			HTML;
+		exit;
+	}
+	else
+	{
+		http_response_code(429);
+		header('Retry-After: 30');
+		exit('{{BB_LOGGER_TEMPLATE_ERROR_TOO_MANY_REQUESTS}}');
+	}
+}

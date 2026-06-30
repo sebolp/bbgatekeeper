@@ -1,0 +1,50 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: true
+
+    sebo.bbgatekeeper.acp.main_module:
+        class: sebo\bbgatekeeper\acp\main_module
+    
+    sebo.bbgatekeeper.listener:
+        class: sebo\bbgatekeeper\event\main_listener
+        tags:
+            - { name: event.listener }
+
+    sebo.bbgatekeeper.config_exporter:
+        class: sebo\bbgatekeeper\core\config_exporter
+        bind:
+            $store_path: '%core.root_path%ext/sebo/bbgatekeeper/store/bbgatekeeper/'
+
+    sebo.bbgatekeeper.deployer:
+        class: sebo\bbgatekeeper\core\deployer
+        bind:
+            $store_path: '%core.root_path%ext/sebo/bbgatekeeper/store/bbgatekeeper/'
+            $root_path: '%core.root_path%'
+
+    sebo.bbgatekeeper.htaccess_writer:
+        class: sebo\bbgatekeeper\core\htaccess_writer
+        bind:
+            $root_path: '%core.root_path%'
+
+    sebo.bbgatekeeper.robots_writer:
+        class: sebo\bbgatekeeper\core\robots_writer
+        bind:
+            $root_path: '%core.root_path%'
+
+    sebo.bbgatekeeper.reset:
+        class: sebo\bbgatekeeper\core\reset
+        bind:
+            $store_path: '%core.root_path%ext/sebo/bbgatekeeper/store/bbgatekeeper/'
+
+    sebo.bbgatekeeper.acp.deploy_status_checker:
+        class: sebo\bbgatekeeper\acp\deploy_status_checker
+        bind:
+            $store_path: '%core.root_path%ext/sebo/bbgatekeeper/store/bbgatekeeper/'
+            $root_path: '%core.root_path%'
+
+    sebo.bbgatekeeper.acp.log_reader:
+        class: sebo\bbgatekeeper\acp\log_reader
+        bind:
+            $store_path: '%core.root_path%ext/sebo/bbgatekeeper/store/bbgatekeeper/'

@@ -1,0 +1,202 @@
+<?php
+/**
+ * store/bbgatekeeper_config.php.template — rendered into store/bbgatekeeper_config.php
+ * by core/config_exporter.php. The {{PLACEHOLDER}} tokens below are
+ * replaced with var_export()-safe PHP literals; everything else in this
+ * file is copied through unchanged.
+*
+ * powered by sebo - Bad Bot Gatekeeper - https://github.com/sebolp 
+ *
+ */
+
+// ====================== GENERATED SETTINGS ======================
+// Values below come from ACP > Customise > Bad Bot Gatekeeper > Settings.
+
+define('HCAP_SITE_SECRET', {{HCAP_SITE_SECRET}});
+define('HCAP_SITE_KEY', {{HCAP_SITE_KEY}});
+define('HCAP_SIGN_SECRET', {{HCAP_SIGN_SECRET}});
+define('HCAP_COOKIE_NAME', {{HCAP_COOKIE_NAME}});
+define('HCAP_COOKIE_TTL', {{HCAP_COOKIE_TTL}});
+define('HCAP_COOKIE_SAMESITE', {{HCAP_COOKIE_SAMESITE}});
+define('HCAP_COOKIE_DOMAIN', {{HCAP_COOKIE_DOMAIN}});
+
+// 1 = strict (bind to exact IP), 2 = relaxed (bind to network prefix),
+// 3 = disabled (no IP binding at all). See get_ip_binding_value() below.
+define('IP_BINDING_LEVEL', {{IP_BINDING_LEVEL}});
+
+define('DRY_RUN', {{DRY_RUN}});
+
+define('BLOCKED_UA_PATTERNS', {{BLOCKED_UA_PATTERNS}});
+define('ALLOWED_BOT_DOMAINS', {{ALLOWED_BOT_DOMAINS}});
+
+// ====================== STATIC LOGIC ======================
+// Everything below rarely needs to change between deployments.
+
+/**
+* Verifies, via Forward-Confirmed reverse DNS, that an IP genuinely
+* belongs to a search engine whitelisted in ALLOWED_BOT_DOMAINS. Plain
+* reverse DNS alone is spoofable; the forward-confirm step closes that
+* gap. Handles both IPv4 and IPv6.
+*/
+function is_search_engine_bot(string $ip): bool
+{
+	$host = gethostbyaddr($ip);
+	if ($host === false || $host === $ip)
+	{
+		return false;
+	}
+
+	$host_lower = strtolower($host);
+	$matched = false;
+	foreach (ALLOWED_BOT_DOMAINS as $domain)
+	{
+		if (substr($host_lower, -strlen($domain)) === strtolower($domain))
+		{
+			$matched = true;
+			break;
+		}
+	}
+
+	if (!$matched)
+	{
+		return false;
+	}
+
+	return forward_confirms_hostname($host, $ip);
+}
+
+/**
+* Confirms that the hostname found via reverse lookup resolves back to
+* the original IP (A record for IPv4, AAAA for IPv6).
+*/
+function forward_confirms_hostname(string $host, string $ip): bool
+{
+	$is_ipv6 = filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) !== false;
+
+	if ($is_ipv6)
+	{
+		$records = @dns_get_record($host, DNS_AAAA);
+		if (!is_array($records))
+		{
+			return false;
+		}
+		foreach ($records as $record)
+		{
+			if (isset($record['ipv6']) && hash_equals($record['ipv6'], $ip))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	$forward_ip = gethostbyname($host);
+	if ($forward_ip === $host)
+	{
+		return false;
+	}
+	return hash_equals($forward_ip, $ip);
+}
+
+/**
+* Computes the value an hCaptcha token gets bound to, depending on
+* IP_BINDING_LEVEL:
+*  1 = exact IP (strictest, default)
+*  2 = network prefix only (IPv4 first two octets, IPv6 first two hex
+*      groups) - tolerates IP rotation within the same mobile/ISP network
+*  3 = no binding at all - the token survives any IP change, at the cost
+*      of being usable by anyone who obtains the cookie value
+*/
+function get_ip_binding_value(string $ip, int $level): string
+{
+	if ($level === 3)
+	{
+		return 'nobind';
+	}
+
+	$is_ipv6 = filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) !== false;
+
+	if ($level === 2)
+	{
+		if ($is_ipv6)
+		{
+			$groups = explode(':', $ip);
+			return strtolower(($groups[0] ?? '0') . ':' . ($groups[1] ?? '0'));
+		}
+
+		$octets = explode('.', $ip);
+		return ($octets[0] ?? '0') . '.' . ($octets[1] ?? '0');
+	}
+
+	return $ip;
+}
+
+/**
+* Generates a signed (HMAC-SHA256) token to store in the hCaptcha
+* verification cookie. Content: bound_value|expires|signature.
+*/
+function make_hcap_token(string $ip): string
+{
+	$bound = get_ip_binding_value($ip, IP_BINDING_LEVEL);
+	$expires = time() + HCAP_COOKIE_TTL;
+	$payload = $bound . '|' . $expires;
+	$sig = hash_hmac('sha256', $payload, HCAP_SIGN_SECRET);
+	return base64_encode($payload . '|' . $sig);
+}
+
+/**
+* Verifies the token in the cookie: correct format, not expired,
+* signature matches HCAP_SIGN_SECRET, and the binding value matches what
+* the current request computes at the configured IP_BINDING_LEVEL.
+*/
+function verify_hcap_token(?string $token, string $ip): bool
+{
+	if ($token === null || $token === '')
+	{
+		return false;
+	}
+
+	$decoded = base64_decode($token, true);
+	if ($decoded === false)
+	{
+		return false;
+	}
+
+	$parts = explode('|', $decoded);
+	if (count($parts) !== 3)
+	{
+		return false;
+	}
+
+	[$tok_bound, $expires, $sig] = $parts;
+
+	if (!ctype_digit($expires) || (int) $expires < time())
+	{
+		return false;
+	}
+
+	$expected_sig = hash_hmac('sha256', $tok_bound . '|' . $expires, HCAP_SIGN_SECRET);
+	if (!hash_equals($expected_sig, $sig))
+	{
+		return false;
+	}
+
+	$current_bound = get_ip_binding_value($ip, IP_BINDING_LEVEL);
+	return hash_equals($tok_bound, $current_bound);
+}
+
+/**
+* Sets the hCaptcha verification cookie with a freshly generated token.
+*/
+function set_hcap_cookie(string $ip): void
+{
+	$token = make_hcap_token($ip);
+	setcookie(HCAP_COOKIE_NAME, $token, [
+		'expires'  => time() + HCAP_COOKIE_TTL,
+		'path'     => '/',
+		'domain'   => HCAP_COOKIE_DOMAIN,
+		'secure'   => true,
+		'httponly' => true,
+		'samesite' => HCAP_COOKIE_SAMESITE,
+	]);
+}

@@ -1,0 +1,205 @@
+{% INCLUDE 'overall_header.html' %}
+{% INCLUDECSS '@sebo_bbgatekeeper/acp_css.css' %}
+
+<h1>{{ lang('ACP_BBGATEKEEPER_SETTINGS') }}</h1>
+<p>{{ lang('ACP_BBGATEKEEPER_SETTINGS_PRE_EXPLAIN', HCAP_EXTERNAL_LINK) }}</p>
+<p>{{ lang('ACP_BBGATEKEEPER_SETTINGS_EXPLAIN') }}</p>
+<div class="errorbox">
+	<p><strong>{{ lang('ACP_BBGATEKEEPER_SETTINGS_LANGUAGE_FALLBACK') }}</strong><br />{{ lang('ACP_BBGATEKEEPER_SETTINGS_LANGUAGE_FALLBACK_EXPLAIN') }}</p>
+</div>
+
+<fieldset>
+    <legend>{{ lang('BBGATEKEEPER_FUNDAMENTAL_STEPS') }}</legend>
+    <p>{{ lang('BBGATEKEEPER_FUNDAMENTAL_STEPS_EXPLAIN') }}</p>
+
+    <div class="bbgk-status-grid">
+        <!-- BEGIN fundamental_checks -->
+        <div class="bbgk-status-card">
+            <!-- IF fundamental_checks.S_OK -->
+                <div class="successbox">
+                    <p><strong>{{ fundamental_checks.LABEL }}</strong><br /><!-- IF not S_INI_PREPEND_OK and S_INI_STATUS == 'ok'  -->⚠️<!-- ELSE -->🗹<!-- ENDIF --> {{ lang('BBGATEKEEPER_FUNDAMENTAL_STEPS_ALL_OK') }}</p>
+                </div>
+            <!-- ELSEIF fundamental_checks.S_BAD -->
+                <div class="errorbox">
+                    <p><strong>{{ fundamental_checks.LABEL }}</strong><br />✗ {{ lang('BBGATEKEEPER_FUNDAMENTAL_STEPS_BAD') }}</p>
+                </div>
+            <!-- ELSEIF fundamental_checks.S_NO_PERMS -->
+                <div class="errorbox notice">
+                    <p><strong>{{ fundamental_checks.LABEL }}</strong><br />⚠ {{ lang('BBGATEKEEPER_FUNDAMENTAL_STEPS_NO_RIGHT_PERMISSIONS') }}</p>
+                </div>	
+            <!-- ENDIF -->
+        </div>
+        <!-- END fundamental_checks -->
+    </div>
+	<!-- IF SHOW_PERMISSIONS_WARNING -->
+		<div class="errorbox notice">
+			<p>{{ lang('BBGATEKEEPER_PERMISSIONS_WARNING') }}</p>
+		</div>
+	<!-- ENDIF -->
+	<!-- IF not S_INI_PREPEND_OK and S_INI_STATUS == 'ok'  -->
+		<div class="errorbox notice">
+			<p>{{ lang('BBGATEKEEPER_INI_PREPEND_INCORRECT') }}</p>
+		</div>
+	<!-- ENDIF -->
+
+</fieldset>
+
+
+
+<form id="bbgatekeeper_settings" method="post" action="{U_ACTION}">
+
+	<fieldset>
+		<legend>🧩 {{ lang('BBGATEKEEPER_HCAPTCHA') }}</legend>
+
+		<dl>
+			<dt>
+				<label for="hcap_site_key">{{ lang('BBGATEKEEPER_HCAP_SITE_KEY') }}</label>
+				<p>{{ lang('BBGATEKEEPER_HCAP_SITE_KEY_EXPLAIN') }}</p>
+			</dt>
+			<dd><input type="text" id="hcap_site_key" name="hcap_site_key" value="{HCAP_SITE_KEY}" class="medium" /></dd>
+		</dl>
+
+		<dl>
+			<dt>
+				<label for="hcap_site_secret">{{ lang('BBGATEKEEPER_HCAP_SITE_SECRET') }}</label>
+				<p>{{ lang('BBGATEKEEPER_HCAP_SITE_SECRET_EXPLAIN') }}</p>
+			</dt>
+			<dd><input type="password" id="hcap_site_secret" name="hcap_site_secret" value="{HCAP_SITE_SECRET}" class="medium" autocomplete="off" /></dd>
+		</dl>
+
+		<dl>
+			<dt>
+				<label for="hcap_sign_secret">{{ lang('BBGATEKEEPER_HCAP_SIGN_SECRET') }}</label>
+				<p>{{ lang('BBGATEKEEPER_HCAP_SIGN_SECRET_EXPLAIN') }}</p>
+			</dt>
+			<dd>
+				<input type="text" id="hcap_sign_secret" name="hcap_sign_secret" value="{HCAP_SIGN_SECRET}" class="medium" />
+				<input class="button2" type="submit" name="submit_generate_secret" value="{{ lang('BBGATEKEEPER_GENERATE') }}" />
+				
+			</dd>
+		</dl>
+	</fieldset>
+
+	<fieldset>
+		<legend>🍪 {{ lang('BBGATEKEEPER_COOKIE') }}</legend>
+
+		<dl>
+			<dt>
+				<label for="cookie_name">{{ lang('BBGATEKEEPER_COOKIE_NAME') }}</label>
+				<p>{{ lang('BBGATEKEEPER_COOKIE_NAME_EXPLAIN') }}</p>
+			</dt>
+			<dd><input type="text" id="cookie_name" name="cookie_name" value="{COOKIE_NAME}" class="medium" /></dd>
+		</dl>
+
+		<dl>
+			<dt>
+				<label for="cookie_ttl">{{ lang('BBGATEKEEPER_COOKIE_TTL') }}</label>
+				<p>{{ lang('BBGATEKEEPER_COOKIE_TTL_EXPLAIN') }}</p>
+			</dt>
+			<dd><input type="number" id="cookie_ttl" name="cookie_ttl" value="{COOKIE_TTL}" min="60" class="medium" /> {{ lang('SECONDS') }}</dd>
+		</dl>
+
+		<dl>
+			<dt>
+				<label for="cookie_domain">{{ lang('BBGATEKEEPER_COOKIE_DOMAIN') }}</label>
+				<p>{{ lang('BBGATEKEEPER_COOKIE_DOMAIN_EXPLAIN') }}</p>
+			</dt>
+			<dd><input type="text" id="cookie_domain" name="cookie_domain" value="{COOKIE_DOMAIN}" class="medium" /></dd>
+		</dl>
+
+		<dl>
+			<dt>
+				<strong>{{ lang('BBGATEKEEPER_COOKIE_SAMESITE') }}</strong>
+				<p>{{ lang('BBGATEKEEPER_COOKIE_SAMESITE_EXPLAIN') }}</p>
+			</dt>
+			<dd>
+				<label><input type="radio" name="cookie_samesite" value="Lax" <!-- IF COOKIE_SAMESITE_LAX -->checked="checked"<!-- ENDIF --> /> Lax</label>
+				&nbsp;
+				<label><input type="radio" name="cookie_samesite" value="Strict" <!-- IF COOKIE_SAMESITE_STRICT -->checked="checked"<!-- ENDIF --> /> Strict</label>
+			</dd>
+		</dl>
+	</fieldset>
+
+	<fieldset>
+		<legend>🤖 {{ lang('BBGATEKEEPER_UA_BLOCKLIST') }}</legend>
+		<dl>
+			<dt>
+				<label for="ua_patterns">{{ lang('BBGATEKEEPER_UA_PATTERNS') }}</label>
+				<p>{{ lang('BBGATEKEEPER_UA_PATTERNS_EXPLAIN') }}</p>
+			</dt>
+			<dd>
+				<textarea id="ua_patterns" name="ua_patterns" rows="8" cols="40" style="overflow-y: auto;">{UA_PATTERNS}</textarea>
+			</dd>
+		</dl>
+	</fieldset>
+
+	<fieldset>
+		<legend>📍 {{ lang('BBGATEKEEPER_IP_BINDING') }}</legend>
+		<dl>
+			<dt>
+				{{ lang('BBGATEKEEPER_IP_BINDING') }}
+				<p>{{ lang('BBGATEKEEPER_IP_BINDING_EXPLAIN') }}</p>	
+			</dt>
+			<dd>
+				<label><input type="radio" name="ip_binding_level" value="1" <!-- IF IP_LEVEL_1 -->checked="checked"<!-- ENDIF --> /> {{ lang('BBGATEKEEPER_IP_LEVEL_1') }}</label><br />
+				<label><input type="radio" name="ip_binding_level" value="2" <!-- IF IP_LEVEL_2 -->checked="checked"<!-- ENDIF --> /> {{ lang('BBGATEKEEPER_IP_LEVEL_2') }}</label><br />
+				<label><input type="radio" name="ip_binding_level" value="3" <!-- IF IP_LEVEL_3 -->checked="checked"<!-- ENDIF --> /> {{ lang('BBGATEKEEPER_IP_LEVEL_3') }}</label>
+			</dd>
+		</dl>
+	</fieldset>
+
+	<fieldset>
+		<legend>🌐 {{ lang('BBGATEKEEPER_BOT_WHITELIST') }}</legend>
+		<dl>
+			<dt>
+				<label for="bot_domains">{{ lang('BBGATEKEEPER_BOT_DOMAINS') }}</label>
+				<p>{{ lang('BBGATEKEEPER_BOT_DOMAINS_EXPLAIN') }}</p>
+				ACP_BBGATEKEEPER_SETTINGS_LANGUAGE_FALLBACK
+			</dt>
+			<dd>
+				<textarea id="bot_domains" name="bot_domains" rows="8" cols="40">{BOT_DOMAINS}</textarea>
+			</dd>
+		</dl>
+	</fieldset>
+
+	<fieldset>
+		<legend>{{ lang('BBGATEKEEPER_MODE') }}</legend>
+		<dl>
+			<dt>
+				<label for="dry_run">{{ lang('BBGATEKEEPER_DRY_RUN') }}</label>
+				<p>{{ lang('BBGATEKEEPER_DRY_RUN_EXPLAIN') }}</p>
+			</dt>
+			<dd>
+				<input type="checkbox" id="dry_run" name="dry_run" value="1" <!-- IF DRY_RUN -->checked="checked"<!-- ENDIF --> />
+			</dd>
+		</dl>
+	</fieldset>
+
+	<fieldset>
+		<legend>{{ lang('BBGATEKEEPER_DEPLOY_STATUS') }}</legend>
+		<p>
+			<!-- IF DEPLOY_OK -->
+				<strong class="text-success">{{ lang('BBGATEKEEPER_DEPLOY_OK') }}</strong>
+			<!-- ELSE -->
+				<strong class="text-error">{{ lang('BBGATEKEEPER_DEPLOY_NOT_OK') }}</strong>
+			<!-- ENDIF -->
+			&mdash; {{ lang('BBGATEKEEPER_LAST_DEPLOY') }}: {LAST_DEPLOY_TIME}
+		</p>
+	</fieldset>
+
+	<fieldset style="background-color: #ffe5ca;">
+		<legend>⚠️ {{ lang('BBGATEKEEPER_RESET') }}</legend>
+		<p>{{ lang('BBGATEKEEPER_RESET_EXPLAIN') }}</p>
+		<p><strong>{{ lang('BBGATEKEEPER_RESET_EXPLAIN_WARNING') }}</strong></p>
+	</fieldset>
+
+	<fieldset class="submit-buttons">
+		{S_FORM_TOKEN}
+		<input class="button1" type="submit" name="submit_save" value="{{ lang('BBGATEKEEPER_SAVE_CHANGES') }}" />
+		<input class="button2" type="submit" name="submit_deploy" value="{{ lang('BBGATEKEEPER_GENERATE_DEPLOY') }}" />
+		<input class="button2" type="submit" name="submit_reset" value="{{ lang('BBGATEKEEPER_RESET') }}" onclick="return confirm('{LA_CONFIRM_OPERATION}');" />
+	</fieldset>
+
+</form>
+
+{% INCLUDE 'overall_footer.html' %}

@@ -1,0 +1,16 @@
+/* Contenitore Flexbox */
+.bbgk-status-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.bbgk-status-card {
+    flex: 1 1 250px;
+}
+
+.bbgk-status-card .successbox,
+.bbgk-status-card .errorbox {
+    margin-bottom: 0;
+}

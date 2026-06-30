@@ -1,0 +1,39 @@
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.table-container table {
+    width: 100%;
+    table-layout: fixed; /* Fondamentale: le colonne avranno la larghezza definita */
+    border-collapse: collapse;
+}
+
+.table-container th, 
+.table-container td {
+    padding: 8px;
+    overflow: hidden;
+    white-space: nowrap;      /* Impedisce il ritorno a capo */
+    text-overflow: ellipsis;  /* Aggiunge i puntini (...) se il testo è lungo */
+}
+
+/* Definisci le percentuali o larghezze per ogni colonna */
+.table-container th:nth-child(1) { width: 15%; } /* DATETIME */
+.table-container th:nth-child(2) { width: 10%; } /* IP */
+.table-container th:nth-child(3) { width: 10%; } /* STATUS */
+.table-container th:nth-child(4) { width: 30%; } /* URI */
+.table-container th:nth-child(5) { width: 35%; } /* USER_AGENT */
+
+/* inline folder coding */
+code.inline {
+    background: #FFF;
+    border: 1px solid #C9D2D8;
+    color: #2E8B57;
+    display: inline;
+    font-family: Monaco, "Andale Mono", "Courier New", Courier, monospace;
+    font-size: 0.9em;
+    font-style: normal;
+    line-height: 1.3em;
+    white-space: pre;
+    padding: 0 3px;
+}
