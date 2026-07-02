@@ -27,5 +27,14 @@ $lang = array_merge($lang, [
 	'BBGATEKEEPER_TEMPLATE_LOGGER_JS' => 'E\' necessario anche l\'uso dei JavaScript.',
 	'BBGATEKEEPER_TEMPLATE_LOGGER_DO_NOT_AGREE' => 'Se non acconsenti a questo trattamento / scopo non proseguire.',
 	'BBGATEKEEPER_TEMPLATE_LOGGER_ASSISTANCE' => 'Per qualunque comunicazione o assistenza:',
+	'BBGATEKEEPER_TEMPLATE_LOGGER_ERROR_TOO_MANY_REQUESTS'		=> 'Troppe richieste o accesso negato. Per favore riprova più tardi.',
+	'BBGATEKEEPER_TEMPLATE_LOGGER_WORD_MINUTE'			=> 'minuto',
+	'BBGATEKEEPER_TEMPLATE_LOGGER_WORD_MINUTES'			=> 'minuti',
+	'BBGATEKEEPER_TEMPLATE_LOGGER_WORD_HOUR'			=> 'ora',
+	'BBGATEKEEPER_TEMPLATE_LOGGER_WORD_HOURS'			=> 'ore',
+	'BBGATEKEEPER_TEMPLATE_LOGGER_WORD_DAY'				=> 'giorno',
+	'BBGATEKEEPER_TEMPLATE_LOGGER_WORD_DAYS'			=> 'giorni',
+	'BBGATEKEEPER_TEMPLATE_LOGGER_WORD_WEEK'			=> 'settimana',
+	'BBGATEKEEPER_TEMPLATE_LOGGER_WORD_WEEKS'			=> 'settimane',
 
 ]);
