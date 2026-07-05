@@ -1,8 +1,6 @@
 <?php
 namespace sebo\bbgatekeeper\controller;
 
-use Symfony\Component\HttpFoundation\Response;
-
 class whois_controller
 {
 	protected $auth;

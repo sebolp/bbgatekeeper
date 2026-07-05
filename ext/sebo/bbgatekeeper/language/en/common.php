@@ -125,7 +125,7 @@ $lang = array_merge($lang, [
 
 	// >= 1.1
 	'BBGATEKEEPER_WHOIS' => 'WHOIS IP',
-    'BBGATEKEEPER_SAVE_MODAL_TITLE'   => 'Settings saving',
-    'BBGATEKEEPER_SAVE_MODAL_TEXT'    => 'This action only save settings in the database. If you want to apply settings to current files and your forum, you have to use the button:',
-    'BBGATEKEEPER_SAVE_MODAL_CONFIRM' => 'Save anyway',
+	'BBGATEKEEPER_SAVE_MODAL_TITLE'   => 'Settings saving',
+	'BBGATEKEEPER_SAVE_MODAL_TEXT'    => 'This action only save settings in the database. If you want to apply settings to current files and your forum, you have to use the button:',
+	'BBGATEKEEPER_SAVE_MODAL_CONFIRM' => 'Save anyway',
 ]);

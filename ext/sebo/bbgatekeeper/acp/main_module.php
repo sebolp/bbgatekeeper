@@ -29,8 +29,8 @@ class main_module
 
 		$user->add_lang_ext('sebo/bbgatekeeper', 'common');
 
-		/* 
-		*	Detect whois 
+		/*
+		*	Detect whois
 		*/
 		$whois_ip = $request->variable('whois', '');
 			if ($whois_ip !== '')
@@ -338,7 +338,7 @@ class main_module
 		global $request, $template, $phpbb_container;
 
 		/** @var \phpbb\controller\helper $helper */
-    	$helper = $phpbb_container->get('controller.helper');
+		$helper = $phpbb_container->get('controller.helper');
 
 		/** @var log_reader $log_reader */
 		$log_reader = $phpbb_container->get('sebo.bbgatekeeper.acp.log_reader');

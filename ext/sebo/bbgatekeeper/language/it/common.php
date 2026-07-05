@@ -101,7 +101,7 @@ $lang = array_merge($lang, [
 	'BBGATEKEEPER_IP_LEVEL_2'		=> 'Media (predefinito) - Tolleranza di città',
 	'BBGATEKEEPER_IP_LEVEL_3'		=> 'Media MULTI (preferito) - Tolleranza di città e gestione fino a 5 luoghi multipli',
 	'BBGATEKEEPER_IP_LEVEL_4'		=> 'Bassa — Nessun binding IP',
-	
+
 	'BBGATEKEEPER_SAVE_CHANGES'		=> 'Salva impostazioni',
 	'BBGATEKEEPER_RESET'			=> 'Elimina i file generati e pulisci il file .user.ini',
 	'BBGATEKEEPER_RESET_EXPLAIN'		=> 'Se vuoi eliminare i file e il file .user.ini, usa il relativo pulsante.<br />Rimuove auto_prepend_file da .user.ini ed elimina i file PHP generati sotto store/gatekeeper.<br />Le impostazioni salvate vengono mantenute.<br />',
@@ -126,6 +126,6 @@ $lang = array_merge($lang, [
 	// >= 1.1
 	'BBGATEKEEPER_WHOIS' => 'IP WHOIS',
 	'BBGATEKEEPER_SAVE_MODAL_TITLE'   => 'Stai salvando le impostazioni',
-    'BBGATEKEEPER_SAVE_MODAL_TEXT'    => 'Questa azione salva le impostazioni ma non genera il file di configurazione. Per applicare le modifiche definitivamente devi cliccare sull\'altro pulsante:',
-    'BBGATEKEEPER_SAVE_MODAL_CONFIRM' => 'Salva comunque',
+	'BBGATEKEEPER_SAVE_MODAL_TEXT'    => 'Questa azione salva le impostazioni ma non genera il file di configurazione. Per applicare le modifiche definitivamente devi cliccare sull\'altro pulsante:',
+	'BBGATEKEEPER_SAVE_MODAL_CONFIRM' => 'Salva comunque',
 ]);
