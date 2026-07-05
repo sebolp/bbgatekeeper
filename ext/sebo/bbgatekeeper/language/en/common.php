@@ -96,10 +96,11 @@ $lang = array_merge($lang, [
 	'BBGATEKEEPER_PERMISSIONS_WARNING'  => 'Your config file (config.php) is currently world-writable. We strongly encourage you to change the permissions to 640 or at least to 644 (for example: chmod 640 config.php).',
 
 	'BBGATEKEEPER_IP_BINDING'       => 'IP binding (mobile / network change tolerance)',
-	'BBGATEKEEPER_IP_BINDING_EXPLAIN'       => 'Moving within the same city or network provider may change your IP address.<br />This option looks forward possible IP changes to avoid facing the hCaptcha challenge too many times.<br /><em>High</em> - Exactly the same IP: You must have a provider with a static IP and not move within your city.<br /><em>Medium (default)</em> - You can move within the city and have a provider with a dynamic IP at home.<br /><em>Low</em> - No IP checks (reduces protection against cookie theft/reuse)',
+	'BBGATEKEEPER_IP_BINDING_EXPLAIN'       => 'Moving within the same city or network provider may change your IP address.<br />This option looks forward possible IP changes to avoid facing the hCaptcha challenge too many times.<br /><em>High</em> - Exactly the same IP: You must have a provider with a static IP and not move within your city.<br /><em>Medium (default)</em> - You can move within the city and have a provider with a dynamic IP at home.<br /><em>Medium MULTI (preferred)</em> - the same as Medium level but allows (and remeber) 5 different IPs.<br /><em>Low</em> - No IP checks (reduces protection against cookie theft/reuse)',
 	'BBGATEKEEPER_IP_LEVEL_1'       => 'High - Street tolerance',
 	'BBGATEKEEPER_IP_LEVEL_2'       => 'Medium (default) - City tolerance',
-	'BBGATEKEEPER_IP_LEVEL_3'       => 'Low — no IP binding at all',
+	'BBGATEKEEPER_IP_LEVEL_3'       => 'Medium MULTI — bind to the network prefix, remembers up to 5 locations at once (e.g. home + work)',
+	'BBGATEKEEPER_IP_LEVEL_4'       => 'Low — no IP binding at all',
 
 	'BBGATEKEEPER_SAVE_CHANGES'     => 'Save settings',
 	'BBGATEKEEPER_RESET'            => 'Delete generated files and purge .user.ini file',
@@ -121,4 +122,10 @@ $lang = array_merge($lang, [
 	'BBGATEKEEPER_CONFIRM_REMOVE_STORE_FILES' => 'Removing config.php and logger.php files from store/bbgatekeeper folder',
 	'BBGATEKEEPER_CONFIG_FILE_GENERATING' => 'Creating <strong>bbgatekeeper_config.php</strong> file into store/bbgatekeeper folder',
 	'BBGATEKEEPER_LOGGER_AND_INI_DEPLOY' => 'Creating <strong>bbgatekeeper_logger.php</strong> file into store/bbgatekeeper folder and <strong>.user.ini</strong> file into root website folder',
+
+	// >= 1.1
+	'BBGATEKEEPER_WHOIS' => 'WHOIS IP',
+    'BBGATEKEEPER_SAVE_MODAL_TITLE'   => 'Settings saving',
+    'BBGATEKEEPER_SAVE_MODAL_TEXT'    => 'This action only save settings in the database. If you want to apply settings to current files and your forum, you have to use the button:',
+    'BBGATEKEEPER_SAVE_MODAL_CONFIRM' => 'Save anyway',
 ]);

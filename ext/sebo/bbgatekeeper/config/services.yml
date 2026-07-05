@@ -6,7 +6,7 @@ services:
 
     sebo.bbgatekeeper.acp.main_module:
         class: sebo\bbgatekeeper\acp\main_module
-    
+
     sebo.bbgatekeeper.listener:
         class: sebo\bbgatekeeper\event\main_listener
         tags:
@@ -38,3 +38,14 @@ services:
         class: sebo\bbgatekeeper\acp\log_reader
         bind:
             $store_path: '%core.root_path%ext/sebo/bbgatekeeper/store/bbgatekeeper/'
+
+    sebo.bbgatekeeper.controller.whois:
+        class: sebo\bbgatekeeper\controller\whois_controller
+        arguments:
+            - '@auth'
+            - '@template'
+            - '@user'
+            - '@request'
+            - '@controller.helper'
+            - '%core.root_path%'
+            - '%core.php_ext%'

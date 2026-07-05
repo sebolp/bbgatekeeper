@@ -96,11 +96,12 @@ $lang = array_merge($lang, [
 	'BBGATEKEEPER_PERMISSIONS_WARNING'	=> 'Il tuo file di configurazione (config.php) è attualmente scrivibile da chiunque (world-writable). Ti consigliamo vivamente di cambiare i permessi a 640 o almeno a 644 (per esempio: chmod 640 config.php).',
 
 	'BBGATEKEEPER_IP_BINDING'		=> 'Binding IP (tolleranza cambio rete/mobile)',
-	'BBGATEKEEPER_IP_BINDING_EXPLAIN'	=> 'Spostarsi all\'interno della stessa città o cambiare fornitore di rete può modificare il tuo indirizzo IP.<br />Questa opzione previene possibili cambi di IP per evitare di dover affrontare la challenge di hCaptcha troppe volte.<br /><em>Alta</em> - IP esattamente identico: devi avere un fornitore con IP statico e non spostarti all\'interno della tua città.<br /><em>Media (predefinito)</em> - Puoi spostarti all\'interno della città e avere un fornitore con IP dinamico a casa.<br /><em>Bassa</em> - Nessun controllo IP (riduce la protezione contro il furto/riutilizzo dei cookie)',
+	'BBGATEKEEPER_IP_BINDING_EXPLAIN'	=> 'Spostarsi all\'interno della stessa città o cambiare fornitore di rete può modificare il tuo indirizzo IP.<br />Questa opzione previene possibili cambi di IP per evitare di dover affrontare la challenge di hCaptcha troppe volte.<br /><em>Alta</em> - IP esattamente identico: devi avere un fornitore con IP statico e non spostarti all\'interno della tua città.<br /><em>Media (predefinito)</em> - Puoi spostarti all\'interno della città e avere un fornitore con IP dinamico a casa.<br /><em>Media MULTI (preferito)</em> - Come al livello Medio ma memorizza fino a 5 indirizzi IP preferiti. Utile per casa + lavoro + luogo preferito ad esempio.<br /><em>Bassa</em> - Nessun controllo IP (riduce la protezione contro il furto/riutilizzo dei cookie)',
 	'BBGATEKEEPER_IP_LEVEL_1'		=> 'Alta - Tolleranza di strada',
 	'BBGATEKEEPER_IP_LEVEL_2'		=> 'Media (predefinito) - Tolleranza di città',
-	'BBGATEKEEPER_IP_LEVEL_3'		=> 'Bassa — Nessun binding IP',
-
+	'BBGATEKEEPER_IP_LEVEL_3'		=> 'Media MULTI (preferito) - Tolleranza di città e gestione fino a 5 luoghi multipli',
+	'BBGATEKEEPER_IP_LEVEL_4'		=> 'Bassa — Nessun binding IP',
+	
 	'BBGATEKEEPER_SAVE_CHANGES'		=> 'Salva impostazioni',
 	'BBGATEKEEPER_RESET'			=> 'Elimina i file generati e pulisci il file .user.ini',
 	'BBGATEKEEPER_RESET_EXPLAIN'		=> 'Se vuoi eliminare i file e il file .user.ini, usa il relativo pulsante.<br />Rimuove auto_prepend_file da .user.ini ed elimina i file PHP generati sotto store/gatekeeper.<br />Le impostazioni salvate vengono mantenute.<br />',
@@ -122,4 +123,9 @@ $lang = array_merge($lang, [
 	'BBGATEKEEPER_CONFIG_FILE_GENERATING'	=> 'Creazione del file <strong>bbgatekeeper_config.php</strong> nella cartella store/bbgatekeeper',
 	'BBGATEKEEPER_LOGGER_AND_INI_DEPLOY'	=> 'Creazione del file <strong>bbgatekeeper_logger.php</strong> nella cartella store/bbgatekeeper e del file <strong>.user.ini</strong> nella cartella root del sito',
 
+	// >= 1.1
+	'BBGATEKEEPER_WHOIS' => 'IP WHOIS',
+	'BBGATEKEEPER_SAVE_MODAL_TITLE'   => 'Stai salvando le impostazioni',
+    'BBGATEKEEPER_SAVE_MODAL_TEXT'    => 'Questa azione salva le impostazioni ma non genera il file di configurazione. Per applicare le modifiche definitivamente devi cliccare sull\'altro pulsante:',
+    'BBGATEKEEPER_SAVE_MODAL_CONFIRM' => 'Salva comunque',
 ]);

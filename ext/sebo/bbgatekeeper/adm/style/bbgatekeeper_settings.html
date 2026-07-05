@@ -1,5 +1,7 @@
 {% INCLUDE 'overall_header.html' %}
 {% INCLUDECSS '@sebo_bbgatekeeper/acp_css.css' %}
+{% INCLUDEJS '@sebo_bbgatekeeper/acp_popup.js' %}
+
 
 <h1>{{ lang('ACP_BBGATEKEEPER_SETTINGS') }}</h1>
 <p>{{ lang('ACP_BBGATEKEEPER_SETTINGS_PRE_EXPLAIN', HCAP_EXTERNAL_LINK) }}</p>
@@ -143,7 +145,8 @@
 			<dd>
 				<label><input type="radio" name="ip_binding_level" value="1" <!-- IF IP_LEVEL_1 -->checked="checked"<!-- ENDIF --> /> {{ lang('BBGATEKEEPER_IP_LEVEL_1') }}</label><br />
 				<label><input type="radio" name="ip_binding_level" value="2" <!-- IF IP_LEVEL_2 -->checked="checked"<!-- ENDIF --> /> {{ lang('BBGATEKEEPER_IP_LEVEL_2') }}</label><br />
-				<label><input type="radio" name="ip_binding_level" value="3" <!-- IF IP_LEVEL_3 -->checked="checked"<!-- ENDIF --> /> {{ lang('BBGATEKEEPER_IP_LEVEL_3') }}</label>
+				<label><input type="radio" name="ip_binding_level" value="3" <!-- IF IP_LEVEL_3 -->checked="checked"<!-- ENDIF --> /> {{ lang('BBGATEKEEPER_IP_LEVEL_3') }}</label><br />
+				<label><input type="radio" name="ip_binding_level" value="4" <!-- IF IP_LEVEL_4 -->checked="checked"<!-- ENDIF --> /> {{ lang('BBGATEKEEPER_IP_LEVEL_4') }}</label>
 			</dd>
 		</dl>
 	</fieldset>
@@ -194,11 +197,26 @@
 
 	<fieldset class="submit-buttons">
 		{S_FORM_TOKEN}
-		<input class="button1" type="submit" name="submit_save" value="{{ lang('BBGATEKEEPER_SAVE_CHANGES') }}" />
-		<input class="button2" type="submit" name="submit_deploy" value="{{ lang('BBGATEKEEPER_GENERATE_DEPLOY') }}" />
-		<input class="button2" type="submit" name="submit_reset" value="{{ lang('BBGATEKEEPER_RESET') }}" onclick="return confirm('{LA_CONFIRM_OPERATION}');" />
+		<input id="bbgatekeeper-save-btn" class="button1 larger-button" type="submit" name="submit_save" value="{{ lang('BBGATEKEEPER_SAVE_CHANGES') }}" />
+		<input class="button2 larger-button" type="submit" name="submit_deploy" value="{{ lang('BBGATEKEEPER_GENERATE_DEPLOY') }}" />
+		<input class="button2 larger-button" type="submit" name="submit_reset" value="{{ lang('BBGATEKEEPER_RESET') }}" onclick="return confirm('{LA_CONFIRM_OPERATION}');" />
 	</fieldset>
 
 </form>
+
+<div id="bbgatekeeper-save-modal" class="bbgatekeeper-modal-overlay" style="display:none;">
+    <div class="bbgatekeeper-modal-box submit-buttons">
+        <h3>{{ lang('BBGATEKEEPER_SAVE_MODAL_TITLE') }}</h3>
+        <p>{{ lang('BBGATEKEEPER_SAVE_MODAL_TEXT') }} {{ lang('BBGATEKEEPER_GENERATE_DEPLOY') }}</p>
+        <div class="bbgatekeeper-modal-actions">
+            <button type="button" id="bbgatekeeper-modal-cancel" class="button2 larger-button">
+                {{ lang('CANCEL') }}
+            </button>
+            <button type="button" class="button1 larger-button" id="bbgatekeeper-modal-confirm">
+                {{ lang('BBGATEKEEPER_SAVE_MODAL_CONFIRM') }}
+            </button>
+        </div>
+    </div>
+</div>
 
 {% INCLUDE 'overall_footer.html' %}

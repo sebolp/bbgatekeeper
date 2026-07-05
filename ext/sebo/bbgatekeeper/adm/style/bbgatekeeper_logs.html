@@ -32,7 +32,7 @@
 		<!-- BEGIN log_lines -->
 		<tr>
 			<td>{log_lines.DATETIME}</td>
-			<td>{log_lines.IP}</td>
+			<td><a href="{log_lines.U_WHOIS}" onclick="popup(this.href, 750, 500); return false;">🔍</a> {log_lines.IP}</td>
 			<td>{log_lines.STATUS}</td>
 			<td>{log_lines.URI}</td>
 			<td>{log_lines.USER_AGENT}</td>

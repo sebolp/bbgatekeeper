@@ -25,9 +25,29 @@ class main_module
 	*/
 	public function main($id, $mode)
 	{
-		global $user;
+		global $user, $request, $template, $phpbb_root_path, $phpEx;
 
 		$user->add_lang_ext('sebo/bbgatekeeper', 'common');
+
+		/* 
+		*	Detect whois 
+		*/
+		$whois_ip = $request->variable('whois', '');
+			if ($whois_ip !== '')
+			{
+				if (!filter_var($whois_ip, FILTER_VALIDATE_IP))
+				{
+					trigger_error('FORM_INVALID');
+				}
+				if (!function_exists('user_ipwhois'))
+				{
+					include($phpbb_root_path . 'includes/functions_user.' . $phpEx);
+				}
+				$template->assign_var('WHOIS', user_ipwhois($whois_ip));
+				$this->tpl_name   = 'bbgatekeeper_whois';
+				$this->page_title = 'BBGATEKEEPER_WHOIS';
+				return; // esce prima dello switch, non serve form_key
+			}
 
 		add_form_key('sebo_bbgatekeeper');
 
@@ -225,6 +245,7 @@ class main_module
 			'IP_LEVEL_1'            => ($ip_level === 1),
 			'IP_LEVEL_2'            => ($ip_level === 2),
 			'IP_LEVEL_3'            => ($ip_level === 3),
+			'IP_LEVEL_4'			=> ($ip_level === 4),
 
 			'DRY_RUN'           => (bool) ($config['bbgatekeeper_dry_run'] ?? true),
 
@@ -289,7 +310,7 @@ class main_module
 		$db->sql_query($sql);
 
 		$ip_level = $request->variable('ip_binding_level', 2);
-		$config->set('bbgatekeeper_ip_binding_level', (string) (in_array($ip_level, [1, 2, 3], true) ? $ip_level : 2));
+		$config->set('bbgatekeeper_ip_binding_level', (string) (in_array($ip_level, [1, 2, 3, 4], true) ? $ip_level : 2));
 
 		$config->set('bbgatekeeper_dry_run', $request->variable('dry_run', false) ? '1' : '0');
 	}
@@ -315,6 +336,9 @@ class main_module
 	private function logs()
 	{
 		global $request, $template, $phpbb_container;
+
+		/** @var \phpbb\controller\helper $helper */
+    	$helper = $phpbb_container->get('controller.helper');
 
 		/** @var log_reader $log_reader */
 		$log_reader = $phpbb_container->get('sebo.bbgatekeeper.acp.log_reader');
@@ -349,6 +373,7 @@ class main_module
 				'STATUS'        => isset($line['status']) ? $line['status'] : '',
 				'URI'           => isset($line['uri']) ? $line['uri'] : '',
 				'USER_AGENT'    => isset($line['user_agent']) ? $line['user_agent'] : '',
+				'U_WHOIS' => $helper->route('sebo_bbgatekeeper_whois', ['ip' => isset($line['ip']) ? $line['ip'] : '']),
 			]);
 		}
 

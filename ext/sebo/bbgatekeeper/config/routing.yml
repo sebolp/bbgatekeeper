@@ -1,0 +1,4 @@
+sebo_bbgatekeeper_whois:
+    path: /bbgatekeeper/whois
+    methods: [GET]
+    defaults: { _controller: sebo.bbgatekeeper.controller.whois:handle }

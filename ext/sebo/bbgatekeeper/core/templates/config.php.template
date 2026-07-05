@@ -21,13 +21,18 @@ define('HCAP_COOKIE_SAMESITE', {{HCAP_COOKIE_SAMESITE}});
 define('HCAP_COOKIE_DOMAIN', {{HCAP_COOKIE_DOMAIN}});
 
 // 1 = strict (bind to exact IP), 2 = relaxed (bind to network prefix),
-// 3 = disabled (no IP binding at all). See get_ip_binding_value() below.
+// 4 = disabled (no IP binding at all). See get_ip_binding_value() below.
 define('IP_BINDING_LEVEL', {{IP_BINDING_LEVEL}});
 
 define('DRY_RUN', {{DRY_RUN}});
 
 define('BLOCKED_UA_PATTERNS', {{BLOCKED_UA_PATTERNS}});
 define('ALLOWED_BOT_DOMAINS', {{ALLOWED_BOT_DOMAINS}});
+
+// Fixed policy: level 3 (medium-multi) remembers at most this many
+// distinct network locations at once (e.g. home + work + a friend's
+// wifi). Not exposed in ACP - 5 is a deliberate, fixed ceiling.
+define('BBGATEKEEPER_MULTI_BINDING_MAX', 5);
 
 // ====================== STATIC LOGIC ======================
 // Everything below rarely needs to change between deployments.
@@ -99,24 +104,30 @@ function forward_confirms_hostname(string $host, string $ip): bool
 }
 
 /**
-* Computes the value an hCaptcha token gets bound to, depending on
+* Computes the "shape" of the value an hCaptcha token binds to, given
 * IP_BINDING_LEVEL:
-*  1 = exact IP (strictest, default)
-*  2 = network prefix only (IPv4 first two octets, IPv6 first two hex
-*      groups) - tolerates IP rotation within the same mobile/ISP network
-*  3 = no binding at all - the token survives any IP change, at the cost
-*      of being usable by anyone who obtains the cookie value
+*  1 = exact IP (strictest)
+*  2 = network prefix, single binding (tolerates IP rotation within the
+*      same network, but a location change still forces a new challenge)
+*  3 = network prefix, MULTI binding - up to BBGATEKEEPER_MULTI_BINDING_MAX
+*      locations remembered at once (e.g. home + work), each with its
+*      own expiry (see make_hcap_token() / verify_hcap_token())
+*  4 = no binding at all (weakest - token usable from any IP)
+*
+* Levels 2 and 3 share the same prefix computation; the difference
+* between them is entirely in how many such values the cookie can hold
+* simultaneously, handled below.
 */
 function get_ip_binding_value(string $ip, int $level): string
 {
-	if ($level === 3)
+	if ($level === 4)
 	{
 		return 'nobind';
 	}
 
 	$is_ipv6 = filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) !== false;
 
-	if ($level === 2)
+	if ($level === 2 || $level === 3)
 	{
 		if ($is_ipv6)
 		{
@@ -128,26 +139,132 @@ function get_ip_binding_value(string $ip, int $level): string
 		return ($octets[0] ?? '0') . '.' . ($octets[1] ?? '0');
 	}
 
+	// level 1, or any unrecognised value: fall back to the strictest mode.
 	return $ip;
 }
 
 /**
 * Generates a signed (HMAC-SHA256) token to store in the hCaptcha
-* verification cookie. Content: bound_value|expires|signature.
+* verification cookie.
+*
+* For level 3 (medium-multi), $existing_raw_token (the cookie value
+* BEFORE overwriting it, i.e. what the visitor is presenting right now)
+* is read to carry forward still-valid entries for other locations,
+* instead of discarding them. Pass null/omit if there is no existing
+* cookie, or for any other level.
 */
-function make_hcap_token(string $ip): string
+function make_hcap_token(string $ip, ?string $existing_raw_token = null): string
 {
-	$bound = get_ip_binding_value($ip, IP_BINDING_LEVEL);
+	$level = IP_BINDING_LEVEL;
+	$bound = get_ip_binding_value($ip, $level);
 	$expires = time() + HCAP_COOKIE_TTL;
+
+	if ($level === 3)
+	{
+		$entries = decode_multi_entries($existing_raw_token);
+		$entries = prune_and_merge_multi_entries($entries, $bound, $expires);
+
+		$entries_str = implode(',', array_map(
+			function ($entry) { return $entry['bound'] . ':' . $entry['expires']; },
+			$entries
+		));
+
+		$payload = 'M|' . $entries_str;
+		$sig = hash_hmac('sha256', $payload, HCAP_SIGN_SECRET);
+		return base64_encode($payload . '|' . $sig);
+	}
+
 	$payload = $bound . '|' . $expires;
 	$sig = hash_hmac('sha256', $payload, HCAP_SIGN_SECRET);
 	return base64_encode($payload . '|' . $sig);
 }
 
 /**
-* Verifies the token in the cookie: correct format, not expired,
-* signature matches HCAP_SIGN_SECRET, and the binding value matches what
-* the current request computes at the configured IP_BINDING_LEVEL.
+* Extracts the (unverified - signature is checked separately) list of
+* bound/expires entries from an existing multi-binding cookie value.
+* Returns an empty array if the token is missing, malformed, not a
+* multi-format token, or fails signature verification (we never carry
+* forward entries from a token we can't trust).
+*
+* @return array<int, array{bound: string, expires: int}>
+*/
+function decode_multi_entries(?string $token): array
+{
+	if ($token === null || $token === '')
+	{
+		return [];
+	}
+
+	$decoded = base64_decode($token, true);
+	if ($decoded === false)
+	{
+		return [];
+	}
+
+	$parts = explode('|', $decoded, 3);
+	if (count($parts) !== 3 || $parts[0] !== 'M')
+	{
+		return [];
+	}
+
+	[, $entries_str, $sig] = $parts;
+
+	$expected_sig = hash_hmac('sha256', 'M|' . $entries_str, HCAP_SIGN_SECRET);
+	if (!hash_equals($expected_sig, $sig))
+	{
+		return [];
+	}
+
+	$entries = [];
+	if ($entries_str !== '')
+	{
+		foreach (explode(',', $entries_str) as $raw_entry)
+		{
+			$pieces = explode(':', $raw_entry, 2);
+			if (count($pieces) !== 2 || !ctype_digit($pieces[1]))
+			{
+				continue;
+			}
+			$entries[] = ['bound' => $pieces[0], 'expires' => (int) $pieces[1]];
+		}
+	}
+
+	return $entries;
+}
+
+/**
+* Drops expired entries and any existing entry for the same $bound
+* value, then appends a fresh entry for it, then caps the list to
+* BBGATEKEEPER_MULTI_BINDING_MAX by dropping the oldest ones.
+*
+* @param array<int, array{bound: string, expires: int}> $entries
+* @return array<int, array{bound: string, expires: int}>
+*/
+function prune_and_merge_multi_entries(array $entries, string $new_bound, int $new_expires): array
+{
+	$now = time();
+
+	$entries = array_values(array_filter($entries, function ($entry) use ($now, $new_bound)
+	{
+		return $entry['expires'] > $now && $entry['bound'] !== $new_bound;
+	}));
+
+	$entries[] = ['bound' => $new_bound, 'expires' => $new_expires];
+
+	if (count($entries) > BBGATEKEEPER_MULTI_BINDING_MAX)
+	{
+		$entries = array_slice($entries, -BBGATEKEEPER_MULTI_BINDING_MAX);
+	}
+
+	return $entries;
+}
+
+/**
+* Verifies that the token in the cookie is valid for the current
+* request: correct format, signature intact, and - depending on
+* IP_BINDING_LEVEL - either the single bound value or ANY still-valid
+* entry in the multi-binding list matches the current request's binding
+* value.
 */
 function verify_hcap_token(?string $token, string $ip): bool
 {
@@ -162,12 +279,50 @@ function verify_hcap_token(?string $token, string $ip): bool
 		return false;
 	}
 
-	$parts = explode('|', $decoded);
+	$parts = explode('|', $decoded, 3);
 	if (count($parts) !== 3)
 	{
 		return false;
 	}
 
+	// Multi-binding format, regardless of the level currently configured
+	// in ACP - a cookie issued while level 3 was active must keep working
+	// until it naturally expires, even if the admin switches level.
+	if ($parts[0] === 'M')
+	{
+		[, $entries_str, $sig] = $parts;
+
+		$expected_sig = hash_hmac('sha256', 'M|' . $entries_str, HCAP_SIGN_SECRET);
+		if (!hash_equals($expected_sig, $sig))
+		{
+			return false;
+		}
+
+		$now = time();
+		$current_bound = get_ip_binding_value($ip, 3);
+
+		if ($entries_str === '')
+		{
+			return false;
+		}
+
+		foreach (explode(',', $entries_str) as $raw_entry)
+		{
+			$pieces = explode(':', $raw_entry, 2);
+			if (count($pieces) !== 2 || !ctype_digit($pieces[1]))
+			{
+				continue;
+			}
+			if ($pieces[1] > $now && hash_equals($pieces[0], $current_bound))
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	// Single-binding format (levels 1, 2, 4).
 	[$tok_bound, $expires, $sig] = $parts;
 
 	if (!ctype_digit($expires) || (int) $expires < time())
@@ -187,10 +342,14 @@ function verify_hcap_token(?string $token, string $ip): bool
 
 /**
 * Sets the hCaptcha verification cookie with a freshly generated token.
+* Reads the visitor's current cookie value (if any) BEFORE overwriting
+* it, so level 3 (medium-multi) can carry forward still-valid entries
+* for other locations instead of discarding them.
 */
 function set_hcap_cookie(string $ip): void
 {
-	$token = make_hcap_token($ip);
+	$existing = $_COOKIE[HCAP_COOKIE_NAME] ?? null;
+	$token = make_hcap_token($ip, $existing);
 	setcookie(HCAP_COOKIE_NAME, $token, [
 		'expires'  => time() + HCAP_COOKIE_TTL,
 		'path'     => '/',
