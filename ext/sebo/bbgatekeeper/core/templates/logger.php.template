@@ -334,39 +334,232 @@ if ($reason !== null && !DRY_RUN)
 				<title>{{BB_LOGGER_LANG_SECURITY_CHECK}}</title>
 				<script src="https://js.hcaptcha.com/1/api.js" async defer></script>
 				<style>
-					body { font-family: sans-serif; text-align: center; padding: 1.25rem; line-height: 1.6; }
-					.bot-container { position: relative; display: inline-block; margin-bottom: 1.25rem; }
-					.bot-icon { font-size: 2.5rem; }
-					.ban-icon { position: absolute; top: -30%; left: 50%; color: red; font-size: 4.375rem; pointer-events: none; }
-					input[type="submit"] { padding: 0.25rem 1.25rem; font-size: 1rem; cursor: pointer; }
+					/* Color variables */
+					:root {
+						--bg-base: #f4f7f6;
+						--card-bg: #ffffff;
+						--text-main: #2d3748;
+						--text-muted: #4a5568;
+						--primary-btn: #3182ce;
+						--primary-btn-hover: #2b6cb0;
+						--pattern-color: rgba(120, 150, 200, 0.05);
+						--node-color: rgba(100, 130, 180, 0.15);
+					}
+
+					body { 
+						margin: 0;
+						padding: 2rem 1rem;
+						min-height: 100vh;
+						box-sizing: border-box;
+						font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+						display: flex;
+						flex-direction: column;
+						align-items: center;
+						justify-content: center;
+						color: var(--text-main);
+
+						/* Animated CSS background */
+						background-color: var(--bg-base);
+						background-image: 
+							repeating-linear-gradient(45deg, var(--pattern-color) 0px, var(--pattern-color) 1px, transparent 1px, transparent 20px),
+							repeating-linear-gradient(-45deg, var(--pattern-color) 0px, var(--pattern-color) 1px, transparent 1px, transparent 20px),
+							radial-gradient(circle, var(--node-color) 1px, transparent 1px),
+							radial-gradient(circle at 15% 15%, rgba(253, 235, 218, 0.7) 0%, transparent 40%),
+							radial-gradient(circle at 85% 85%, rgba(226, 241, 255, 0.8) 0%, transparent 40%);
+
+						background-position: 0 0, 0 0, 0 0, 0 0, 0 0;
+						animation: movePattern 20s linear infinite;
+					}
+
+					@keyframes movePattern {
+						from { background-position: 0 0, 0 0, 0 0, 0 0, 0 0; }
+						to { background-position: 100px 100px, -100px -100px, 50px 50px, 0 0, 0 0; }
+					}
+
+					/* Header section outside the card */
+					.page-header {
+						text-align: center;
+						margin-bottom: 3.5rem; /* Space for the half-bubble */
+						z-index: 10;
+					}
+
+					h1 {
+						margin-top: 0;
+						font-size: 1.8rem;
+						color: #1a202c;
+						font-weight: 600;
+						margin-bottom: 0.5rem;
+					}
+
+					.page-header p {
+						color: var(--text-muted);
+						font-size: 1.1rem;
+						margin: 0;
+					}
+
+					/* Wrapper to apply a unified shadow to both bubble and card */
+					.card-wrapper {
+						position: relative;
+						max-width: 550px;
+						width: 100%;
+						/* drop-shadow creates a single shadow around the combined shape of its children */
+						filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.05));
+					}
+
+					/* Bubble half-merged with the card */
+					.bot-bubble {
+						position: absolute;
+						top: -40px;
+						left: 50%;
+						transform: translateX(-50%);
+						width: 100px;
+						height: 100px;
+						background: var(--card-bg);
+						border-radius: 50%;
+						display: flex;
+						justify-content: center;
+						align-items: center;
+						z-index: 2;
+					}
+
+					.bot-icon { 
+						font-size: 3.2rem; /* Reduced size */
+						z-index: 3;
+						margin-top: -10px;
+					}
+
+					/* Neon Flicker warning effect */
+					@keyframes neonFlicker
+					{
+						0%, 19%, 21%, 23%, 25%, 54%, 56%, 100%
+						{
+							opacity: 1;
+							filter: drop-shadow(0 0 10px rgba(220, 38, 38, 0.8));
+						}
+						20%, 22%, 24%, 55%
+						{
+							opacity: 0.3;
+							filter: drop-shadow(0 0 0 transparent);
+						}
+					}
+
+					.ban-icon { 
+						position: absolute; 
+						top: 44%; 
+						left: 50%; 
+						transform: translate(-50%, -50%);
+						color: #dc2626; 
+						font-size: 6rem; /* Larger than the bot */
+						pointer-events: none; 
+						line-height: 1;
+						/* filter: drop-shadow(0 0 12px rgba(220, 38, 38, 0.5)); */
+						animation: neonFlicker 3s infinite;
+						z-index: 4;
+					}
+
+					/* Main card content */
+					.card {
+						background: var(--card-bg);
+						padding: 4rem 2rem 3rem; /* Top padding clears the bottom half of the bubble */
+						border-radius: 16px;
+						width: 100%;
+						box-sizing: border-box;
+						text-align: center;
+						position: relative;
+						z-index: 1;
+					}
+
+					/* Form and Buttons */
+					.h-captcha {
+						display: flex;
+						justify-content: center;
+						margin: 1.5rem 0 2rem;
+					}
+
+					input[type="submit"] { 
+						background-color: var(--primary-btn);
+						color: #ffffff;
+						border: none;
+						padding: 0.75rem 2rem; 
+						font-size: 1rem;
+						font-weight: 600;
+						border-radius: 8px; 
+						cursor: pointer; 
+						transition: all 0.2s ease;
+					}
+
+					input[type="submit"]:hover {
+						background-color: var(--primary-btn-hover);
+						transform: translateY(-1px);
+					}
+
+					/* Footer links */
+					.card p {
+						color: var(--text-muted);
+						font-size: 0.95rem;
+						line-height: 1.6;
+						margin: 1rem 0;
+					}
+
+					.footer-links {
+						margin-top: 2rem;
+						padding-top: 1.5rem;
+						border-top: 1px solid #edf2f7;
+						font-size: 0.85rem;
+					}
+
+					.footer-links p { margin: 0.5rem 0; }
+
+					a {
+						color: var(--primary-btn);
+						text-decoration: none;
+						font-weight: 500;
+					}
+					a:hover { text-decoration: underline; }
+
+					.important-text {
+						font-weight: bold;
+						color: #1a202c !important;
+					}
 				</style>
 			</head>
 			<body>
-				<h2>🤔 {{BB_LOGGER_LANG_SECURITY_CHECK}}</h2>
-				<p>{{BB_LOGGER_LANG_SECURITY_CHECK_EXPLAIN}}</p>
-
-				<div class="bot-container">
-					<span class="bot-icon">🤖</span>
-					<span class="ban-icon">&#8416;</span>
+				<!-- Header outside the card -->
+				<div class="page-header">
+					<h1>🤔 {{BB_LOGGER_LANG_SECURITY_CHECK}}</h1>
+					<p>{{BB_LOGGER_LANG_SECURITY_CHECK_EXPLAIN}}</p>
 				</div>
 
-				<form action="" method="POST">
-					<div class="h-captcha" data-sitekey="{{BB_LOGGER_SITE_KEY_FOR_HTML}}"></div>
-					<br />
-					<input type="submit" value="{{BB_LOGGER_TEMPLATE_BUTTON}}" />
-				</form>
+				<!-- Unified shape wrapper -->
+				<div class="card-wrapper">
+					<!-- Protruding bubble -->
+					<div class="bot-bubble">
+						<span class="bot-icon">🤖</span>
+						<span class="ban-icon">&#8416;</span>
+					</div>
 
-				<p>{{BB_LOGGER_LANG_SECURITY_CHECK_COOKIE}}</p>
-				<p>{{BB_LOGGER_LANG_SECURITY_CHECK_CLAUSE}}</p>
-				<p>{{BB_LOGGER_LANG_SECURITY_CHECK_JS}}</p>
-				<p style="font-weight:bold;">{{BB_LOGGER_LANG_SECURITY_CHECK_DO_NOT_AGREE}}</p>
+					<!-- Main card -->
+					<div class="card">
+						<form action="" method="POST">
+							<div class="h-captcha" data-sitekey="{{BB_LOGGER_SITE_KEY_FOR_HTML}}"></div>
+							<input type="submit" value="{{BB_LOGGER_TEMPLATE_BUTTON}}" />
+						</form>
 
-				<p style="color:#AA0000;"><a href="https://github.com/sebolp" target="_blank">sebo - bbgatekeeper</a></p>
-				<p>{{BB_LOGGER_LANG_TEMPLATE_ASSISTANCE}}
-					<span id="email-area">
-						<a href="#" style="text-decoration:none !important;" onclick="showEmail(event);">📧</a>
-					</span>
-				</p>
+						<p>{{BB_LOGGER_LANG_SECURITY_CHECK_COOKIE}}</p>
+						<p>{{BB_LOGGER_LANG_SECURITY_CHECK_CLAUSE}}</p>
+						<p>{{BB_LOGGER_LANG_SECURITY_CHECK_JS}}</p>
+						<p class="important-text">{{BB_LOGGER_LANG_SECURITY_CHECK_DO_NOT_AGREE}}</p>
+
+						<div class="footer-links">
+							<p><a href="https://github.com/sebolp" target="_blank">sebo - bbgatekeeper</a></p>
+							<p>{{BB_LOGGER_LANG_TEMPLATE_ASSISTANCE}}
+								<span id="email-area">
+									<a href="#" style="text-decoration:none !important;" onclick="showEmail(event);">📧</a>
+								</span>
+							</p>
+						</div>
+					</div>
+				</div>
 
 				<script>
 					function showEmail(event) {
