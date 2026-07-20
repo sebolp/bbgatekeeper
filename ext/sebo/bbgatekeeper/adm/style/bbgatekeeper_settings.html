@@ -2,7 +2,6 @@
 {% INCLUDECSS '@sebo_bbgatekeeper/acp_css.css' %}
 {% INCLUDEJS '@sebo_bbgatekeeper/acp_popup.js' %}
 
-
 <h1>{{ lang('ACP_BBGATEKEEPER_SETTINGS') }}</h1>
 <p>{{ lang('ACP_BBGATEKEEPER_SETTINGS_PRE_EXPLAIN', HCAP_EXTERNAL_LINK) }}</p>
 <p>{{ lang('ACP_BBGATEKEEPER_SETTINGS_EXPLAIN') }}</p>
@@ -11,44 +10,68 @@
 </div>
 
 <fieldset>
-    <legend>{{ lang('BBGATEKEEPER_FUNDAMENTAL_STEPS') }}</legend>
-    <p>{{ lang('BBGATEKEEPER_FUNDAMENTAL_STEPS_EXPLAIN') }}</p>
+	<legend>{{ lang('BBGATEKEEPER_FUNDAMENTAL_STEPS') }}</legend>
+	<p>{{ lang('BBGATEKEEPER_FUNDAMENTAL_STEPS_EXPLAIN') }}</p>
 
-    <div class="bbgk-status-grid">
-        <!-- BEGIN fundamental_checks -->
-        <div class="bbgk-status-card">
-            <!-- IF fundamental_checks.S_OK -->
-                <div class="successbox">
-                    <p><strong>{{ fundamental_checks.LABEL }}</strong><br /><!-- IF not S_INI_PREPEND_OK and S_INI_STATUS == 'ok'  -->⚠️<!-- ELSE -->🗹<!-- ENDIF --> {{ lang('BBGATEKEEPER_FUNDAMENTAL_STEPS_ALL_OK') }}</p>
-                </div>
-            <!-- ELSEIF fundamental_checks.S_BAD -->
-                <div class="errorbox">
-                    <p><strong>{{ fundamental_checks.LABEL }}</strong><br />✗ {{ lang('BBGATEKEEPER_FUNDAMENTAL_STEPS_BAD') }}</p>
-                </div>
-            <!-- ELSEIF fundamental_checks.S_NO_PERMS -->
-                <div class="errorbox notice">
-                    <p><strong>{{ fundamental_checks.LABEL }}</strong><br />⚠ {{ lang('BBGATEKEEPER_FUNDAMENTAL_STEPS_NO_RIGHT_PERMISSIONS') }}</p>
-                </div>	
-            <!-- ENDIF -->
-        </div>
-        <!-- END fundamental_checks -->
-    </div>
-	<!-- IF SHOW_PERMISSIONS_WARNING -->
+	<div class="bbgk-status-grid">
+		{% for check in fundamental_checks %}
+			<div class="bbgk-status-card">
+				{% if check.S_OK %}
+					<div class="successbox">
+						<p><strong>{{ check.LABEL }}</strong><br />
+							{% if not S_INI_PREPEND_OK and S_INI_STATUS == 'ok' %}⚠️{% else %}🗹{% endif %}
+							{{ lang('BBGATEKEEPER_FUNDAMENTAL_STEPS_ALL_OK') }}</p>
+					</div>
+				{% elseif check.S_BAD %}
+					<div class="errorbox">
+						<p><strong>{{ check.LABEL }}</strong><br />✗ {{ lang('BBGATEKEEPER_FUNDAMENTAL_STEPS_BAD') }}</p>
+					</div>
+				{% elseif check.S_NO_PERMS %}
+					<div class="errorbox notice">
+						<p><strong>{{ check.LABEL }}</strong><br />⚠ {{ lang('BBGATEKEEPER_FUNDAMENTAL_STEPS_NO_RIGHT_PERMISSIONS') }}</p>
+					</div>
+				{% endif %}
+			</div>
+		{% endfor %}
+	</div>
+	{% if SHOW_PERMISSIONS_WARNING %}
 		<div class="errorbox notice">
 			<p>{{ lang('BBGATEKEEPER_PERMISSIONS_WARNING') }}</p>
 		</div>
-	<!-- ENDIF -->
-	<!-- IF not S_INI_PREPEND_OK and S_INI_STATUS == 'ok'  -->
+	{% endif %}
+	{% if not S_INI_PREPEND_OK and S_INI_STATUS == 'ok' %}
 		<div class="errorbox notice">
 			<p>{{ lang('BBGATEKEEPER_INI_PREPEND_INCORRECT') }}</p>
 		</div>
-	<!-- ENDIF -->
+	{% endif %}
 
 </fieldset>
 
+<form id="bbgatekeeper_settings" method="post" action="{{ U_ACTION }}">
 
-
-<form id="bbgatekeeper_settings" method="post" action="{U_ACTION}">
+	<fieldset style="background-color: #fff3e0;">
+		<legend>🚧 {{ lang('BBGATEKEEPER_PRECHECK_TITLE') }}</legend>
+			<p>{{ lang('BBGATEKEEPER_PRECHECK_EXPLAIN') }}</p>
+			<div class="errorbox">
+				<p><strong>{{ lang('BBGATEKEEPER_PRECHECK_WARNING_TITLE') }}</strong><br />{{ lang('BBGATEKEEPER_PRECHECK_WARNING_EXPLAIN') }}</p>
+			</div>
+			<dl>
+				<dt>
+					<label for="precheck_enable">{{ lang('BBGATEKEEPER_PRECHECK_ENABLE') }}</label>
+				</dt>
+				<dd>
+					<input type="checkbox" id="precheck_enable" name="precheck_enable" value="1" {% if PRECHECK_ENABLE %}checked="checked"{% endif %} />
+				</dd>
+			</dl>
+			<p>
+				{{ lang('BBGATEKEEPER_PRECHECK_STATUS') }}:
+				{% if PRECHECK_DEPLOYED %}
+					<strong class="text-success">{{ lang('BBGATEKEEPER_PRECHECK_STATUS_ACTIVE') }}</strong>
+				{% else %}
+					<strong class="text-error">{{ lang('BBGATEKEEPER_PRECHECK_STATUS_NOT_ACTIVE') }}</strong>
+				{% endif %}
+			</p>
+	</fieldset>
 
 	<fieldset>
 		<legend>🧩 {{ lang('BBGATEKEEPER_HCAPTCHA') }}</legend>
@@ -58,7 +81,7 @@
 				<label for="hcap_site_key">{{ lang('BBGATEKEEPER_HCAP_SITE_KEY') }}</label>
 				<p>{{ lang('BBGATEKEEPER_HCAP_SITE_KEY_EXPLAIN') }}</p>
 			</dt>
-			<dd><input type="text" id="hcap_site_key" name="hcap_site_key" value="{HCAP_SITE_KEY}" class="medium" /></dd>
+			<dd><input type="text" id="hcap_site_key" name="hcap_site_key" value="{{ HCAP_SITE_KEY }}" class="medium" /></dd>
 		</dl>
 
 		<dl>
@@ -66,7 +89,7 @@
 				<label for="hcap_site_secret">{{ lang('BBGATEKEEPER_HCAP_SITE_SECRET') }}</label>
 				<p>{{ lang('BBGATEKEEPER_HCAP_SITE_SECRET_EXPLAIN') }}</p>
 			</dt>
-			<dd><input type="password" id="hcap_site_secret" name="hcap_site_secret" value="{HCAP_SITE_SECRET}" class="medium" autocomplete="off" /></dd>
+			<dd><input type="password" id="hcap_site_secret" name="hcap_site_secret" value="{{ HCAP_SITE_SECRET }}" class="medium" autocomplete="off" /></dd>
 		</dl>
 
 		<dl>
@@ -75,9 +98,9 @@
 				<p>{{ lang('BBGATEKEEPER_HCAP_SIGN_SECRET_EXPLAIN') }}</p>
 			</dt>
 			<dd>
-				<input type="text" id="hcap_sign_secret" name="hcap_sign_secret" value="{HCAP_SIGN_SECRET}" class="medium" />
+				<input type="text" id="hcap_sign_secret" name="hcap_sign_secret" value="{{ HCAP_SIGN_SECRET }}" class="medium" />
 				<input class="button2" type="submit" name="submit_generate_secret" value="{{ lang('BBGATEKEEPER_GENERATE') }}" />
-				
+
 			</dd>
 		</dl>
 	</fieldset>
@@ -90,7 +113,7 @@
 				<label for="cookie_name">{{ lang('BBGATEKEEPER_COOKIE_NAME') }}</label>
 				<p>{{ lang('BBGATEKEEPER_COOKIE_NAME_EXPLAIN') }}</p>
 			</dt>
-			<dd><input type="text" id="cookie_name" name="cookie_name" value="{COOKIE_NAME}" class="medium" /></dd>
+			<dd><input type="text" id="cookie_name" name="cookie_name" value="{{ COOKIE_NAME }}" class="medium" /></dd>
 		</dl>
 
 		<dl>
@@ -98,7 +121,7 @@
 				<label for="cookie_ttl">{{ lang('BBGATEKEEPER_COOKIE_TTL') }}</label>
 				<p>{{ lang('BBGATEKEEPER_COOKIE_TTL_EXPLAIN') }}</p>
 			</dt>
-			<dd><input type="number" id="cookie_ttl" name="cookie_ttl" value="{COOKIE_TTL}" min="60" class="medium" /> {{ lang('SECONDS') }}</dd>
+			<dd><input type="number" id="cookie_ttl" name="cookie_ttl" value="{{ COOKIE_TTL }}" min="60" class="medium" /> {{ lang('SECONDS') }}</dd>
 		</dl>
 
 		<dl>
@@ -106,7 +129,7 @@
 				<label for="cookie_domain">{{ lang('BBGATEKEEPER_COOKIE_DOMAIN') }}</label>
 				<p>{{ lang('BBGATEKEEPER_COOKIE_DOMAIN_EXPLAIN') }}</p>
 			</dt>
-			<dd><input type="text" id="cookie_domain" name="cookie_domain" value="{COOKIE_DOMAIN}" class="medium" /></dd>
+			<dd><input type="text" id="cookie_domain" name="cookie_domain" value="{{ COOKIE_DOMAIN }}" class="medium" /></dd>
 		</dl>
 
 		<dl>
@@ -115,9 +138,48 @@
 				<p>{{ lang('BBGATEKEEPER_COOKIE_SAMESITE_EXPLAIN') }}</p>
 			</dt>
 			<dd>
-				<label><input type="radio" name="cookie_samesite" value="Lax" <!-- IF COOKIE_SAMESITE_LAX -->checked="checked"<!-- ENDIF --> /> Lax</label>
+				<label><input type="radio" name="cookie_samesite" value="Lax" {% if COOKIE_SAMESITE_LAX %}checked="checked"{% endif %} /> Lax</label>
 				&nbsp;
-				<label><input type="radio" name="cookie_samesite" value="Strict" <!-- IF COOKIE_SAMESITE_STRICT -->checked="checked"<!-- ENDIF --> /> Strict</label>
+				<label><input type="radio" name="cookie_samesite" value="Strict" {% if COOKIE_SAMESITE_STRICT %}checked="checked"{% endif %} /> Strict</label>
+			</dd>
+		</dl>
+	</fieldset>
+
+	<fieldset>
+		<legend>{% if TRUSTED_PROXY_ENABLE %}🔒{% else %}🔓{% endif %} {{ lang('BBGATEKEEPER_TRUSTED_PROXY') }}</legend>
+
+		{% if SHOW_TRUSTED_PROXY_WARNING %}
+			<div class="errorbox notice">
+				<p>{{ lang('BBGATEKEEPER_TRUSTED_PROXY_WARNING') }}</p>
+			</div>
+		{% endif %}
+
+		<dl>
+			<p style="background-color: #ffeded; border-radius: 8px; padding: 5px;">
+				{{ lang('BBGATEKEEPER_CURRENT_REQUEST_PRE_EXPLAIN') }}
+				<br />
+				<input type="button" class="button2" value="{{ lang('BBGATEKEEPER_IP_PROBE_LINK') }}" onclick="popup('{{ U_IP_PROBE }}', 500, 300);" />
+			</p>
+			<p>{{ lang('BBGATEKEEPER_CURRENT_REQUEST_EXPLAIN') }}</p>
+		</dl>
+
+		<dl>
+			<dt>
+				<label for="trusted_proxy_enable">{{ lang('BBGATEKEEPER_TRUSTED_PROXY_ENABLE') }}</label>
+				<p>{{ lang('BBGATEKEEPER_TRUSTED_PROXY_ENABLE_EXPLAIN') }}</p>
+			</dt>
+			<dd>
+				<input type="checkbox" id="trusted_proxy_enable" name="trusted_proxy_enable" value="1" {% if TRUSTED_PROXY_ENABLE %}checked="checked"{% endif %} />
+			</dd>
+		</dl>
+
+		<dl>
+			<dt>
+				<label for="trusted_proxy_remote_addr">{{ lang('BBGATEKEEPER_TRUSTED_PROXY_REMOTE_ADDR') }}</label>
+				<p>{{ lang('BBGATEKEEPER_TRUSTED_PROXY_REMOTE_ADDR_EXPLAIN') }}</p>
+			</dt>
+			<dd>
+				<input type="text" id="trusted_proxy_remote_addr" name="trusted_proxy_remote_addr" value="{{ TRUSTED_PROXY_REMOTE_ADDR }}" class="medium" />
 			</dd>
 		</dl>
 	</fieldset>
@@ -130,7 +192,7 @@
 				<p>{{ lang('BBGATEKEEPER_UA_PATTERNS_EXPLAIN') }}</p>
 			</dt>
 			<dd>
-				<textarea id="ua_patterns" name="ua_patterns" rows="8" cols="40" style="overflow-y: auto;">{UA_PATTERNS}</textarea>
+				<textarea id="ua_patterns" name="ua_patterns" rows="8" cols="40" style="overflow-y: auto;">{{ UA_PATTERNS }}</textarea>
 			</dd>
 		</dl>
 	</fieldset>
@@ -140,13 +202,13 @@
 		<dl>
 			<dt>
 				{{ lang('BBGATEKEEPER_IP_BINDING') }}
-				<p>{{ lang('BBGATEKEEPER_IP_BINDING_EXPLAIN') }}</p>	
+				<p>{{ lang('BBGATEKEEPER_IP_BINDING_EXPLAIN') }}</p>
 			</dt>
 			<dd>
-				<label><input type="radio" name="ip_binding_level" value="1" <!-- IF IP_LEVEL_1 -->checked="checked"<!-- ENDIF --> /> {{ lang('BBGATEKEEPER_IP_LEVEL_1') }}</label><br />
-				<label><input type="radio" name="ip_binding_level" value="2" <!-- IF IP_LEVEL_2 -->checked="checked"<!-- ENDIF --> /> {{ lang('BBGATEKEEPER_IP_LEVEL_2') }}</label><br />
-				<label><input type="radio" name="ip_binding_level" value="3" <!-- IF IP_LEVEL_3 -->checked="checked"<!-- ENDIF --> /> {{ lang('BBGATEKEEPER_IP_LEVEL_3') }}</label><br />
-				<label><input type="radio" name="ip_binding_level" value="4" <!-- IF IP_LEVEL_4 -->checked="checked"<!-- ENDIF --> /> {{ lang('BBGATEKEEPER_IP_LEVEL_4') }}</label>
+				<label><input type="radio" name="ip_binding_level" value="1" {% if IP_LEVEL_1 %}checked="checked"{% endif %} /> {{ lang('BBGATEKEEPER_IP_LEVEL_1') }}</label><br />
+				<label><input type="radio" name="ip_binding_level" value="2" {% if IP_LEVEL_2 %}checked="checked"{% endif %} /> {{ lang('BBGATEKEEPER_IP_LEVEL_2') }}</label><br />
+				<label><input type="radio" name="ip_binding_level" value="3" {% if IP_LEVEL_3 %}checked="checked"{% endif %} /> {{ lang('BBGATEKEEPER_IP_LEVEL_3') }}</label><br />
+				<label><input type="radio" name="ip_binding_level" value="4" {% if IP_LEVEL_4 %}checked="checked"{% endif %} /> {{ lang('BBGATEKEEPER_IP_LEVEL_4') }}</label>
 			</dd>
 		</dl>
 	</fieldset>
@@ -159,20 +221,33 @@
 				<p>{{ lang('BBGATEKEEPER_BOT_DOMAINS_EXPLAIN') }}</p>
 			</dt>
 			<dd>
-				<textarea id="bot_domains" name="bot_domains" rows="8" cols="40">{BOT_DOMAINS}</textarea>
+				<textarea id="bot_domains" name="bot_domains" rows="8" cols="40">{{ BOT_DOMAINS }}</textarea>
 			</dd>
 		</dl>
 	</fieldset>
 
 	<fieldset>
-		<legend>{{ lang('BBGATEKEEPER_MODE') }}</legend>
+		<legend>⚙️ {{ lang('BBGATEKEEPER_MODE') }}</legend>
 		<dl>
 			<dt>
 				<label for="dry_run">{{ lang('BBGATEKEEPER_DRY_RUN') }}</label>
 				<p>{{ lang('BBGATEKEEPER_DRY_RUN_EXPLAIN') }}</p>
 			</dt>
 			<dd>
-				<input type="checkbox" id="dry_run" name="dry_run" value="1" <!-- IF DRY_RUN -->checked="checked"<!-- ENDIF --> />
+				<input type="checkbox" id="dry_run" name="dry_run" value="1" {% if DRY_RUN %}checked="checked"{% endif %} />
+			</dd>
+		</dl>
+	</fieldset>
+
+	<fieldset>
+		<legend>📋 {{ lang('BBGATEKEEPER_LOGGING') }}</legend>
+		<dl>
+			<dt>
+				<label for="enable_access_log">{{ lang('BBGATEKEEPER_ENABLE_ACCESS_LOG') }}</label>
+				<p>{{ lang('BBGATEKEEPER_ENABLE_ACCESS_LOG_EXPLAIN') }}</p>
+			</dt>
+			<dd>
+				<input type="checkbox" id="enable_access_log" name="enable_access_log" value="1" {% if ENABLE_ACCESS_LOG %}checked="checked"{% endif %} />
 			</dd>
 		</dl>
 	</fieldset>
@@ -180,12 +255,12 @@
 	<fieldset>
 		<legend>{{ lang('BBGATEKEEPER_DEPLOY_STATUS') }}</legend>
 		<p>
-			<!-- IF DEPLOY_OK -->
+			{% if DEPLOY_OK %}
 				<strong class="text-success">{{ lang('BBGATEKEEPER_DEPLOY_OK') }}</strong>
-			<!-- ELSE -->
+			{% else %}
 				<strong class="text-error">{{ lang('BBGATEKEEPER_DEPLOY_NOT_OK') }}</strong>
-			<!-- ENDIF -->
-			&mdash; {{ lang('BBGATEKEEPER_LAST_DEPLOY') }}: {LAST_DEPLOY_TIME}
+			{% endif %}
+			&mdash; {{ lang('BBGATEKEEPER_LAST_DEPLOY') }}: {{ LAST_DEPLOY_TIME }}
 		</p>
 	</fieldset>
 
@@ -196,27 +271,27 @@
 	</fieldset>
 
 	<fieldset class="submit-buttons">
-		{S_FORM_TOKEN}
+		{{ S_FORM_TOKEN }}
 		<input id="bbgatekeeper-save-btn" class="button1 larger-button" type="submit" name="submit_save" value="{{ lang('BBGATEKEEPER_SAVE_CHANGES') }}" />
 		<input class="button2 larger-button" type="submit" name="submit_deploy" value="{{ lang('BBGATEKEEPER_GENERATE_DEPLOY') }}" />
-		<input class="button2 larger-button" type="submit" name="submit_reset" value="{{ lang('BBGATEKEEPER_RESET') }}" onclick="return confirm('{LA_CONFIRM_OPERATION}');" />
+		<input class="button2 larger-button" type="submit" name="submit_reset" value="{{ lang('BBGATEKEEPER_RESET') }}" onclick="return confirm('{{ LA_CONFIRM_OPERATION }}');" />
 	</fieldset>
 
 </form>
 
 <div id="bbgatekeeper-save-modal" class="bbgatekeeper-modal-overlay" style="display:none;">
-    <div class="bbgatekeeper-modal-box submit-buttons">
-        <h3>{{ lang('BBGATEKEEPER_SAVE_MODAL_TITLE') }}</h3>
-        <p>{{ lang('BBGATEKEEPER_SAVE_MODAL_TEXT') }} {{ lang('BBGATEKEEPER_GENERATE_DEPLOY') }}</p>
-        <div class="bbgatekeeper-modal-actions">
-            <button type="button" id="bbgatekeeper-modal-cancel" class="button2 larger-button">
-                {{ lang('CANCEL') }}
-            </button>
-            <button type="button" class="button1 larger-button" id="bbgatekeeper-modal-confirm">
-                {{ lang('BBGATEKEEPER_SAVE_MODAL_CONFIRM') }}
-            </button>
-        </div>
-    </div>
+	<div class="bbgatekeeper-modal-box submit-buttons">
+		<h3>{{ lang('BBGATEKEEPER_SAVE_MODAL_TITLE') }}</h3>
+		<p>{{ lang('BBGATEKEEPER_SAVE_MODAL_TEXT') }} {{ lang('BBGATEKEEPER_GENERATE_DEPLOY') }}</p>
+		<div class="bbgatekeeper-modal-actions">
+			<button type="button" id="bbgatekeeper-modal-cancel" class="button2 larger-button">
+				{{ lang('CANCEL') }}
+			</button>
+			<button type="button" class="button1 larger-button" id="bbgatekeeper-modal-confirm">
+				{{ lang('BBGATEKEEPER_SAVE_MODAL_CONFIRM') }}
+			</button>
+		</div>
+	</div>
 </div>
 
 {% INCLUDE 'overall_footer.html' %}

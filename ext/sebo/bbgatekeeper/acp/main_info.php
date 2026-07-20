@@ -31,6 +31,11 @@ class main_info
 					'auth'  => 'acl_a_board',
 					'cat'   => ['ACP_BBGATEKEEPER_TITLE'],
 				],
+				 'hits_and_bans' => [
+					'title' => 'ACP_BBGATEKEEPER_HITS_AND_BANS',
+					'auth'  => 'acl_a_board',
+					'cat'   => ['ACP_BBGATEKEEPER_TITLE'],
+					],
 			],
 		];
 	}

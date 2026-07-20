@@ -128,4 +128,82 @@ $lang = array_merge($lang, [
 	'BBGATEKEEPER_SAVE_MODAL_TITLE'   => 'Settings saving',
 	'BBGATEKEEPER_SAVE_MODAL_TEXT'    => 'This action only save settings in the database. If you want to apply settings to current files and your forum, you have to use the button:',
 	'BBGATEKEEPER_SAVE_MODAL_CONFIRM' => 'Save anyway',
+
+	// >= 1.2
+	'ACP_BBGATEKEEPER_HITS_AND_BANS'	=> 'Hits &amp; Bans',
+
+	'BBGATEKEEPER_HITSBANS_EXPLAIN' => 'List of IP addresses with failed hCaptcha (HITS, not yet banned) and those currently banned (BANS). You can remove an entry individually or clear the entire category.',
+
+	'BBGATEKEEPER_BANS_TITLE'		=> 'Banned IPs',
+	'BBGATEKEEPER_HITS_TITLE'		=> 'IPs with failed attempts (pending ban)',
+
+	'BBGATEKEEPER_NO_BANS'			=> 'No IPs currently banned.',
+	'BBGATEKEEPER_NO_HITS'			=> 'No failed attempts recorded.',
+
+	'BBGATEKEEPER_COL_IP'			=> 'IP Address',
+	'BBGATEKEEPER_COL_BAN_TIME'		=> 'Ban date',
+	'BBGATEKEEPER_COL_REMAINING'		=> 'Time remaining',
+	'BBGATEKEEPER_COL_HITS'			=> 'Attempts',
+	'BBGATEKEEPER_COL_FIRST_HIT'		=> 'First attempt',
+	'BBGATEKEEPER_COL_ELAPSED_FIRST_HIT'		=> 'Elapsed time',
+	'BBGATEKEEPER_COL_ACTIONS'		=> 'Actions',
+
+	'BBGATEKEEPER_IP_UNKNOWN'		=> 'Unknown IP (file predates IP tracking)',
+
+	'BBGATEKEEPER_DELETE_ALL_BANS'		=> 'Delete all bans',
+	'BBGATEKEEPER_DELETE_ALL_HITS'		=> 'Delete all hits',
+
+	'BBGATEKEEPER_CONFIRM_DELETE_ONE'	=> 'Are you sure you want to remove this entry?',
+	'BBGATEKEEPER_CONFIRM_DELETE_ALL_BANS'	=> 'Are you sure you want to delete ALL active bans? Banned IPs will immediately be able to access the site again.',
+	'BBGATEKEEPER_CONFIRM_DELETE_ALL_HITS'	=> 'Are you sure you want to delete ALL hit records? The relative counters will reset to zero.',
+
+	'BBGATEKEEPER_HITSBANS_UPDATED' => 'Operation completed.',
+
+	'BBGATEKEEPER_HITSBANS_DAYS' => 'days',
+	'BBGATEKEEPER_HITSBANS_HOURS' => 'hours',
+	'BBGATEKEEPER_HITSBANS_MINUTES' => 'minutes',
+
+	'BBGATEKEEPER_AUTOCLEAN_TITLE'		=> 'Automatic cleanup',
+	'BBGATEKEEPER_AUTOCLEAN_EXPLAIN'	=> 'If enabled, a phpBB cron job will periodically remove expired .ban/.hit files (no longer active), without manual intervention.',
+	'BBGATEKEEPER_AUTOCLEAN_ENABLE' => 'Enable automatic cleanup',
+	'BBGATEKEEPER_AUTOCLEAN_INTERVAL'	=> 'Execution interval',
+	'BBGATEKEEPER_AUTOCLEAN_SAVED'		=> 'Automatic cleanup settings saved.',
+
+	'BBGATEKEEPER_LOGGING'			=> 'Access log',
+	'BBGATEKEEPER_ENABLE_ACCESS_LOG'	=> 'Record access log',
+	'BBGATEKEEPER_ENABLE_ACCESS_LOG_EXPLAIN' => 'If disabled, the auto_prepend logger will no longer write to store/logs/access.log on every request (saves an I/O operation per request). This does not affect .ban/.hit files, which remain active.',
+
+	'BBGATEKEEPER_ACTIVE'			=> 'Active',
+	'BBGATEKEEPER_EXPIRED'			=> 'Expired',
+
+	'BBGATEKEEPER_CLEANUP_EXPIRED_BANS' => 'Clean expired bans',
+	'BBGATEKEEPER_CLEANUP_EXPIRED_HITS' => 'Clean expired hits',
+
+	'BBGATEKEEPER_CONFIRM_CLEANUP_BANS' => 'Are you sure you want to clean only expired bans (active bans will not be affected)?',
+	'BBGATEKEEPER_CONFIRM_CLEANUP_HITS' => 'Are you sure you want to clean only expired hits (active hits will not be affected)?',
+
+	'BBGATEKEEPER_PRECHECK_TITLE'			=> 'Static precheck (stage 0)',
+
+	'BBGATEKEEPER_PRECHECK_EXPLAIN' 		=> 'Adds a preliminary check managed directly by Apache, before the request even reaches PHP-FPM: users without a valid clearance cookie are redirected to a static page that sets the cookie via JavaScript and then reloads the original page. It filters out non-JavaScript bots at zero cost, without consuming PHP-FPM processes. This runs alongside the existing hCaptcha check, it does not replace it.<br />⚠️ this static pre-check blocks searc engines (it\'s not affected by the rules setted in this ACP page).',
+
+	'BBGATEKEEPER_PRECHECK_WARNING_TITLE'	=> 'Warning: modifies the .htaccess file',
+
+	'BBGATEKEEPER_PRECHECK_WARNING_EXPLAIN'	=> 'Before enabling it for the first time, your current .htaccess file is renamed to .htaccess.bbgatekeeper-original in the document root and will not be touched again. If the site becomes inaccessible after activation, you can restore everything via FTP: delete the current .htaccess and rename .htaccess.bbgatekeeper-original to .htaccess.',
+
+	'BBGATEKEEPER_PRECHECK_ENABLE'		=> 'Enable static precheck. It could be useful under DDoS attack for blocking simple BOT, but affects SEO. Disable if not necessary.',
+
+	'BBGATEKEEPER_PRECHECK_STATUS'		=> 'Current status',
+	'BBGATEKEEPER_PRECHECK_STATUS_ACTIVE'	=> 'Active (block present in .htaccess)',
+	'BBGATEKEEPER_PRECHECK_STATUS_NOT_ACTIVE'	=> 'Not active',
+
+	'BBGATEKEEPER_PRECHECK_ERROR'		=> 'Unable to write to the filesystem (HTML or .htaccess file). No changes were saved; check the write permissions on the document root.',
+	// >= 1.2.1
+	'BBGATEKEEPER_TRUSTED_PROXY' => 'Trusted Proxy',
+	'BBGATEKEEPER_TRUSTED_PROXY_ENABLE' => 'Enable: use X_FORWARDED_FOR only from a trusted proxy',
+	'BBGATEKEEPER_TRUSTED_PROXY_ENABLE_EXPLAIN' => 'Enable this only if the forum is behind Nginx, Cloudflare, or a reverse proxy. If disabled, <samp class="error">X_FORWARDED_FOR</samp> is always used.',
+	'BBGATEKEEPER_TRUSTED_PROXY_REMOTE_ADDR' => 'Trusted proxy REMOTE_ADDR',
+	'BBGATEKEEPER_TRUSTED_PROXY_REMOTE_ADDR_EXPLAIN' => 'Enter the <samp class="error">REMOTE_ADDR</samp> value seen from the button used above in the explanation box.',
+	'BBGATEKEEPER_CURRENT_REQUEST_PRE_EXPLAIN' => '<samp class="error">REMOTE_ADDR</samp> and <samp class="error">X_FORWARDED_FOR</samp> are always provided together and read together, but they have very different reliability levels.<br />• <samp class="error">REMOTE_ADDR</samp> is the IP address that the server actually sees connecting: no visitor can spoof it.<br />• <samp class="error">X_FORWARDED_FOR</samp> instead is a simple HTTP header that anyone can write at will, so it is inherently unreliable.',
+	'BBGATEKEEPER_CURRENT_REQUEST_EXPLAIN' => 'This check works as follows:<br />- If <samp class="error">REMOTE_ADDR</samp> matches exactly the trusted proxy configured below (e.g., your hosting provider\'s internal proxy), the request truly passed through it, and the value that the proxy itself wrote in <samp class="error">X_FORWARDED_FOR</samp> can be trusted.<br />- If <samp class="error">REMOTE_ADDR</samp> does not match the trusted proxy, the request did not pass through it: X-FORWARDED_FOR could have been written freely by the client, so it is not secure.',
+	'BBGATEKEEPER_IP_PROBE_LINK' => 'View your REMOTE_ADDR and your addresses',
 ]);

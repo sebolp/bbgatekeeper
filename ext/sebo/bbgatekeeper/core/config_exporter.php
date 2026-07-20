@@ -130,8 +130,11 @@ class config_exporter
 			'HCAP_COOKIE_DOMAIN'    => (string) ($this->config['cookie_domain'] ?? ''),
 			'IP_BINDING_LEVEL'      => (int) ($this->config['bbgatekeeper_ip_binding_level'] ?? 2),
 			'DRY_RUN'               => (bool) ($this->config['bbgatekeeper_dry_run'] ?? true),
+			'ENABLE_ACCESS_LOG'     => (bool) ($this->config['bbgatekeeper_enable_access_log'] ?? true),
 			'BLOCKED_UA_PATTERNS'   => is_array($ua_patterns) ? $ua_patterns : [],
 			'ALLOWED_BOT_DOMAINS'   => is_array($bot_domains) ? $bot_domains : [],
+			'TRUSTED_PROXY_ENABLE'      => (bool) ($this->config['bbgatekeeper_trusted_proxy_enable'] ?? false),
+			'TRUSTED_PROXY_REMOTE_ADDR' => (string) ($this->config['bbgatekeeper_trusted_proxy_remote_addr'] ?? ''),
 		];
 
 		$replacements = [];

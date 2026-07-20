@@ -31,15 +31,66 @@ require $bbgatekeeper_config_path;
 
 define('BBGATEKEEPER_LOG_DIR', __DIR__ . '/../logs');
 define('BBGATEKEEPER_ACCESS_LOG', BBGATEKEEPER_LOG_DIR . '/access.log');
+define('BBGATEKEEPER_BANS_DIR', BBGATEKEEPER_LOG_DIR . '/bans');
 define('BBGATEKEEPER_MAX_LOG_SIZE', 20 * 1024 * 1024); // 20MB, then truncate
 
 // ====================== UTILITY ======================
 
 function get_real_ip(): string
 {
-	$ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
-	$parts = explode(',', $ip);
-	return trim($parts[0]);
+	$remote_addr = $_SERVER['REMOTE_ADDR'] ?? '';
+	$xff = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? '';
+
+	// Hardened path (opt-in): only trusted if REMOTE_ADDR matches the
+	// configured proxy exactly - the rightmost XFF entry is the one
+	// appended by that proxy itself, so it can't be forged by the client.
+	if (
+		defined('TRUSTED_PROXY_ENABLE') && TRUSTED_PROXY_ENABLE
+		&& defined('TRUSTED_PROXY_REMOTE_ADDR')
+		&& TRUSTED_PROXY_REMOTE_ADDR !== ''
+		&& $remote_addr === TRUSTED_PROXY_REMOTE_ADDR
+		&& $xff !== ''
+	)
+	{
+		$forwarded_ips = array_reverse(array_map('trim', explode(',', $xff)));
+
+		foreach ($forwarded_ips as $candidate)
+		{
+			if (filter_var($candidate, FILTER_VALIDATE_IP))
+			{
+				return $candidate;
+			}
+		}
+	}
+	// Default path (always on, no configuration required): when the
+	// trusted proxy isn't set up, still prefer the rightmost XFF entry
+	// over REMOTE_ADDR whenever REMOTE_ADDR looks like a local proxy hop
+	// (127.0.0.x) - this is the common nginx -> PHP-FPM setup where
+	// REMOTE_ADDR is otherwise the same for every visitor. It's a
+	// reasonable default (the rightmost entry is normally appended by the
+	// proxy itself, not the client) but not cryptographically guaranteed
+	// like the hardened path above, since it doesn't verify who the proxy
+	// actually is. Extensions/forums that need the stronger guarantee
+	// should enable Trusted Proxy in ACP instead.
+	else if ($xff !== '' && preg_match('/^127\.0\.0\.\d+$/', $remote_addr))
+	{
+		$forwarded_ips = array_reverse(array_map('trim', explode(',', $xff)));
+
+		foreach ($forwarded_ips as $candidate)
+		{
+			if (filter_var($candidate, FILTER_VALIDATE_IP))
+			{
+				return $candidate;
+			}
+		}
+	}
+
+	if (filter_var($remote_addr, FILTER_VALIDATE_IP))
+	{
+		return $remote_addr;
+	}
+
+	return '0.0.0.0';
 }
 
 function ensure_log_dir(): void
@@ -53,11 +104,102 @@ function ensure_log_dir(): void
 function write_log(string $line): void
 {
 	ensure_log_dir();
-	if (file_exists(BBGATEKEEPER_ACCESS_LOG) && filesize(BBGATEKEEPER_ACCESS_LOG) > BBGATEKEEPER_MAX_LOG_SIZE)
+	if (mt_rand(1, 500) === 1 && file_exists(BBGATEKEEPER_ACCESS_LOG) && filesize(BBGATEKEEPER_ACCESS_LOG) > BBGATEKEEPER_MAX_LOG_SIZE)
 	{
 		@file_put_contents(BBGATEKEEPER_ACCESS_LOG, '');
 	}
-	@file_put_contents(BBGATEKEEPER_ACCESS_LOG, $line, FILE_APPEND | LOCK_EX);
+	// Remove LOCK_EX to avoid PHP workers queuing up and causing 504 errors
+	@file_put_contents(BBGATEKEEPER_ACCESS_LOG, $line, FILE_APPEND);
+	// LOCK_EX impedisce la sovrapposizione di processi e mette in coda. Se attacco BOT, non importa, ma almeno libera memoria.
+	// @file_put_contents(BBGATEKEEPER_ACCESS_LOG, $line, FILE_APPEND | LOCK_EX);
+}
+
+// ====================== RATE LIMITING AND BAN FUNCTION ======================
+
+function ensure_bans_dir(): void
+{
+	if (!is_dir(BBGATEKEEPER_BANS_DIR))
+	{
+		@mkdir(BBGATEKEEPER_BANS_DIR, 0750, true);
+	}
+}
+
+function is_ip_banned(string $ip): bool
+{
+	$ban_file = BBGATEKEEPER_BANS_DIR . '/' . md5($ip) . '.ban';
+
+	// Check if the ban file exists
+	if (file_exists($ban_file))
+	{
+		// Check if 30 minutes (1800 seconds) have passed
+		if (filemtime($ban_file) > (time() - 1800))
+		{
+			return true;
+		}
+		else
+		{
+			// Time expired, remove the ban file
+			@unlink($ban_file);
+		}
+	}
+
+	return false;
+}
+
+function record_block_and_check_ban(string $ip): void
+{
+	ensure_bans_dir();
+
+	$hit_file = BBGATEKEEPER_BANS_DIR . '/' . md5($ip) . '.hit';
+	$now = time();
+	$start_time = $now;
+	$hits = 0;
+
+	// Read existing hits for this IP
+	if (file_exists($hit_file))
+	{
+		$data = @file_get_contents($hit_file);
+
+		if ($data !== false)
+		{
+			// Format: "{start_time}|{hits}|{ip}" (the ip part is new;
+			// older files without it still parse fine, ip stays empty).
+			$parts = explode('|', $data);
+
+			if (count($parts) >= 2)
+			{
+				$start_time = (int)$parts[0];
+				$hits = (int)$parts[1];
+			}
+		}
+	}
+
+	// Reset counter if more than 60 seconds have passed
+	if (($now - $start_time) > 60)
+	{
+		$start_time = $now;
+		$hits = 0;
+	}
+
+	$hits++;
+
+	// #################################
+	// #################################
+	// If the IP hits 2 times (fails two times hCaptcha
+	// within the 60 seconds window, trigger the ban
+	if ($hits >= 2)
+	{
+		$ban_file = BBGATEKEEPER_BANS_DIR . '/' . md5($ip) . '.ban';
+		// Store the ip (and ban time) in clear text so the ACP
+		// Hits & Bans view can display it without reversing the hash.
+		@file_put_contents($ban_file, $ip . '|' . $now);
+		@unlink($hit_file);
+	}
+	else
+	{
+		// Update the hit counter, now including the ip for ACP display
+		@file_put_contents($hit_file, $start_time . '|' . $hits . '|' . $ip);
+	}
 }
 
 // ====================== STEP 1: USER-AGENT ======================
@@ -82,6 +224,15 @@ function check_user_agent_block(array $patterns): ?string
 // ====================== EXECUTION ======================
 
 $ip = get_real_ip();
+
+// Immediately reject banned IPs without rendering anything
+if (is_ip_banned($ip))
+{
+	http_response_code(429);
+	header('Retry-After: 1800');
+	exit;
+}
+
 $uri = $_SERVER['REQUEST_URI'] ?? '-';
 $ua_raw = $_SERVER['HTTP_USER_AGENT'] ?? '-';
 $now_str = date('Y-m-d H:i:s');
@@ -153,20 +304,30 @@ else
 {
 	$status = 'PASSED';
 }
-
-write_log("{$now_str}|{$ip}|{$status}|{$uri}|{$ua_raw}\n");
+// Write only if enabled
+if (!defined('ENABLE_ACCESS_LOG') || ENABLE_ACCESS_LOG)
+{
+	write_log("{$now_str}|{$ip}|{$status}|{$uri}|{$ua_raw}\n");
+}
 
 // ====================== ENFORCEMENT ======================
 
 if ($reason !== null && !DRY_RUN)
 {
-	if ($hc_challenge_failed)
+	// If POST and captcha failed, hit
+	if ($hc_challenge_failed && $_SERVER['REQUEST_METHOD'] === 'POST')
+	{
+		// Record the violation to evaluate a temporary 30-minutes ban
+		record_block_and_check_ban($ip);
+	}
+
+		if ($hc_challenge_failed)
 	{
 		http_response_code(503);
 		echo
 		<<<HTML
 			<!DOCTYPE html>
-			<html lang="it">
+			<html lang="en">
 			<head>
 				<meta charset="UTF-8">
 				<meta name="viewport" content="width=device-width, initial-scale=1.0">

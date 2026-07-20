@@ -46,7 +46,7 @@ class main_module
 				$template->assign_var('WHOIS', user_ipwhois($whois_ip));
 				$this->tpl_name   = 'bbgatekeeper_whois';
 				$this->page_title = 'BBGATEKEEPER_WHOIS';
-				return; // esce prima dello switch, non serve form_key
+				return; // exits before the switch, no form_key needed here
 			}
 
 		add_form_key('sebo_bbgatekeeper');
@@ -63,6 +63,12 @@ class main_module
 				$this->tpl_name = 'bbgatekeeper_logs';
 				$this->page_title = 'ACP_BBGATEKEEPER_LOGS';
 				$this->logs();
+				break;
+
+			case 'hits_and_bans':
+				$this->tpl_name = 'bbgatekeeper_hits_and_bans';
+				$this->page_title = 'ACP_BBGATEKEEPER_HITS_AND_BANS';
+				$this->hits_and_bans();
 				break;
 		}
 	}
@@ -176,9 +182,10 @@ class main_module
 				'LABEL'         => $user->lang($check['label']),
 				'STATUS'        => $check['status'],
 
-				// Booleani comodi per il template Twig
+				// Convenience booleans for the Twig template
 				'S_OK'          => ($check['status'] === 'ok'),
 				'S_BAD'         => ($check['status'] === 'bad'),
+				'S_NO_PERMS'    => ($check['status'] === 'no_right_permissions'),
 			]);
 		}
 
@@ -249,6 +256,30 @@ class main_module
 
 			'DRY_RUN'           => (bool) ($config['bbgatekeeper_dry_run'] ?? true),
 
+			// Toggle to enable/disable the access log write
+			// (store/logs/access.log) from the auto_prepend logger, to
+			// save one write per request when it's not needed.
+			'ENABLE_ACCESS_LOG' => (bool) ($config['bbgatekeeper_enable_access_log'] ?? true),
+
+			'TRUSTED_PROXY_ENABLE'      => (bool) ($config['bbgatekeeper_trusted_proxy_enable'] ?? false),
+			'TRUSTED_PROXY_REMOTE_ADDR' => (string) ($config['bbgatekeeper_trusted_proxy_remote_addr'] ?? ''),
+
+			// Warn when REMOTE_ADDR still looks like a local proxy hop
+			// and Trusted Proxy isn't configured: means every visitor is
+			// currently sharing the same address for bans/logs.
+			'SHOW_TRUSTED_PROXY_WARNING' => (bool) preg_match('/^127\.0\.0\.\d+$/', (string) $request->server('REMOTE_ADDR'))
+				&& !(bool) ($config['bbgatekeeper_trusted_proxy_enable'] ?? false),
+
+			// Static, always-reachable diagnostic file: shows $_SERVER
+			// exactly as the web server passes it, before phpBB (and
+			// startup.php) touches anything - opened directly by the
+			// admin in a new tab, no deploy/config needed.
+			'U_IP_PROBE' => generate_board_url() . '/ext/sebo/bbgatekeeper/sebo-bbgatekeeper-ip-probe.php',
+
+			// Stage 0 (Apache, before PHP-FPM): static page + .htaccess block
+			'PRECHECK_ENABLE'    => (bool) ($config['bbgatekeeper_precheck_enable'] ?? false),
+			'PRECHECK_DEPLOYED'  => $phpbb_container->get('sebo.bbgatekeeper.precheck_deployer')->is_deployed(),
+
 			'DEPLOY_OK'         => $checker->all_ok(),
 			'LAST_DEPLOY_TIME'      => !empty($config['bbgatekeeper_last_deploy_time']) ? $user->format_date((int) $config['bbgatekeeper_last_deploy_time']) : '-',
 
@@ -263,7 +294,7 @@ class main_module
 	*/
 	private function save_settings($request, $config)
 	{
-		global $db, $table_prefix;
+		global $db, $table_prefix, $phpbb_container, $user;
 
 		$config->set('bbgatekeeper_hcap_site_key', $request->variable('hcap_site_key', ''));
 		$config->set('bbgatekeeper_hcap_site_secret', $request->variable('hcap_site_secret', ''));
@@ -313,6 +344,57 @@ class main_module
 		$config->set('bbgatekeeper_ip_binding_level', (string) (in_array($ip_level, [1, 2, 3, 4], true) ? $ip_level : 2));
 
 		$config->set('bbgatekeeper_dry_run', $request->variable('dry_run', false) ? '1' : '0');
+
+		// If not yet present in the form (older bbgatekeeper_settings.html
+		// not updated yet), the default stays "enabled" so we don't
+		// silently stop writing the log on sites already in production:
+		// we use is_set_post to distinguish "checkbox absent from the
+		// form" from "checkbox present but unchecked".
+		if ($request->is_set_post('enable_access_log') || $request->is_set_post('submit_save') || $request->is_set_post('submit_deploy'))
+		{
+			$config->set('bbgatekeeper_enable_access_log', $request->variable('enable_access_log', false) ? '1' : '0');
+		}
+
+		// Enable check for trusted PROXY to access to X_FORWARDED_FOR
+		$trusted_proxy_remote_addr = trim($request->variable('trusted_proxy_remote_addr', ''));
+		$trusted_proxy_enable = $request->variable('trusted_proxy_enable', false);
+
+		if ($trusted_proxy_enable && !filter_var($trusted_proxy_remote_addr, FILTER_VALIDATE_IP))
+		{
+			trigger_error('FORM_INVALID' . adm_back_link($this->u_action), E_USER_WARNING);
+		}
+
+		$config->set('bbgatekeeper_trusted_proxy_enable', $trusted_proxy_enable ? '1' : '0');
+		$config->set('bbgatekeeper_trusted_proxy_remote_addr', $trusted_proxy_remote_addr);
+
+		// ============ Static precheck (sebo-bbgatekeeper.html + .htaccess) ============
+		// Acts only on a state CHANGE, not on every save: writing to
+		// .htaccess is a delicate operation (can take the site down if it
+		// goes wrong), so it should only be touched when the admin
+		// actually flips the checkbox, not on every settings save.
+		$old_precheck_enable = (bool) ($config['bbgatekeeper_precheck_enable'] ?? false);
+		$new_precheck_enable = (bool) $request->variable('precheck_enable', false);
+
+		if ($new_precheck_enable !== $old_precheck_enable)
+		{
+			/** @var \sebo\bbgatekeeper\core\precheck_deployer $precheck */
+			$precheck = $phpbb_container->get('sebo.bbgatekeeper.precheck_deployer');
+
+			$precheck_ok = $new_precheck_enable ? $precheck->deploy() : $precheck->remove();
+
+			if ($precheck_ok)
+			{
+				$config->set('bbgatekeeper_precheck_enable', $new_precheck_enable ? '1' : '0');
+			}
+			else
+			{
+				// Don't update the config if the disk write failed: the
+				// state shown in ACP must stay consistent with the real
+				// on-disk state (checkbox not saved = nothing changed on
+				// the filesystem).
+				trigger_error($user->lang('BBGATEKEEPER_PRECHECK_ERROR') . adm_back_link($this->u_action), E_USER_WARNING);
+			}
+		}
 	}
 
 	/**
@@ -384,6 +466,141 @@ class main_module
 		$template->assign_vars([
 			'U_ACTION'  => $this->u_action,
 			'LOG_EMPTY' => empty($lines),
+		]);
+	}
+
+	/**
+	* Shows two tables: currently banned IPs, and IPs with a pending hCaptcha
+	* failure hit that hasn't escalated to a ban yet. Both come from the flat
+	* .ban / .hit marker files written by bbgatekeeper_logger.php in
+	* store/logs/bans/. Supports:
+	*  - deleting a single entry or wiping a whole category
+	*  - cleaning up only the entries that are no longer active (expired)
+	*  - configuring an automatic cleanup interval (executed by the real
+	*    cron task in core/cron/cleanup_task.php, not by this page itself)
+	* plus a whois link reusing the same mechanism as logs().
+	*
+	* @return void
+	*/
+	private function hits_and_bans()
+	{
+		global $request, $template, $user, $config, $phpbb_root_path, $phpbb_container;
+
+		/** @var \phpbb\controller\helper $helper */
+		$helper = $phpbb_container->get('controller.helper');
+
+		/** @var \sebo\bbgatekeeper\core\hits_ban_manager $manager */
+		$manager = new \sebo\bbgatekeeper\core\hits_ban_manager($phpbb_root_path . 'ext/sebo/bbgatekeeper/store/logs/bans');
+
+		// ============ Auto-cleanup settings (form at the top of the page) ============
+		if ($request->is_set_post('submit_autoclean_save'))
+		{
+			if (!check_form_key('sebo_bbgatekeeper'))
+			{
+				trigger_error('FORM_INVALID' . adm_back_link($this->u_action), E_USER_WARNING);
+			}
+
+			$config->set('bbgatekeeper_autoclean_enable', $request->variable('autoclean_enable', false) ? '1' : '0');
+
+			$interval = $request->variable('autoclean_interval', 60);
+			$config->set('bbgatekeeper_autoclean_interval', (string) max(5, $interval));
+
+			trigger_error($user->lang('BBGATEKEEPER_AUTOCLEAN_SAVED') . adm_back_link($this->u_action), E_USER_NOTICE);
+		}
+
+		// ============ Actions on single entries / whole categories ============
+		if ($request->is_set_post('action'))
+		{
+			if (!check_form_key('sebo_bbgatekeeper'))
+			{
+				trigger_error('FORM_INVALID' . adm_back_link($this->u_action), E_USER_WARNING);
+			}
+
+			$action = $request->variable('action', '');
+			$hash   = $request->variable('hash', '');
+
+			switch ($action)
+			{
+				case 'delete_ban':
+					if (preg_match('/^[a-f0-9]{32}$/', $hash))
+					{
+						$manager->delete_ban($hash);
+					}
+					break;
+
+				case 'delete_hit':
+					if (preg_match('/^[a-f0-9]{32}$/', $hash))
+					{
+						$manager->delete_hit($hash);
+					}
+					break;
+
+				case 'delete_all_bans':
+					$manager->delete_all_bans();
+					break;
+
+				case 'delete_all_hits':
+					$manager->delete_all_hits();
+					break;
+
+				case 'cleanup_expired_bans':
+					$manager->delete_expired_bans();
+					break;
+
+				case 'cleanup_expired_hits':
+					$manager->delete_expired_hits();
+					break;
+			}
+
+			trigger_error($user->lang('BBGATEKEEPER_HITSBANS_UPDATED') . adm_back_link($this->u_action), E_USER_NOTICE);
+		}
+
+		$bans = $manager->get_bans();
+		$hits = $manager->get_hits();
+
+		foreach ($bans as $ban)
+		{
+			$remaining = max(0, \sebo\bbgatekeeper\core\hits_ban_manager::BAN_TTL - (time() - $ban['ban_time']));
+
+			$template->assign_block_vars('bans', [
+				'IP'        => $ban['ip'] ?: $user->lang('BBGATEKEEPER_IP_UNKNOWN'),
+				'HASH'      => $ban['hash'],
+				'BAN_TIME'  => $user->format_date($ban['ban_time']),
+				'REMAINING' => gmdate('i:s', $remaining),
+				'ACTIVE'    => $ban['active'],
+				'U_WHOIS'   => $helper->route('sebo_bbgatekeeper_whois', ['ip' => $ban['ip'] ?: '']),
+			]);
+		}
+
+		foreach ($hits as $hit)
+		{
+			$reference = $hit['start_time'] !== null ? $hit['start_time'] : $hit['mtime'];
+			$elapsed = max(0, time() - $reference);
+
+			$days    = (int) floor($elapsed / 86400);
+			$hours   = (int) floor(($elapsed % 86400) / 3600);
+			$minutes = (int) floor(($elapsed % 3600) / 60);
+
+			$template->assign_block_vars('hits', [
+				'IP'        => $hit['ip'] ?: $user->lang('BBGATEKEEPER_IP_UNKNOWN'),
+				'HASH'      => $hit['hash'],
+				'HITS'      => $hit['hits'] !== null ? $hit['hits'] : '-',
+				'FIRST_HIT' => $hit['start_time'] ? $user->format_date($hit['start_time']) : '-',
+				'S_DAYS'    => $days,
+				'S_HOURS'   => $hours,
+				'S_MINUTES' => $minutes,
+				'ACTIVE'    => $hit['active'],
+				'U_WHOIS'   => $helper->route('sebo_bbgatekeeper_whois', ['ip' => $hit['ip'] ?: '']),
+			]);
+		}
+
+		$template->assign_vars([
+			'U_ACTION'           => $this->u_action,
+			'BANS_EMPTY'         => empty($bans),
+			'HITS_EMPTY'         => empty($hits),
+
+			'AUTOCLEAN_ENABLE'   => (bool) ($config['bbgatekeeper_autoclean_enable'] ?? false),
+			'AUTOCLEAN_INTERVAL' => (int) ($config['bbgatekeeper_autoclean_interval'] ?? 60),
 		]);
 	}
 }

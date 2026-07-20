@@ -1,0 +1,164 @@
+{# bbgatekeeper_hits_and_bans.html — ACP: banned IPs + pending hCaptcha-fail hits #}
+{% INCLUDE 'overall_header.html' %}
+
+<h1>{{ lang('ACP_BBGATEKEEPER_HITS_AND_BANS') }}</h1>
+
+<p>{{ lang('BBGATEKEEPER_HITSBANS_EXPLAIN') }}</p>
+
+<fieldset>
+	<legend>{{ lang('BBGATEKEEPER_AUTOCLEAN_TITLE') }}</legend>
+	<p>{{ lang('BBGATEKEEPER_AUTOCLEAN_EXPLAIN') }}</p>
+
+	<form method="post" action="{{ U_ACTION }}">
+		<dl>
+			<dt>
+				<label>{{ lang('BBGATEKEEPER_AUTOCLEAN_ENABLE') }}</label>
+			</dt>
+			<dd>
+				<label><input type="radio" name="autoclean_enable" value="1" {% if AUTOCLEAN_ENABLE %}checked="checked"{% endif %} /> {{ lang('YES') }}</label>
+				&nbsp;
+				<label><input type="radio" name="autoclean_enable" value="0" {% if not AUTOCLEAN_ENABLE %}checked="checked"{% endif %} /> {{ lang('NO') }}</label>
+			</dd>
+		</dl>
+		<dl>
+			<dt>
+				<label for="autoclean_interval">{{ lang('BBGATEKEEPER_AUTOCLEAN_INTERVAL') }}</label>
+			</dt>
+			<dd>
+				<input type="number" min="5" id="autoclean_interval" name="autoclean_interval" value="{{ AUTOCLEAN_INTERVAL }}" class="medium" /> {{ lang('MINUTES') }}
+			</dd>
+		</dl>
+		{{ S_FORM_TOKEN }}
+		<input type="submit" class="button1" name="submit_autoclean_save" value="{{ lang('BBGATEKEEPER_SAVE_CHANGES') }}" />
+	</form>
+</fieldset>
+
+<fieldset class="tabulated">
+	<legend style="display: block !important;">{{ lang('BBGATEKEEPER_BANS_TITLE') }}</legend>
+
+	{% if BANS_EMPTY %}
+		<p>{{ lang('BBGATEKEEPER_NO_BANS') }}</p>
+	{% else %}
+		<table cellspacing="1">
+			<thead>
+				<tr>
+					<th>{{ lang('BBGATEKEEPER_COL_IP') }}</th>
+					<th>{{ lang('BBGATEKEEPER_COL_BAN_TIME') }}</th>
+					<th>{{ lang('BBGATEKEEPER_COL_REMAINING') }}</th>
+					<th>{{ lang('BBGATEKEEPER_COL_ACTIONS') }}</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for ban in bans %}
+					<tr>
+						<td>
+							{% if ban.ACTIVE %}
+								<span title="{{ lang('BBGATEKEEPER_ACTIVE') }}" style="color:#2e8b2e;">&#9679;</span>
+							{% else %}
+								<span title="{{ lang('BBGATEKEEPER_EXPIRED') }}" style="color:#bbb;">&#9675;</span>
+							{% endif %}
+							{{ ban.IP }}
+						</td>
+						<td>{{ ban.BAN_TIME }}</td>
+						<td>{{ ban.REMAINING }}</td>
+						<td>
+							{% if ban.U_WHOIS %}
+								<a href="{{ ban.U_WHOIS }}" target="_blank" rel="noopener" onclick="popup(this.href, 750, 500); return false;">{{ lang('WHOIS') }}</a> |
+							{% endif %}
+							<form method="post" action="{{ U_ACTION }}" style="display:inline;">
+								<input type="hidden" name="action" value="delete_ban" />
+								<input type="hidden" name="hash" value="{{ ban.HASH }}" />
+								{{ S_FORM_TOKEN }}
+								<input type="submit" class="button2" onclick="return confirm('{{ lang('BBGATEKEEPER_CONFIRM_DELETE_ONE') }}');" value="{{ lang('DELETE') }}" />
+							</form>
+						</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+
+		<p>
+			<form method="post" action="{{ U_ACTION }}" style="display:inline;">
+				<input type="hidden" name="action" value="cleanup_expired_bans" />
+				{{ S_FORM_TOKEN }}
+				<input type="submit" class="button2" onclick="return confirm('{{ lang('BBGATEKEEPER_CONFIRM_CLEANUP_BANS') }}');" value="{{ lang('BBGATEKEEPER_CLEANUP_EXPIRED_BANS') }}" />
+			</form>
+			<form method="post" action="{{ U_ACTION }}" style="display:inline;">
+				<input type="hidden" name="action" value="delete_all_bans" />
+				{{ S_FORM_TOKEN }}
+				<input type="submit" class="button2" onclick="return confirm('{{ lang('BBGATEKEEPER_CONFIRM_DELETE_ALL_BANS') }}');" value="{{ lang('BBGATEKEEPER_DELETE_ALL_BANS') }}" />
+			</form>
+		</p>
+	{% endif %}
+</fieldset>
+
+<fieldset class="tabulated">
+	<legend style="display: block !important;">{{ lang('BBGATEKEEPER_HITS_TITLE') }}</legend>
+
+	{% if HITS_EMPTY %}
+		<p>{{ lang('BBGATEKEEPER_NO_HITS') }}</p>
+	{% else %}
+		<table cellspacing="1">
+			<thead>
+				<tr>
+					<th>{{ lang('BBGATEKEEPER_COL_IP') }}</th>
+					<th>{{ lang('BBGATEKEEPER_COL_HITS') }}</th>
+					<th>{{ lang('BBGATEKEEPER_COL_FIRST_HIT') }}</th>
+					<th>{{ lang('BBGATEKEEPER_COL_ELAPSED_FIRST_HIT') }}</th>
+					<th>{{ lang('BBGATEKEEPER_COL_ACTIONS') }}</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for hit in hits %}
+					<tr>
+						<td>
+							{% if hit.ACTIVE %}
+								<span title="{{ lang('BBGATEKEEPER_ACTIVE') }}" style="color:#2e8b2e;">&#9679;</span>
+							{% else %}
+								<span title="{{ lang('BBGATEKEEPER_EXPIRED') }}" style="color:#bbb;">&#9675;</span>
+							{% endif %}
+							{{ hit.IP }}
+						</td>
+						<td>{{ hit.HITS }}</td>
+						<td>
+							{{ hit.FIRST_HIT }}
+						</td>
+						<td>
+							{% if hit.S_DAYS > 0 %}
+								{{ hit.S_DAYS }} {{ lang('DAYS') }},
+							{% endif %}
+							{{ hit.S_HOURS }} {{ lang('HOURS') }},
+							{{ hit.S_MINUTES }} {{ lang('MINUTES') }}
+						</td>
+						<td>
+							{% if hit.U_WHOIS %}
+								<a href="{{ hit.U_WHOIS }}" target="_blank" rel="noopener" onclick="popup(this.href, 750, 500); return false;">{{ lang('WHOIS') }}</a> |
+							{% endif %}
+							<form method="post" action="{{ U_ACTION }}" style="display:inline;">
+								<input type="hidden" name="action" value="delete_hit" />
+								<input type="hidden" name="hash" value="{{ hit.HASH }}" />
+								{{ S_FORM_TOKEN }}
+								<input type="submit" class="button2" onclick="return confirm('{{ lang('BBGATEKEEPER_CONFIRM_DELETE_ONE') }}');" value="{{ lang('DELETE') }}" />
+							</form>
+						</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+
+		<p>
+			<form method="post" action="{{ U_ACTION }}" style="display:inline;">
+				<input type="hidden" name="action" value="cleanup_expired_hits" />
+				{{ S_FORM_TOKEN }}
+				<input type="submit" class="button2" onclick="return confirm('{{ lang('BBGATEKEEPER_CONFIRM_CLEANUP_HITS') }}');" value="{{ lang('BBGATEKEEPER_CLEANUP_EXPIRED_HITS') }}" />
+			</form>
+			<form method="post" action="{{ U_ACTION }}" style="display:inline;">
+				<input type="hidden" name="action" value="delete_all_hits" />
+				{{ S_FORM_TOKEN }}
+				<input type="submit" class="button2" onclick="return confirm('{{ lang('BBGATEKEEPER_CONFIRM_DELETE_ALL_HITS') }}');" value="{{ lang('BBGATEKEEPER_DELETE_ALL_HITS') }}" />
+			</form>
+		</p>
+	{% endif %}
+</fieldset>
+
+{% INCLUDE 'overall_footer.html' %}

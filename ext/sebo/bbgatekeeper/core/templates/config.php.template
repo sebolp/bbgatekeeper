@@ -19,6 +19,8 @@ define('HCAP_COOKIE_NAME', {{HCAP_COOKIE_NAME}});
 define('HCAP_COOKIE_TTL', {{HCAP_COOKIE_TTL}});
 define('HCAP_COOKIE_SAMESITE', {{HCAP_COOKIE_SAMESITE}});
 define('HCAP_COOKIE_DOMAIN', {{HCAP_COOKIE_DOMAIN}});
+define('TRUSTED_PROXY_ENABLE', {{TRUSTED_PROXY_ENABLE}});
+define('TRUSTED_PROXY_REMOTE_ADDR', {{TRUSTED_PROXY_REMOTE_ADDR}});
 
 // 1 = strict (bind to exact IP), 2 = relaxed (bind to network prefix),
 // 4 = disabled (no IP binding at all). See get_ip_binding_value() below.
@@ -45,6 +47,13 @@ define('BBGATEKEEPER_MULTI_BINDING_MAX', 5);
 */
 function is_search_engine_bot(string $ip): bool
 {
+	// lighthouse can go through
+	$user_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+	$is_lighthouse = (strpos($user_agent, 'Lighthouse') !== false);
+	if ($is_lighthouse) {
+		return true;
+	}
+
 	$host = gethostbyaddr($ip);
 	if ($host === false || $host === $ip)
 	{

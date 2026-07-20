@@ -51,9 +51,9 @@ class deploy_status_checker
 	}
 
 	/**
-	* Check if file exists and it is readeable.
+	* Check if file exists and it is readable.
 	*
-	* @return string 'ok', 'bad', o 'no_right_permissions'
+	* @return string 'ok', 'bad', or 'no_right_permissions'
 	*/
 	private function get_file_status(string $path): string
 	{
@@ -62,13 +62,18 @@ class deploy_status_checker
 			return 'bad';
 		}
 
+		if (!is_readable($path))
+		{
+			return 'no_right_permissions';
+		}
+
 		return 'ok';
 	}
 
 	/**
 	* Check .user.ini file
 	*
-	* @return string 'ok', 'bad', o 'no_rigth_permissions'
+	* @return string 'ok', 'bad', or 'no_right_permissions'
 	*/
 	public function get_ini_status(): string
 	{
@@ -86,7 +91,11 @@ class deploy_status_checker
 			return 'bad';
 		}
 
-		// if exists
+		if (!is_readable($ini_path))
+		{
+			return 'no_right_permissions';
+		}
+
 		return 'ok';
 	}
 

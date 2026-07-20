@@ -128,4 +128,81 @@ $lang = array_merge($lang, [
 	'BBGATEKEEPER_SAVE_MODAL_TITLE'   => 'Stai salvando le impostazioni',
 	'BBGATEKEEPER_SAVE_MODAL_TEXT'    => 'Questa azione salva le impostazioni ma non genera il file di configurazione. Per applicare le modifiche definitivamente devi cliccare sull\'altro pulsante:',
 	'BBGATEKEEPER_SAVE_MODAL_CONFIRM' => 'Salva comunque',
+	// >= 1.2
+	'ACP_BBGATEKEEPER_HITS_AND_BANS'	=> 'Hits &amp; Ban',
+
+	'BBGATEKEEPER_HITSBANS_EXPLAIN'	=> 'Elenco degli indirizzi IP con hCaptcha fallito (HIT, non ancora bannati) e di quelli attualmente bannati (BAN). Puoi rimuovere singolarmente una voce o svuotare l\'intera categoria.',
+
+	'BBGATEKEEPER_BANS_TITLE'		=> 'IP bannati',
+	'BBGATEKEEPER_HITS_TITLE'		=> 'IP con tentativi falliti (in attesa di ban)',
+
+	'BBGATEKEEPER_NO_BANS'			=> 'Nessun IP attualmente bannato.',
+	'BBGATEKEEPER_NO_HITS'			=> 'Nessun tentativo fallito registrato.',
+
+	'BBGATEKEEPER_COL_IP'			=> 'Indirizzo IP',
+	'BBGATEKEEPER_COL_BAN_TIME'		=> 'Data ban',
+	'BBGATEKEEPER_COL_REMAINING'		=> 'Tempo rimanente',
+	'BBGATEKEEPER_COL_HITS'		=> 'Tentativi',
+	'BBGATEKEEPER_COL_FIRST_HIT'		=> 'Primo tentativo',
+	'BBGATEKEEPER_COL_ELAPSED_FIRST_HIT'		=> 'Tempo trascorso',
+	'BBGATEKEEPER_COL_ACTIONS'		=> 'Azioni',
+
+	'BBGATEKEEPER_IP_UNKNOWN'		=> 'IP sconosciuto (file precedente al tracciamento IP)',
+
+	'BBGATEKEEPER_DELETE_ALL_BANS'		=> 'Elimina tutti i ban',
+	'BBGATEKEEPER_DELETE_ALL_HITS'		=> 'Elimina tutti gli hit',
+
+	'BBGATEKEEPER_CONFIRM_DELETE_ONE'	=> 'Confermi la rimozione di questa voce?',
+	'BBGATEKEEPER_CONFIRM_DELETE_ALL_BANS'	=> 'Confermi di voler eliminare TUTTI i ban attivi? Gli IP bannati torneranno immediatamente a poter accedere al sito.',
+	'BBGATEKEEPER_CONFIRM_DELETE_ALL_HITS'	=> 'Confermi di voler eliminare TUTTI i record di hit? I relativi contatori ripartiranno da zero.',
+
+	'BBGATEKEEPER_HITSBANS_UPDATED'	=> 'Operazione completata.',
+
+	'BBGATEKEEPER_HITSBANS_DAYS' =>	'giorni',
+	'BBGATEKEEPER_HITSBANS_HOURS' => 'ore',
+	'BBGATEKEEPER_HITSBANS_MINUTES' => 'minuti',
+
+	'BBGATEKEEPER_AUTOCLEAN_TITLE'		=> 'Pulizia automatica',
+	'BBGATEKEEPER_AUTOCLEAN_EXPLAIN'	=> 'Se abilitata, un cron di phpBB rimuove periodicamente i file .ban/.hit scaduti (non più attivi), senza bisogno di intervento manuale.',
+	'BBGATEKEEPER_AUTOCLEAN_ENABLE'	=> 'Abilita pulizia automatica',
+	'BBGATEKEEPER_AUTOCLEAN_INTERVAL'	=> 'Intervallo di esecuzione',
+	'BBGATEKEEPER_AUTOCLEAN_SAVED'		=> 'Impostazioni di pulizia automatica salvate.',
+
+	'BBGATEKEEPER_LOGGING'			=> 'Log di accesso',
+	'BBGATEKEEPER_ENABLE_ACCESS_LOG'	=> 'Registra access log',
+	'BBGATEKEEPER_ENABLE_ACCESS_LOG_EXPLAIN' => 'Se disattivato, il logger auto_prepend non scrive più su store/logs/access.log ad ogni richiesta (risparmia una operazione di I/O per request). Non influisce sui file .ban/.hit, che restano sempre attivi.',
+
+	'BBGATEKEEPER_ACTIVE'			=> 'Attivo',
+	'BBGATEKEEPER_EXPIRED'			=> 'Scaduto',
+
+	'BBGATEKEEPER_CLEANUP_EXPIRED_BANS'	=> 'Pulisci ban scaduti',
+	'BBGATEKEEPER_CLEANUP_EXPIRED_HITS'	=> 'Pulisci hit scaduti',
+
+	'BBGATEKEEPER_CONFIRM_CLEANUP_BANS'	=> 'Confermi la pulizia dei soli ban scaduti (i ban ancora attivi non verranno toccati)?',
+	'BBGATEKEEPER_CONFIRM_CLEANUP_HITS'	=> 'Confermi la pulizia dei soli hit scaduti (gli hit ancora attivi non verranno toccati)?',
+
+	'BBGATEKEEPER_PRECHECK_TITLE'		=> 'Precheck statico (stadio 0)',
+
+	'BBGATEKEEPER_PRECHECK_EXPLAIN'	=> 'Aggiunge un controllo preliminare gestito direttamente da Apache, prima ancora che la richiesta arrivi a PHP-FPM: chi non ha un cookie di clearance valido viene reindirizzato a una pagina statica che imposta il cookie via JavaScript e poi ricarica la pagina originale. Filtra i bot senza JavaScript a costo zero, senza consumare processi PHP-FPM. Si affianca al controllo hCaptcha esistente, non lo sostituisce.<br />⚠️ questo pre-check impedisce ai motori di ricerca di passare (non rispecchia le regole salvate in questa pagina). Utile negli attacchi massivi come ulteriore difesa dei BOT più semplici, ma causa problemi SEO. Disattivalo se non necessario.',
+
+	'BBGATEKEEPER_PRECHECK_WARNING_TITLE'	=> 'Attenzione: modifica il file .htaccess',
+
+	'BBGATEKEEPER_PRECHECK_WARNING_EXPLAIN' => 'Prima di attivarlo per la prima volta, il tuo .htaccess attuale viene rinominato in .htaccess.bbgatekeeper-original nella document root e non viene più toccato. Se dopo l\'attivazione il sito diventasse irraggiungibile, puoi ripristinare tutto via FTP: cancella .htaccess e rinomina .htaccess.bbgatekeeper-original in .htaccess.',
+
+	'BBGATEKEEPER_PRECHECK_ENABLE'		=> 'Abilita precheck statico.',
+
+	'BBGATEKEEPER_PRECHECK_STATUS'		=> 'Stato attuale',
+	'BBGATEKEEPER_PRECHECK_STATUS_ACTIVE'	=> 'Attivo (blocco presente in .htaccess)',
+	'BBGATEKEEPER_PRECHECK_STATUS_NOT_ACTIVE' => 'Non attivo',
+
+	'BBGATEKEEPER_PRECHECK_ERROR'		=> 'Impossibile scrivere sul filesystem (file html o .htaccess). Nessuna modifica è stata salvata; verifica i permessi di scrittura sulla document root.',
+	// >= 1.2.1
+	'BBGATEKEEPER_TRUSTED_PROXY' => 'Proxy fidato',
+	'BBGATEKEEPER_TRUSTED_PROXY_ENABLE' => 'Abilita: usa X_FORWARDED_FOR solo da proxy fidato',
+	'BBGATEKEEPER_TRUSTED_PROXY_ENABLE_EXPLAIN' => 'Abilitalo solo se il forum è dietro Nginx, Cloudflare o un reverse proxy. Se disattivato viene usato sempre <samp class="error">X_FORWARDED_FOR</samp>.',
+	'BBGATEKEEPER_TRUSTED_PROXY_REMOTE_ADDR' => 'REMOTE_ADDR del proxy fidato',
+	'BBGATEKEEPER_TRUSTED_PROXY_REMOTE_ADDR_EXPLAIN' => 'Inserisci il valore <samp class="error">REMOTE_ADDR</samp> visto dal pulsante utilizzato sopra nel riquadro di spiegazione.',
+	'BBGATEKEEPER_CURRENT_REQUEST_PRE_EXPLAIN' => '<samp class="error">REMOTE_ADDR</samp> e <samp class="error"><samp class="error">X_FORWARDED_FOR</samp></samp> vengono sempre forniti entrambi e letti insieme, ma hanno un\'affidabilità molto diversa.<br />• <samp class="error">REMOTE_ADDR</samp> è l\'indirizzo IP che il server vede realmente collegarsi: nessun visitatore può falsificarlo.<br />• <samp class="error">X_FORWARDED_FOR</samp> invece è un semplice header HTTP che chiunque può scrivere a piacere, quindi di per sé non è affidabile.',
+	'BBGATEKEEPER_CURRENT_REQUEST_EXPLAIN' => 'Questo controllo funziona così:<br />- Se <samp class="error">REMOTE_ADDR</samp> corrisponde esattamente al proxy fidato configurato qui sotto (es. il proxy interno del vostro hosting), la richiesta è passata davvero da lì, quindi <samp class="error">X_FORWARDED_FOR</samp> <strong style="color:green;">è sicuro</strong>.<br />- Se <samp class="error">REMOTE_ADDR</samp> non corrisponde al proxy fidato, la richiesta non è passata da lì: <samp class="error">X_FORWARDED_FOR</samp> potrebbe essere stato scritto liberamente dal client, quindi <strong style="color:red;">non è sicuro</strong>.',
+	'BBGATEKEEPER_IP_PROBE_LINK' => 'Visualizza il tuo REMOTE_ADDR ed i tuoi indirizzi',
 ]);
