@@ -19,7 +19,9 @@
 
 header('Content-Type: text/plain; charset=UTF-8');
 
-echo '> REMOTE_ADDR: ' . ($_SERVER['REMOTE_ADDR'] ?? '-') . "\n";
-echo '> HTTP_X_FORWARDED_FOR: ' . ($_SERVER['HTTP_X_FORWARDED_FOR'] ?? '-') . "\n";
-echo '> HTTP_X_REAL_IP: ' . ($_SERVER['HTTP_X_REAL_IP'] ?? '-') . "\n";
-echo '> SERVER_ADDR: ' . ($_SERVER['SERVER_ADDR'] ?? '-') . "\n";
+$output = '> REMOTE_ADDR: ' . ($_SERVER['REMOTE_ADDR'] ?? '-') . "\n";
+$output .= '> HTTP_X_FORWARDED_FOR: ' . ($_SERVER['HTTP_X_FORWARDED_FOR'] ?? '-') . "\n";
+$output .= '> HTTP_X_REAL_IP: ' . ($_SERVER['HTTP_X_REAL_IP'] ?? '-') . "\n";
+$output .= '> SERVER_ADDR: ' . ($_SERVER['SERVER_ADDR'] ?? '-') . "\n";
+
+exit($output);
