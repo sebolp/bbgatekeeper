@@ -49,30 +49,6 @@
 
 <form id="bbgatekeeper_settings" method="post" action="{{ U_ACTION }}">
 
-	<fieldset style="background-color: #fff3e0;">
-		<legend>🚧 {{ lang('BBGATEKEEPER_PRECHECK_TITLE') }}</legend>
-			<p>{{ lang('BBGATEKEEPER_PRECHECK_EXPLAIN') }}</p>
-			<div class="errorbox">
-				<p><strong>{{ lang('BBGATEKEEPER_PRECHECK_WARNING_TITLE') }}</strong><br />{{ lang('BBGATEKEEPER_PRECHECK_WARNING_EXPLAIN') }}</p>
-			</div>
-			<dl>
-				<dt>
-					<label for="precheck_enable">{{ lang('BBGATEKEEPER_PRECHECK_ENABLE') }}</label>
-				</dt>
-				<dd>
-					<input type="checkbox" id="precheck_enable" name="precheck_enable" value="1" {% if PRECHECK_ENABLE %}checked="checked"{% endif %} />
-				</dd>
-			</dl>
-			<p>
-				{{ lang('BBGATEKEEPER_PRECHECK_STATUS') }}:
-				{% if PRECHECK_DEPLOYED %}
-					<strong class="text-success">{{ lang('BBGATEKEEPER_PRECHECK_STATUS_ACTIVE') }}</strong>
-				{% else %}
-					<strong class="text-error">{{ lang('BBGATEKEEPER_PRECHECK_STATUS_NOT_ACTIVE') }}</strong>
-				{% endif %}
-			</p>
-	</fieldset>
-
 	<fieldset>
 		<legend>🧩 {{ lang('BBGATEKEEPER_HCAPTCHA') }}</legend>
 

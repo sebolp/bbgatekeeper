@@ -276,10 +276,6 @@ class main_module
 			// admin in a new tab, no deploy/config needed.
 			'U_IP_PROBE' => generate_board_url() . '/ext/sebo/bbgatekeeper/sebo-bbgatekeeper-ip-probe.php',
 
-			// Stage 0 (Apache, before PHP-FPM): static page + .htaccess block
-			'PRECHECK_ENABLE'    => (bool) ($config['bbgatekeeper_precheck_enable'] ?? false),
-			'PRECHECK_DEPLOYED'  => $phpbb_container->get('sebo.bbgatekeeper.precheck_deployer')->is_deployed(),
-
 			'DEPLOY_OK'         => $checker->all_ok(),
 			'LAST_DEPLOY_TIME'      => !empty($config['bbgatekeeper_last_deploy_time']) ? $user->format_date((int) $config['bbgatekeeper_last_deploy_time']) : '-',
 
@@ -367,34 +363,6 @@ class main_module
 		$config->set('bbgatekeeper_trusted_proxy_enable', $trusted_proxy_enable ? '1' : '0');
 		$config->set('bbgatekeeper_trusted_proxy_remote_addr', $trusted_proxy_remote_addr);
 
-		// ============ Static precheck (sebo-bbgatekeeper.html + .htaccess) ============
-		// Acts only on a state CHANGE, not on every save: writing to
-		// .htaccess is a delicate operation (can take the site down if it
-		// goes wrong), so it should only be touched when the admin
-		// actually flips the checkbox, not on every settings save.
-		$old_precheck_enable = (bool) ($config['bbgatekeeper_precheck_enable'] ?? false);
-		$new_precheck_enable = (bool) $request->variable('precheck_enable', false);
-
-		if ($new_precheck_enable !== $old_precheck_enable)
-		{
-			/** @var \sebo\bbgatekeeper\core\precheck_deployer $precheck */
-			$precheck = $phpbb_container->get('sebo.bbgatekeeper.precheck_deployer');
-
-			$precheck_ok = $new_precheck_enable ? $precheck->deploy() : $precheck->remove();
-
-			if ($precheck_ok)
-			{
-				$config->set('bbgatekeeper_precheck_enable', $new_precheck_enable ? '1' : '0');
-			}
-			else
-			{
-				// Don't update the config if the disk write failed: the
-				// state shown in ACP must stay consistent with the real
-				// on-disk state (checkbox not saved = nothing changed on
-				// the filesystem).
-				trigger_error($user->lang('BBGATEKEEPER_PRECHECK_ERROR') . adm_back_link($this->u_action), E_USER_WARNING);
-			}
-		}
 	}
 
 	/**

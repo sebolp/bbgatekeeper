@@ -182,21 +182,6 @@ $lang = array_merge($lang, [
 	'BBGATEKEEPER_CONFIRM_CLEANUP_BANS' => 'Are you sure you want to clean only expired bans (active bans will not be affected)?',
 	'BBGATEKEEPER_CONFIRM_CLEANUP_HITS' => 'Are you sure you want to clean only expired hits (active hits will not be affected)?',
 
-	'BBGATEKEEPER_PRECHECK_TITLE'			=> 'Static precheck (stage 0)',
-
-	'BBGATEKEEPER_PRECHECK_EXPLAIN' 		=> 'Adds a preliminary check managed directly by Apache, before the request even reaches PHP-FPM: users without a valid clearance cookie are redirected to a static page that sets the cookie via JavaScript and then reloads the original page. It filters out non-JavaScript bots at zero cost, without consuming PHP-FPM processes. This runs alongside the existing hCaptcha check, it does not replace it.<br />⚠️ this static pre-check blocks searc engines (it\'s not affected by the rules setted in this ACP page).',
-
-	'BBGATEKEEPER_PRECHECK_WARNING_TITLE'	=> 'Warning: modifies the .htaccess file',
-
-	'BBGATEKEEPER_PRECHECK_WARNING_EXPLAIN'	=> 'Before enabling it for the first time, your current .htaccess file is renamed to .htaccess.bbgatekeeper-original in the document root and will not be touched again. If the site becomes inaccessible after activation, you can restore everything via FTP: delete the current .htaccess and rename .htaccess.bbgatekeeper-original to .htaccess.',
-
-	'BBGATEKEEPER_PRECHECK_ENABLE'		=> 'Enable static precheck. It could be useful under DDoS attack for blocking simple BOT, but affects SEO. Disable if not necessary.',
-
-	'BBGATEKEEPER_PRECHECK_STATUS'		=> 'Current status',
-	'BBGATEKEEPER_PRECHECK_STATUS_ACTIVE'	=> 'Active (block present in .htaccess)',
-	'BBGATEKEEPER_PRECHECK_STATUS_NOT_ACTIVE'	=> 'Not active',
-
-	'BBGATEKEEPER_PRECHECK_ERROR'		=> 'Unable to write to the filesystem (HTML or .htaccess file). No changes were saved; check the write permissions on the document root.',
 	// >= 1.2.1
 	'BBGATEKEEPER_TRUSTED_PROXY' => 'Trusted Proxy',
 	'BBGATEKEEPER_TRUSTED_PROXY_ENABLE' => 'Enable: use X_FORWARDED_FOR only from a trusted proxy',

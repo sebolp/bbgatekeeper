@@ -57,8 +57,3 @@ services:
             - '%core.root_path%'
         tags:
             - { name: cron.task }
- 
-    sebo.bbgatekeeper.precheck_deployer:
-        class: sebo\bbgatekeeper\core\precheck_deployer
-        arguments:
-            - '@request'

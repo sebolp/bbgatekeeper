@@ -181,21 +181,6 @@ $lang = array_merge($lang, [
 	'BBGATEKEEPER_CONFIRM_CLEANUP_BANS'	=> 'Confermi la pulizia dei soli ban scaduti (i ban ancora attivi non verranno toccati)?',
 	'BBGATEKEEPER_CONFIRM_CLEANUP_HITS'	=> 'Confermi la pulizia dei soli hit scaduti (gli hit ancora attivi non verranno toccati)?',
 
-	'BBGATEKEEPER_PRECHECK_TITLE'		=> 'Precheck statico (stadio 0)',
-
-	'BBGATEKEEPER_PRECHECK_EXPLAIN'	=> 'Aggiunge un controllo preliminare gestito direttamente da Apache, prima ancora che la richiesta arrivi a PHP-FPM: chi non ha un cookie di clearance valido viene reindirizzato a una pagina statica che imposta il cookie via JavaScript e poi ricarica la pagina originale. Filtra i bot senza JavaScript a costo zero, senza consumare processi PHP-FPM. Si affianca al controllo hCaptcha esistente, non lo sostituisce.<br />⚠️ questo pre-check impedisce ai motori di ricerca di passare (non rispecchia le regole salvate in questa pagina). Utile negli attacchi massivi come ulteriore difesa dei BOT più semplici, ma causa problemi SEO. Disattivalo se non necessario.',
-
-	'BBGATEKEEPER_PRECHECK_WARNING_TITLE'	=> 'Attenzione: modifica il file .htaccess',
-
-	'BBGATEKEEPER_PRECHECK_WARNING_EXPLAIN' => 'Prima di attivarlo per la prima volta, il tuo .htaccess attuale viene rinominato in .htaccess.bbgatekeeper-original nella document root e non viene più toccato. Se dopo l\'attivazione il sito diventasse irraggiungibile, puoi ripristinare tutto via FTP: cancella .htaccess e rinomina .htaccess.bbgatekeeper-original in .htaccess.',
-
-	'BBGATEKEEPER_PRECHECK_ENABLE'		=> 'Abilita precheck statico.',
-
-	'BBGATEKEEPER_PRECHECK_STATUS'		=> 'Stato attuale',
-	'BBGATEKEEPER_PRECHECK_STATUS_ACTIVE'	=> 'Attivo (blocco presente in .htaccess)',
-	'BBGATEKEEPER_PRECHECK_STATUS_NOT_ACTIVE' => 'Non attivo',
-
-	'BBGATEKEEPER_PRECHECK_ERROR'		=> 'Impossibile scrivere sul filesystem (file html o .htaccess). Nessuna modifica è stata salvata; verifica i permessi di scrittura sulla document root.',
 	// >= 1.2.1
 	'BBGATEKEEPER_TRUSTED_PROXY' => 'Proxy fidato',
 	'BBGATEKEEPER_TRUSTED_PROXY_ENABLE' => 'Abilita: usa X_FORWARDED_FOR solo da proxy fidato',

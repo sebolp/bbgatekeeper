@@ -3,8 +3,8 @@
     "type": "phpbb-extension",
     "description": "ACP-managed bad bot gatekeeper: hCaptcha challenge, Forward-Confirmed reverse DNS bot whitelisting, User-Agent blocklist, and deployment tooling for an auto_prepend_file edge filter.",
     "homepage": "https://www.fiatpandaclub.org",
-    "version": "1.2.1",
-    "time": "2026-07-20",
+    "version": "1.2.2",
+    "time": "2026-07-21",
     "license": "GPL-2.0-only",
     "authors": [
         {
@@ -32,9 +32,5 @@
         "allow-plugins": {
             "composer/installers": true
         }
-    },
-    "require-dev": {
-        "squizlabs/php_codesniffer": "^3.13",
-        "senky/phpbb-coding-standard": "dev-master"
     }
 }
