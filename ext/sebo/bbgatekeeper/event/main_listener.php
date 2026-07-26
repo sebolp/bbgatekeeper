@@ -75,9 +75,31 @@ class main_listener implements EventSubscriberInterface
 	{
 		return [
 			'core.acp_main_notices' => 'add_acp_overview_notice',
-			'core.page_header'          => 'add_index_admin_warning',
+			'core.page_header'		=> 'add_index_admin_warning',
+			'core.user_setup'		=> 'load_language_on_setup',
 		];
 	}
+
+	/**
+	* Registers the extension's language file on every page via
+	* core.user_setup, so LOG_BBGATEKEEPER_AUTOCLEAN (and any other key
+	* used outside this extension's own pages, e.g. the native ACP
+	* "Logs" page) resolves correctly instead of falling back to the
+	* raw {LANG_KEY} placeholder.
+	*
+	* @param \phpbb\event\data $event
+	* @return void
+	*/
+	public function load_language_on_setup($event)
+	{
+		$lang_set_ext = $event['lang_set_ext'];
+		$lang_set_ext[] = [
+			'ext_name' => 'sebo/bbgatekeeper',
+			'lang_set' => 'common',
+		];
+		$event['lang_set_ext'] = $lang_set_ext;
+	}
+
 
 	/**
 	* ACP overview notice when the deployment looks unhealthy.

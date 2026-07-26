@@ -191,5 +191,5 @@ $lang = array_merge($lang, [
 	'BBGATEKEEPER_CURRENT_REQUEST_EXPLAIN' => 'Questo controllo funziona così:<br />- Se <samp class="error">REMOTE_ADDR</samp> corrisponde esattamente al proxy fidato configurato qui sotto (es. il proxy interno del vostro hosting), la richiesta è passata davvero da lì, quindi <samp class="error">X_FORWARDED_FOR</samp> <strong style="color:green;">è sicuro</strong>.<br />- Se <samp class="error">REMOTE_ADDR</samp> non corrisponde al proxy fidato, la richiesta non è passata da lì: <samp class="error">X_FORWARDED_FOR</samp> potrebbe essere stato scritto liberamente dal client, quindi <strong style="color:red;">non è sicuro</strong>.',
 	'BBGATEKEEPER_IP_PROBE_LINK' => 'Visualizza il tuo REMOTE_ADDR ed i tuoi indirizzi',
 	/* >=1.2.3 */
-	'LOG_BBGATEKEEPER_AUTOCLEAN' => 'Pulizia automatica Bad Bot Gatekeeper: %1$d ban(s) e %2$d hit(s) scaduti rimossi',
+	'LOG_BBGATEKEEPER_AUTOCLEAN' => '<strong>Pulizia automatica Bad Bot Gatekeeper:</strong><br />» %1$d ban(s) e %2$d hit(s) scaduti rimossi',
 ]);
