@@ -123,13 +123,13 @@ $lang = array_merge($lang, [
 	'BBGATEKEEPER_CONFIG_FILE_GENERATING' => 'Creating <strong>bbgatekeeper_config.php</strong> file into store/bbgatekeeper folder',
 	'BBGATEKEEPER_LOGGER_AND_INI_DEPLOY' => 'Creating <strong>bbgatekeeper_logger.php</strong> file into store/bbgatekeeper folder and <strong>.user.ini</strong> file into root website folder',
 
-	// >= 1.1
+	/* >= 1.1 */
 	'BBGATEKEEPER_WHOIS' => 'WHOIS IP',
 	'BBGATEKEEPER_SAVE_MODAL_TITLE'   => 'Settings saving',
 	'BBGATEKEEPER_SAVE_MODAL_TEXT'    => 'This action only save settings in the database. If you want to apply settings to current files and your forum, you have to use the button:',
 	'BBGATEKEEPER_SAVE_MODAL_CONFIRM' => 'Save anyway',
 
-	// >= 1.2
+	/* >= 1.2 */
 	'ACP_BBGATEKEEPER_HITS_AND_BANS'	=> 'Hits &amp; Bans',
 
 	'BBGATEKEEPER_HITSBANS_EXPLAIN' => 'List of IP addresses with failed hCaptcha (HITS, not yet banned) and those currently banned (BANS). You can remove an entry individually or clear the entire category.',
@@ -182,7 +182,7 @@ $lang = array_merge($lang, [
 	'BBGATEKEEPER_CONFIRM_CLEANUP_BANS' => 'Are you sure you want to clean only expired bans (active bans will not be affected)?',
 	'BBGATEKEEPER_CONFIRM_CLEANUP_HITS' => 'Are you sure you want to clean only expired hits (active hits will not be affected)?',
 
-	// >= 1.2.1
+	/* >= 1.2.1 */
 	'BBGATEKEEPER_TRUSTED_PROXY' => 'Trusted Proxy',
 	'BBGATEKEEPER_TRUSTED_PROXY_ENABLE' => 'Enable: use X_FORWARDED_FOR only from a trusted proxy',
 	'BBGATEKEEPER_TRUSTED_PROXY_ENABLE_EXPLAIN' => 'Enable this only if the forum is behind Nginx, Cloudflare, or a reverse proxy. If disabled, <samp class="error">X_FORWARDED_FOR</samp> is always used.',
@@ -191,4 +191,6 @@ $lang = array_merge($lang, [
 	'BBGATEKEEPER_CURRENT_REQUEST_PRE_EXPLAIN' => '<samp class="error">REMOTE_ADDR</samp> and <samp class="error">X_FORWARDED_FOR</samp> are always provided together and read together, but they have very different reliability levels.<br />• <samp class="error">REMOTE_ADDR</samp> is the IP address that the server actually sees connecting: no visitor can spoof it.<br />• <samp class="error">X_FORWARDED_FOR</samp> instead is a simple HTTP header that anyone can write at will, so it is inherently unreliable.',
 	'BBGATEKEEPER_CURRENT_REQUEST_EXPLAIN' => 'This check works as follows:<br />- If <samp class="error">REMOTE_ADDR</samp> matches exactly the trusted proxy configured below (e.g., your hosting provider\'s internal proxy), the request truly passed through it, and the value that the proxy itself wrote in <samp class="error">X_FORWARDED_FOR</samp> can be trusted.<br />- If <samp class="error">REMOTE_ADDR</samp> does not match the trusted proxy, the request did not pass through it: X-FORWARDED_FOR could have been written freely by the client, so it is not secure.',
 	'BBGATEKEEPER_IP_PROBE_LINK' => 'View your REMOTE_ADDR and your addresses',
+	/* >=1.2.3 */
+	'LOG_BBGATEKEEPER_AUTOCLEAN' => 'Bad Bot Gatekeeper automatic cleanup ran: %1$d expired ban(s) and %2$d expired hit(s) removed',
 ]);

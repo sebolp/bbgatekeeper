@@ -11,27 +11,32 @@
 namespace sebo\bbgatekeeper\cron;
 
 /**
- * Cron task: pulizia automatica dei file .ban/.hit non più attivi in
- * store/logs/bans/. Attivabile/configurabile (intervallo in minuti) dalla
- * pagina ACP "Hits & Ban" (bbgatekeeper_autoclean_enable / _interval).
+ * Cron task: automatic cleanup of no-longer-active .ban/.hit files in
+ * store/logs/bans/. Enabled/configured (interval in minutes) from the
+ * "Hits & Ban" ACP page (bbgatekeeper_autoclean_enable / _interval).
  *
- * Registrare come servizio con tag cron.task (vedi services_cron_snippet.yml).
+ * Register as a service tagged cron.task (see services_cron_snippet.yml).
  */
 class cleanup_task extends \phpbb\cron\task\base
 {
 	/** @var \phpbb\config\config */
 	protected $config;
 
+	/** @var \phpbb\log\log_interface */
+	protected $log;
+
 	/** @var string */
 	protected $phpbb_root_path;
 
 	/**
-	* @param \phpbb\config\config $config
-	* @param string               $phpbb_root_path
+	* @param \phpbb\config\config     $config
+	* @param \phpbb\log\log_interface $log
+	* @param string                   $phpbb_root_path
 	*/
-	public function __construct(\phpbb\config\config $config, $phpbb_root_path)
+	public function __construct(\phpbb\config\config $config, \phpbb\log\log_interface $log, $phpbb_root_path)
 	{
 		$this->config = $config;
+		$this->log = $log;
 		$this->phpbb_root_path = $phpbb_root_path;
 	}
 
@@ -46,8 +51,8 @@ class cleanup_task extends \phpbb\cron\task\base
 	}
 
 	/**
-	* Il task esiste/gira solo se l'admin ha abilitato la pulizia automatica
-	* dalla pagina Hits & Ban.
+	* The task only exists/runs if the admin has enabled automatic cleanup
+	* from the Hits & Ban page.
 	*
 	* @return bool
 	*/
@@ -76,9 +81,18 @@ class cleanup_task extends \phpbb\cron\task\base
 			$this->phpbb_root_path . 'ext/sebo/bbgatekeeper/store/logs/bans'
 		);
 
-		$manager->delete_expired_bans();
-		$manager->delete_expired_hits();
+		$deleted_bans = $manager->delete_expired_bans();
+		$deleted_hits = $manager->delete_expired_hits();
 
 		$this->config->set('bbgatekeeper_autoclean_last_run', (string) time());
+
+		$this->log->add(
+			'admin',
+			ANONYMOUS,
+			'',
+			'LOG_BBGATEKEEPER_AUTOCLEAN',
+			time(),
+			array((int) $deleted_bans, (int) $deleted_hits)
+		);
 	}
 }

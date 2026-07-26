@@ -54,6 +54,7 @@ services:
         class: sebo\bbgatekeeper\cron\cleanup_task
         arguments:
             - '@config'
+            - '@log'
             - '%core.root_path%'
         tags:
             - { name: cron.task }
