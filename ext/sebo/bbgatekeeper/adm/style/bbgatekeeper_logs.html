@@ -23,8 +23,8 @@
 		<tr>
 			<th>{L_BBGATEKEEPER_DATETIME}</th>
 			<th>{L_BBGATEKEEPER_IP}</th>
-			<th>{L_BBGATEKEEPER_STATUS}</th>
 			<th>{L_BBGATEKEEPER_URI}</th>
+			<th>{L_BBGATEKEEPER_STATUS}</th>
 			<th>{L_BBGATEKEEPER_USER_AGENT}</th>
 		</tr>
 	</thead>
@@ -33,9 +33,9 @@
 		<tr>
 			<td>{log_lines.DATETIME}</td>
 			<td><a href="{log_lines.U_WHOIS}" onclick="popup(this.href, 750, 500); return false;">🔍</a> {log_lines.IP}</td>
-			<td>{log_lines.STATUS}</td>
-			<td>{log_lines.URI}</td>
-			<td>{log_lines.USER_AGENT}</td>
+			<td title="{log_lines.STATUS}">{log_lines.STATUS}</td>
+			<td title="{log_lines.URI}">{log_lines.URI}</td>
+			<td title="{log_lines.USER_AGENT}">{log_lines.USER_AGENT}</td>
 		</tr>
 		<!-- END log_lines -->
 	</tbody>

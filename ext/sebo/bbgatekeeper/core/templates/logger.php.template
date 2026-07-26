@@ -110,8 +110,6 @@ function write_log(string $line): void
 	}
 	// Remove LOCK_EX to avoid PHP workers queuing up and causing 504 errors
 	@file_put_contents(BBGATEKEEPER_ACCESS_LOG, $line, FILE_APPEND);
-	// LOCK_EX impedisce la sovrapposizione di processi e mette in coda. Se attacco BOT, non importa, ma almeno libera memoria.
-	// @file_put_contents(BBGATEKEEPER_ACCESS_LOG, $line, FILE_APPEND | LOCK_EX);
 }
 
 // ====================== RATE LIMITING AND BAN FUNCTION ======================
@@ -294,15 +292,15 @@ if ($hc_challenge_failed && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POS
 
 if ($reason === 'hcaptcha-required')
 {
-	$status = 'BLOCKED-CHALLENGE: hCaptcha';
+	$status = '🚫: hCaptcha';
 }
 else if ($reason !== null)
 {
-	$status = 'BLOCKED:' . $reason;
+	$status = '🚫:' . $reason;
 }
 else
 {
-	$status = 'PASSED';
+	$status = '✅';
 }
 // Write only if enabled
 if (!defined('ENABLE_ACCESS_LOG') || ENABLE_ACCESS_LOG)
@@ -323,7 +321,6 @@ if ($reason !== null && !DRY_RUN)
 
 		if ($hc_challenge_failed)
 	{
-		http_response_code(503);
 		echo
 		<<<HTML
 			<!DOCTYPE html>
@@ -494,6 +491,17 @@ if ($reason !== null && !DRY_RUN)
 						transform: translateY(-1px);
 					}
 
+					input[type="submit"]:disabled {
+						background-color: #a0aec0;
+						cursor: not-allowed;
+						color: #edf2f7;
+					}
+
+					input[type="submit"]:disabled:hover {
+						background-color: #a0aec0;
+						transform: none;
+					}
+
 					/* Footer links */
 					.card p {
 						color: var(--text-muted);
@@ -544,9 +552,9 @@ if ($reason !== null && !DRY_RUN)
 
 					<!-- Main card -->
 					<div class="card">
-						<form action="" method="POST">
-							<div class="h-captcha" data-sitekey="{{BB_LOGGER_SITE_KEY_FOR_HTML}}"></div>
-							<input type="submit" value="{{BB_LOGGER_TEMPLATE_BUTTON}}" />
+						<form action="" method="POST" onsubmit="return checkCaptchaBeforeSubmit();">
+							<div class="h-captcha" data-sitekey="{{BB_LOGGER_SITE_KEY_FOR_HTML}}" data-callback="onCaptchaSuccess"></div>
+							<input type="submit" id="submitBtn" value="{{BB_LOGGER_TEMPLATE_BUTTON}}" disabled />
 						</form>
 
 						<p>{{BB_LOGGER_LANG_SECURITY_CHECK_COOKIE}}</p>
@@ -566,6 +574,20 @@ if ($reason !== null && !DRY_RUN)
 				</div>
 
 				<script>
+					function onCaptchaSuccess(token) {
+					document.getElementById('submitBtn').disabled = false;
+				}
+				function checkCaptchaBeforeSubmit() {
+					// prevent click before challenge
+					var response = document.querySelector('textarea[name="h-captcha-response"]');
+					if (!response || response.value.trim() === '') {
+						alert('{{BB_LOGGER_TEMPLATE_ERROR_CHALLENGE_NOT_COMPLETED}}');
+						return false;
+					}
+					// prevent double click
+					document.getElementById('submitBtn').disabled = true;
+					return true;
+				}
 					function showEmail(event) {
 						event.preventDefault();
 						var user = "{{BB_LOGGER_TEMPLATE_EMAIL_NAME}}";

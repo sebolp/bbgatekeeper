@@ -5,7 +5,7 @@
 
 .table-container table {
 	width: 100%;
-	table-layout: fixed; /* Fondamentale: le colonne avranno la larghezza definita */
+	table-layout: fixed;
 	border-collapse: collapse;
 }
 
@@ -13,15 +13,15 @@
 .table-container td {
 	padding: 8px;
 	overflow: hidden;
-	white-space: nowrap;      /* Impedisce il ritorno a capo */
-	text-overflow: ellipsis;  /* Aggiunge i puntini (...) se il testo è lungo */
+	white-space: nowrap;
+	text-overflow: ellipsis;
 }
 
-/* Definisci le percentuali o larghezze per ogni colonna */
+/* width */
 .table-container th:nth-child(1) { width: 15%; } /* DATETIME */
 .table-container th:nth-child(2) { width: 10%; } /* IP */
-.table-container th:nth-child(3) { width: 10%; } /* STATUS */
-.table-container th:nth-child(4) { width: 30%; } /* URI */
+.table-container th:nth-child(3) { width: 30%; } /* URI */
+.table-container th:nth-child(4) { width: 10%; } /* STATUS */
 .table-container th:nth-child(5) { width: 35%; } /* USER_AGENT */
 
 /* inline folder coding */
