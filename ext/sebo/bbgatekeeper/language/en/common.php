@@ -23,7 +23,7 @@ $lang = array_merge($lang, [
 	'ACP_BBGATEKEEPER_SETTINGS'     => 'Settings',
 	'ACP_BBGATEKEEPER_LOGS'         => 'Logs',
 	'ACP_BBGATEKEEPER_SETTINGS_PRE_EXPLAIN' => 'This extension requires registration with the challenge system your prefer. If you haven\'t already done so, register and obtain the necessary keys at those link (you can choose the one you prefer):<br />» %1$s<br />» %2$s',
-	'ACP_BBGATEKEEPER_SETTINGS_EXPLAIN' => 'From this page, you can configure the hCaptcha challenge, the User-Agent blacklist, and the search engine whitelist that can visit your forum.<br />After modifying these settings, use "Save and Generate/Deploy" to write / overwrite the runtime script.',
+	'ACP_BBGATEKEEPER_SETTINGS_EXPLAIN' => 'From this page, you can configure the challenge, the User-Agent blacklist, and the search engine whitelist that can visit your forum.<br />After modifying these settings, use "Save and Generate/Deploy" to write / overwrite the runtime script.',
 	'ACP_BBGATEKEEPER_SETTINGS_LANGUAGE_FALLBACK' => 'WARNING: Language files output',
 	'ACP_BBGATEKEEPER_SETTINGS_LANGUAGE_FALLBACK_EXPLAIN'   => 'Generated files will be in user language only IF there is a complete translation of the extension. If there isn\'t, files will be generated in English.',
 
