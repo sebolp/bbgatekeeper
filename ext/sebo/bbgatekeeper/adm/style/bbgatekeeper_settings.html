@@ -3,7 +3,6 @@
 {% INCLUDEJS '@sebo_bbgatekeeper/acp_popup.js' %}
 
 <h1>{{ lang('ACP_BBGATEKEEPER_SETTINGS') }}</h1>
-<p>{{ lang('ACP_BBGATEKEEPER_SETTINGS_PRE_EXPLAIN', HCAP_EXTERNAL_LINK) }}</p>
 <p>{{ lang('ACP_BBGATEKEEPER_SETTINGS_EXPLAIN') }}</p>
 <div class="errorbox">
 	<p><strong>{{ lang('ACP_BBGATEKEEPER_SETTINGS_LANGUAGE_FALLBACK') }}</strong><br />{{ lang('ACP_BBGATEKEEPER_SETTINGS_LANGUAGE_FALLBACK_EXPLAIN') }}</p>
@@ -50,23 +49,67 @@
 <form id="bbgatekeeper_settings" method="post" action="{{ U_ACTION }}">
 
 	<fieldset>
-		<legend>🧩 {{ lang('BBGATEKEEPER_HCAPTCHA') }}</legend>
+		<legend>🧩 {{ lang('BBGATEKEEPER_CAPTCHA_PROVIDER') }}</legend>
+		<p>{{ lang('ACP_BBGATEKEEPER_SETTINGS_PRE_EXPLAIN', HCAP_EXTERNAL_LINK , TURNSTILE_EXTERNAL_LINK) }}</p>
+		<p>{{ lang('ACP_BBGATEKEEPER_CPRIGHTS_EXPLAIN') }}</p>
 
-		<dl>
-			<dt>
-				<label for="hcap_site_key">{{ lang('BBGATEKEEPER_HCAP_SITE_KEY') }}</label>
-				<p>{{ lang('BBGATEKEEPER_HCAP_SITE_KEY_EXPLAIN') }}</p>
-			</dt>
-			<dd><input type="text" id="hcap_site_key" name="hcap_site_key" value="{{ HCAP_SITE_KEY }}" class="medium" /></dd>
-		</dl>
+		<div class="bbgk-provider-switch">
+			<input type="radio" id="bbgk_provider_hcaptcha" name="captcha_provider" value="hcaptcha" class="bbgk-tab-radio" {% if PROVIDER_HCAPTCHA %}checked="checked"{% endif %} />
+			<input type="radio" id="bbgk_provider_turnstile" name="captcha_provider" value="turnstile" class="bbgk-tab-radio" {% if PROVIDER_TURNSTILE %}checked="checked"{% endif %} />
 
-		<dl>
-			<dt>
-				<label for="hcap_site_secret">{{ lang('BBGATEKEEPER_HCAP_SITE_SECRET') }}</label>
-				<p>{{ lang('BBGATEKEEPER_HCAP_SITE_SECRET_EXPLAIN') }}</p>
-			</dt>
-			<dd><input type="password" id="hcap_site_secret" name="hcap_site_secret" value="{{ HCAP_SITE_SECRET }}" class="medium" autocomplete="off" /></dd>
-		</dl>
+			<div class="bbgk-tabs">
+				<label for="bbgk_provider_hcaptcha" class="bbgk-tab bbgk-tab-hcaptcha">
+					<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256"><title>hcaptcha-icon</title><defs><linearGradient id="SVGKKxv1bVF" x1="49.979%" x2="49.979%" y1="-702.201%" y2="97.969%"><stop offset="0%" stop-color="#00d4bf"/><stop offset="100%" stop-color="#0074bf"/></linearGradient><linearGradient id="SVGKJGOvfkX" x1="50%" x2="50%" y1="-602.243%" y2="197.926%"><stop offset="0%" stop-color="#00d4bf"/><stop offset="100%" stop-color="#0074bf"/></linearGradient><linearGradient id="SVGHlnzSbhR" x1="49.979%" x2="49.979%" y1="-602.243%" y2="197.926%"><stop offset="0%" stop-color="#00d4bf"/><stop offset="100%" stop-color="#0074bf"/></linearGradient><linearGradient id="SVGAy1YRdVi" x1="50.021%" x2="50.021%" y1="-502.498%" y2="298.01%"><stop offset="0%" stop-color="#00d4bf"/><stop offset="100%" stop-color="#0074bf"/></linearGradient><linearGradient id="SVG3bRWbdAG" x1="50%" x2="50%" y1="-502.498%" y2="298.01%"><stop offset="0%" stop-color="#00d4bf"/><stop offset="100%" stop-color="#0074bf"/></linearGradient><linearGradient id="SVGSMH1tNET" x1="49.979%" x2="49.979%" y1="-502.498%" y2="298.01%"><stop offset="0%" stop-color="#00d4bf"/><stop offset="100%" stop-color="#0074bf"/></linearGradient><linearGradient id="SVGDk6zTd0J" x1="50.021%" x2="50.021%" y1="-402.285%" y2="397.884%"><stop offset="0%" stop-color="#00d4bf"/><stop offset="100%" stop-color="#0074bf"/></linearGradient><linearGradient id="SVGGTyrYbWF" x1="50%" x2="50%" y1="-402.285%" y2="397.884%"><stop offset="0%" stop-color="#00d4bf"/><stop offset="100%" stop-color="#0074bf"/></linearGradient><linearGradient id="SVGhKvCPd4J" x1="49.979%" x2="49.979%" y1="-402.285%" y2="397.884%"><stop offset="0%" stop-color="#00d4bf"/><stop offset="100%" stop-color="#0074bf"/></linearGradient><linearGradient id="SVGe4QvmexB" x1="50.021%" x2="50.021%" y1="-302.328%" y2="497.842%"><stop offset="0%" stop-color="#00d4bf"/><stop offset="100%" stop-color="#0074bf"/></linearGradient><linearGradient id="SVG2WfQ9gmL" x1="50%" x2="50%" y1="-302.328%" y2="497.842%"><stop offset="0%" stop-color="#00d4bf"/><stop offset="100%" stop-color="#0074bf"/></linearGradient><linearGradient id="SVGsud9beXr" x1="49.979%" x2="49.979%" y1="-302.328%" y2="497.842%"><stop offset="0%" stop-color="#00d4bf"/><stop offset="100%" stop-color="#0074bf"/></linearGradient><linearGradient id="SVG44g0ZdjB" x1="50.021%" x2="50.021%" y1="-202.328%" y2="597.842%"><stop offset="0%" stop-color="#00d4bf"/><stop offset="100%" stop-color="#0074bf"/></linearGradient><linearGradient id="SVGAi8oHeYv" x1="50%" x2="50%" y1="-202.328%" y2="597.842%"><stop offset="0%" stop-color="#00d4bf"/><stop offset="100%" stop-color="#0074bf"/></linearGradient><linearGradient id="SVGPjGq4blz" x1="49.979%" x2="49.979%" y1="-202.328%" y2="597.842%"><stop offset="0%" stop-color="#00d4bf"/><stop offset="100%" stop-color="#0074bf"/></linearGradient><linearGradient id="SVGXj60LuIn" x1="50%" x2="50%" y1="-102.37%" y2="697.799%"><stop offset="0%" stop-color="#00d4bf"/><stop offset="100%" stop-color="#0074bf"/></linearGradient><linearGradient id="SVGStkKYT6k" x1="49.979%" x2="49.979%" y1="-102.37%" y2="697.799%"><stop offset="0%" stop-color="#00d4bf"/><stop offset="100%" stop-color="#0074bf"/></linearGradient><linearGradient id="SVG1PTmweIq" x1="49.979%" x2="49.979%" y1="-2.37%" y2="797.799%"><stop offset="0%" stop-color="#00d4bf"/><stop offset="100%" stop-color="#0074bf"/></linearGradient></defs><path fill="url(#SVGKKxv1bVF)" d="M160.007 223.993h32.007V256h-32.007z" opacity=".5"/><path fill="url(#SVGKKxv1bVF)" d="M128 223.993h32.007V256H128z" opacity=".7"/><path fill="url(#SVGKKxv1bVF)" d="M96.007 223.993h32.007V256H96.007z" opacity=".7"/><path fill="url(#SVGKKxv1bVF)" d="M64 223.993h32.007V256H64z" opacity=".5"/><path fill="url(#SVGKJGOvfkX)" d="M192 192h31.993v32.007H192z" opacity=".7"/><path fill="url(#SVGHlnzSbhR)" d="M160.007 192h32.007v32.007h-32.007z" opacity=".8"/><path fill="url(#SVGHlnzSbhR)" d="M128 192h32.007v32.007H128z"/><path fill="url(#SVGHlnzSbhR)" d="M96.007 192h32.007v32.007H96.007z"/><path fill="url(#SVGHlnzSbhR)" d="M64 192h32.007v32.007H64z" opacity=".8"/><path fill="url(#SVGHlnzSbhR)" d="M32.007 192h32.007v32.007H32.007z" opacity=".7"/><path fill="url(#SVGAy1YRdVi)" d="M223.993 160.007H256V192h-32.007z" opacity=".5"/><path fill="url(#SVG3bRWbdAG)" d="M192 160.007h31.993V192H192z" opacity=".8"/><path fill="url(#SVGSMH1tNET)" d="M160.007 160.007h32.007V192h-32.007z"/><path fill="url(#SVGSMH1tNET)" d="M128 160.007h32.007V192H128z"/><path fill="url(#SVGSMH1tNET)" d="M96.007 160.007h32.007V192H96.007z"/><path fill="url(#SVGSMH1tNET)" d="M64 160.007h32.007V192H64z"/><path fill="url(#SVGSMH1tNET)" d="M32.007 160.007h32.007V192H32.007z" opacity=".8"/><path fill="url(#SVGSMH1tNET)" d="M0 160.007h32.007V192H0z" opacity=".5"/><path fill="url(#SVGDk6zTd0J)" d="M223.993 128H256v32.007h-32.007z" opacity=".7"/><path fill="url(#SVGGTyrYbWF)" d="M192 128h31.993v32.007H192z"/><path fill="url(#SVGhKvCPd4J)" d="M160.007 128h32.007v32.007h-32.007z"/><path fill="url(#SVGhKvCPd4J)" d="M128 128h32.007v32.007H128z"/><path fill="url(#SVGhKvCPd4J)" d="M96.007 128h32.007v32.007H96.007z"/><path fill="url(#SVGhKvCPd4J)" d="M64 128h32.007v32.007H64z"/><path fill="url(#SVGhKvCPd4J)" d="M32.007 128h32.007v32.007H32.007z"/><path fill="url(#SVGhKvCPd4J)" d="M0 128h32.007v32.007H0z" opacity=".7"/><path fill="url(#SVGe4QvmexB)" d="M223.993 96.007H256v32.007h-32.007z" opacity=".7"/><path fill="url(#SVG2WfQ9gmL)" d="M192 96.007h31.993v32.007H192z"/><path fill="url(#SVGsud9beXr)" d="M160.007 96.007h32.007v32.007h-32.007z"/><path fill="url(#SVGsud9beXr)" d="M128 96.007h32.007v32.007H128z"/><path fill="url(#SVGsud9beXr)" d="M96.007 96.007h32.007v32.007H96.007z"/><path fill="url(#SVGsud9beXr)" d="M64 96.007h32.007v32.007H64z"/><path fill="url(#SVGsud9beXr)" d="M32.007 96.007h32.007v32.007H32.007z"/><path fill="url(#SVGsud9beXr)" d="M0 96.007h32.007v32.007H0z" opacity=".7"/><path fill="url(#SVG44g0ZdjB)" d="M223.993 64H256v32.007h-32.007z" opacity=".5"/><path fill="url(#SVGAi8oHeYv)" d="M192 64h31.993v32.007H192z" opacity=".8"/><path fill="url(#SVGPjGq4blz)" d="M160.007 64h32.007v32.007h-32.007z"/><path fill="url(#SVGPjGq4blz)" d="M128 64h32.007v32.007H128z"/><path fill="url(#SVGPjGq4blz)" d="M96.007 64h32.007v32.007H96.007z"/><path fill="url(#SVGPjGq4blz)" d="M64 64h32.007v32.007H64z"/><path fill="url(#SVGPjGq4blz)" d="M32.007 64h32.007v32.007H32.007z" opacity=".8"/><path fill="url(#SVGPjGq4blz)" d="M0 64h32.007v32.007H0z" opacity=".5"/><path fill="url(#SVGXj60LuIn)" d="M192 32.007h31.993v32.007H192z" opacity=".7"/><path fill="url(#SVGStkKYT6k)" d="M160.007 32.007h32.007v32.007h-32.007z" opacity=".8"/><path fill="url(#SVGStkKYT6k)" d="M128 32.007h32.007v32.007H128z"/><path fill="url(#SVGStkKYT6k)" d="M96.007 32.007h32.007v32.007H96.007z"/><path fill="url(#SVGStkKYT6k)" d="M64 32.007h32.007v32.007H64z" opacity=".8"/><path fill="url(#SVGStkKYT6k)" d="M32.007 32.007h32.007v32.007H32.007z" opacity=".7"/><path fill="url(#SVG1PTmweIq)" d="M160.007 0h32.007v32.007h-32.007z" opacity=".5"/><path fill="url(#SVG1PTmweIq)" d="M128 0h32.007v32.007H128z" opacity=".7"/><path fill="url(#SVG1PTmweIq)" d="M96.007 0h32.007v32.007H96.007z" opacity=".7"/><path fill="url(#SVG1PTmweIq)" d="M64 0h32.007v32.007H64z" opacity=".5"/><path fill="#fff" d="m84.25 117.841l8.912-19.951c3.251-5.12 2.818-11.378-.745-14.9a9 9 0 0 0-1.57-1.26a9.85 9.85 0 0 0-8.223-.934a13.44 13.44 0 0 0-7.409 5.756s-12.19 28.445-16.755 41.285c-4.565 12.841-2.709 36.274 14.778 53.828c18.556 18.557 45.47 22.837 62.605 9.942a10.8 10.8 0 0 0 2.018-1.354l52.825-44.143c2.574-2.154 6.38-6.502 2.953-11.487c-3.427-4.984-9.63-1.557-12.19.095l-30.423 22.12a1.354 1.354 0 0 1-1.964-.231a3.74 3.74 0 0 1 .298-4.47l46.636-39.578c4.063-3.63 4.592-8.9 1.354-12.516s-8.249-3.44-12.299.23l-41.989 32.833a1.87 1.87 0 0 1-2.709-.352a2.587 2.587 0 0 1-.217-3.44l47.557-46.148a9.305 9.305 0 0 0 .474-13.125a8.9 8.9 0 0 0-6.461-2.709a9.48 9.48 0 0 0-6.678 2.71l-48.531 45.578c-1.165 1.165-3.44 0-3.712-1.355c-.1-.493.058-1.004.42-1.354L160.4 70.556a9.17 9.17 0 1 0-12.936-12.976l-56.428 62.307c-2.018 2.018-4.998 2.113-6.42.948a2.113 2.113 0 0 1-.366-2.994"/></svg>
+					hCaptcha
+				</label>
+				<label for="bbgk_provider_turnstile" class="bbgk-tab bbgk-tab-turnstile">
+					<svg width="20" height="20" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg"><title>cloudflare</title><path fill="#FFF" d="m115.679 69.288l-15.591-8.94l-2.689-1.163l-63.781.436v32.381h82.061z"/><path fill="#F38020" d="M87.295 89.022c.763-2.617.472-5.015-.8-6.796c-1.163-1.635-3.125-2.58-5.488-2.689l-44.737-.581c-.291 0-.545-.145-.691-.363s-.182-.509-.109-.8c.145-.436.581-.763 1.054-.8l45.137-.581c5.342-.254 11.157-4.579 13.192-9.885l2.58-6.723c.109-.291.145-.581.073-.872c-2.906-13.158-14.644-22.97-28.672-22.97c-12.938 0-23.913 8.359-27.838 19.952a13.35 13.35 0 0 0-9.267-2.58c-6.215.618-11.193 5.597-11.811 11.811c-.145 1.599-.036 3.162.327 4.615C10.104 70.051 2 78.337 2 88.549c0 .909.073 1.817.182 2.726a.895.895 0 0 0 .872.763h82.57c.472 0 .909-.327 1.054-.8l.617-2.216z"/><path fill="#FAAE40" d="M101.542 60.275c-.4 0-.836 0-1.236.036c-.291 0-.545.218-.654.509l-1.744 6.069c-.763 2.617-.472 5.015.8 6.796c1.163 1.635 3.125 2.58 5.488 2.689l9.522.581c.291 0 .545.145.691.363c.145.218.182.545.109.8c-.145.436-.581.763-1.054.8l-9.924.582c-5.379.254-11.157 4.579-13.192 9.885l-.727 1.853c-.145.363.109.727.509.727h34.089c.4 0 .763-.254.872-.654c.581-2.108.909-4.325.909-6.614c0-13.447-10.975-24.422-24.458-24.422"/></svg>
+					Turnstile
+				</label>
+			</div>
+
+			<div class="bbgk-tab-panel bbgk-panel-hcaptcha">
+				<dl>
+					<dt>
+						<label for="hcap_site_key">{{ lang('BBGATEKEEPER_HCAP_SITE_KEY') }}</label>
+						<p>{{ lang('BBGATEKEEPER_HCAP_SITE_KEY_EXPLAIN') }}</p>
+					</dt>
+					<dd><input type="text" id="hcap_site_key" name="hcap_site_key" value="{{ HCAP_SITE_KEY }}" class="medium" /></dd>
+				</dl>
+
+				<dl>
+					<dt>
+						<label for="hcap_site_secret">{{ lang('BBGATEKEEPER_HCAP_SITE_SECRET') }}</label>
+						<p>{{ lang('BBGATEKEEPER_HCAP_SITE_SECRET_EXPLAIN') }}</p>
+					</dt>
+					<dd><input type="password" id="hcap_site_secret" name="hcap_site_secret" value="{{ HCAP_SITE_SECRET }}" class="medium" autocomplete="off" /></dd>
+				</dl>
+			</div>
+
+			<div class="bbgk-tab-panel bbgk-panel-turnstile">
+				<dl>
+					<dt>
+						<label for="turnstile_site_key">{{ lang('BBGATEKEEPER_TURNSTILE_SITE_KEY') }}</label>
+						<p>{{ lang('BBGATEKEEPER_TURNSTILE_SITE_KEY_EXPLAIN') }}</p>
+					</dt>
+					<dd><input type="text" id="turnstile_site_key" name="turnstile_site_key" value="{{ TURNSTILE_SITE_KEY }}" class="medium" /></dd>
+				</dl>
+
+				<dl>
+					<dt>
+						<label for="turnstile_site_secret">{{ lang('BBGATEKEEPER_TURNSTILE_SITE_SECRET') }}</label>
+						<p>{{ lang('BBGATEKEEPER_TURNSTILE_SITE_SECRET_EXPLAIN') }}</p>
+					</dt>
+					<dd><input type="password" id="turnstile_site_secret" name="turnstile_site_secret" value="{{ TURNSTILE_SITE_SECRET }}" class="medium" autocomplete="off" /></dd>
+				</dl>
+			</div>
+		</div>
+
+		<p>{{ lang('BBGATEKEEPER_CAPTCHA_PROVIDER_NOTE') }}</p>
+	</fieldset>
+
+	<fieldset>
+		<legend>🍪 {{ lang('BBGATEKEEPER_COOKIE') }}</legend>
 
 		<dl>
 			<dt>
@@ -76,13 +119,8 @@
 			<dd>
 				<input type="text" id="hcap_sign_secret" name="hcap_sign_secret" value="{{ HCAP_SIGN_SECRET }}" class="medium" />
 				<input class="button2" type="submit" name="submit_generate_secret" value="{{ lang('BBGATEKEEPER_GENERATE') }}" />
-
 			</dd>
 		</dl>
-	</fieldset>
-
-	<fieldset>
-		<legend>🍪 {{ lang('BBGATEKEEPER_COOKIE') }}</legend>
 
 		<dl>
 			<dt>

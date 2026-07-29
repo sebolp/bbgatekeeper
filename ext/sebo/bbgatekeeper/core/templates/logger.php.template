@@ -239,7 +239,10 @@ $is_bot_whitelist = is_search_engine_bot($ip);
 
 $reason = check_user_agent_block(BLOCKED_UA_PATTERNS);
 
-// ====================== STEP 2: hCAPTCHA VALIDATION ======================
+// ====================== STEP 2: CAPTCHA VALIDATION ======================
+// Provider-specific bits (endpoint, POST field name, widget markup) come
+// from CAPTCHA_* constants in bbgatekeeper_config.php, resolved once at
+// deploy time by core/config_exporter.php from the ACP provider tab.
 
 $hc_challenge_failed = false;
 
@@ -253,22 +256,22 @@ if (!$is_bot_whitelist && $reason === null)
 
 	if (!$bypass_challenge && !verify_hcap_token($_COOKIE[HCAP_COOKIE_NAME] ?? null, $ip))
 	{
-		$reason = 'hcaptcha-required';
+		$reason = 'captcha-required';
 		$hc_challenge_failed = true;
 	}
 }
 
-if ($hc_challenge_failed && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['h-captcha-response']))
+if ($hc_challenge_failed && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST[CAPTCHA_RESPONSE_FIELD]))
 {
-	$verify_url = 'https://hcaptcha.com/siteverify';
+	$verify_url = CAPTCHA_VERIFY_URL;
 
 	$context = stream_context_create([
 		'http' => [
 			'method'  => 'POST',
 			'header'  => "Content-Type: application/x-www-form-urlencoded\r\n",
 			'content' => http_build_query([
-				'secret'   => HCAP_SITE_SECRET,
-				'response' => $_POST['h-captcha-response'],
+				'secret'   => CAPTCHA_SITE_SECRET,
+				'response' => $_POST[CAPTCHA_RESPONSE_FIELD],
 			]),
 			'timeout' => 5,
 		],
@@ -290,9 +293,9 @@ if ($hc_challenge_failed && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POS
 
 // ====================== LOGGING ======================
 
-if ($reason === 'hcaptcha-required')
+if ($reason === 'captcha-required')
 {
-	$status = '🚫: hCaptcha';
+	$status = '🚫: ' . CAPTCHA_PROVIDER;
 }
 else if ($reason !== null)
 {
@@ -321,6 +324,14 @@ if ($reason !== null && !DRY_RUN)
 
 		if ($hc_challenge_failed)
 	{
+		// Resolved once here (not baked in at deploy time like the old
+		// hCaptcha-only version), so the heredoc below stays provider-
+		// agnostic and just interpolates these.
+		$captcha_script_src = CAPTCHA_WIDGET_SCRIPT_SRC;
+		$captcha_widget_class = CAPTCHA_WIDGET_CLASS;
+		$captcha_site_key = CAPTCHA_SITE_KEY;
+		$captcha_response_field = CAPTCHA_RESPONSE_FIELD;
+
 		echo
 		<<<HTML
 			<!DOCTYPE html>
@@ -329,7 +340,7 @@ if ($reason !== null && !DRY_RUN)
 				<meta charset="UTF-8">
 				<meta name="viewport" content="width=device-width, initial-scale=1.0">
 				<title>{{BB_LOGGER_LANG_SECURITY_CHECK}}</title>
-				<script src="https://js.hcaptcha.com/1/api.js" async defer></script>
+				<script src="{$captcha_script_src}" async defer></script>
 				<style>
 					/* Color variables */
 					:root {
@@ -468,7 +479,7 @@ if ($reason !== null && !DRY_RUN)
 					}
 
 					/* Form and Buttons */
-					.h-captcha {
+					.h-captcha, .cf-turnstile {
 						display: flex;
 						justify-content: center;
 						margin: 1.5rem 0 2rem;
@@ -553,7 +564,7 @@ if ($reason !== null && !DRY_RUN)
 					<!-- Main card -->
 					<div class="card">
 						<form action="" method="POST" onsubmit="return checkCaptchaBeforeSubmit();">
-							<div class="h-captcha" data-sitekey="{{BB_LOGGER_SITE_KEY_FOR_HTML}}" data-callback="onCaptchaSuccess"></div>
+							<div class="{$captcha_widget_class}" data-sitekey="{$captcha_site_key}" data-callback="onCaptchaSuccess"></div>
 							<input type="submit" id="submitBtn" value="{{BB_LOGGER_TEMPLATE_BUTTON}}" disabled />
 						</form>
 
@@ -579,7 +590,7 @@ if ($reason !== null && !DRY_RUN)
 				}
 				function checkCaptchaBeforeSubmit() {
 					// prevent click before challenge
-					var response = document.querySelector('textarea[name="h-captcha-response"]');
+					var response = document.querySelector('[name="{$captcha_response_field}"]');
 					if (!response || response.value.trim() === '') {
 						alert('{{BB_LOGGER_TEMPLATE_ERROR_CHALLENGE_NOT_COMPLETED}}');
 						return false;

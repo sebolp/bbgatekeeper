@@ -12,8 +12,19 @@
 // ====================== GENERATED SETTINGS ======================
 // Values below come from ACP > Customise > Bad Bot Gatekeeper > Settings.
 
-define('HCAP_SITE_SECRET', {{HCAP_SITE_SECRET}});
-define('HCAP_SITE_KEY', {{HCAP_SITE_KEY}});
+// Only the active challenge provider's keys ever reach this file - see
+// core/config_exporter.php. The other provider's keys stay in the ACP
+// database only.
+define('CAPTCHA_PROVIDER', {{CAPTCHA_PROVIDER}});
+define('CAPTCHA_SITE_KEY', {{CAPTCHA_SITE_KEY}});
+define('CAPTCHA_SITE_SECRET', {{CAPTCHA_SITE_SECRET}});
+define('CAPTCHA_VERIFY_URL', {{CAPTCHA_VERIFY_URL}});
+define('CAPTCHA_RESPONSE_FIELD', {{CAPTCHA_RESPONSE_FIELD}});
+define('CAPTCHA_WIDGET_CLASS', {{CAPTCHA_WIDGET_CLASS}});
+define('CAPTCHA_WIDGET_SCRIPT_SRC', {{CAPTCHA_WIDGET_SCRIPT_SRC}});
+
+// Provider-agnostic: signs our own verification cookie regardless of
+// which challenge provider issued it.
 define('HCAP_SIGN_SECRET', {{HCAP_SIGN_SECRET}});
 define('HCAP_COOKIE_NAME', {{HCAP_COOKIE_NAME}});
 define('HCAP_COOKIE_TTL', {{HCAP_COOKIE_TTL}});

@@ -120,9 +120,43 @@ class config_exporter
 		$ua_patterns = is_array($ua_patterns) ? $ua_patterns : [];
 		$bot_domains = is_array($bot_domains) ? $bot_domains : [];
 
+		// Only the active provider's site key/secret are baked into the
+		// deployed config.php - the other provider's keys stay in the
+		// database (so switching tabs in ACP never loses them) but are
+		// never written to the runtime file.
+		$provider = (string) ($this->config['bbgatekeeper_captcha_provider'] ?? 'hcaptcha');
+		$provider = in_array($provider, ['hcaptcha', 'turnstile'], true) ? $provider : 'hcaptcha';
+
+		if ($provider === 'turnstile')
+		{
+			$captcha_site_key = (string) ($this->config['bbgatekeeper_turnstile_site_key'] ?? '');
+			$captcha_site_secret = (string) ($this->config['bbgatekeeper_turnstile_site_secret'] ?? '');
+			$captcha_verify_url = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
+			$captcha_response_field = 'cf-turnstile-response';
+			$captcha_widget_class = 'cf-turnstile';
+			$captcha_widget_script_src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
+		}
+		else
+		{
+			$captcha_site_key = (string) ($this->config['bbgatekeeper_hcap_site_key'] ?? '');
+			$captcha_site_secret = (string) ($this->config['bbgatekeeper_hcap_site_secret'] ?? '');
+			$captcha_verify_url = 'https://hcaptcha.com/siteverify';
+			$captcha_response_field = 'h-captcha-response';
+			$captcha_widget_class = 'h-captcha';
+			$captcha_widget_script_src = 'https://js.hcaptcha.com/1/api.js';
+		}
+
 		$values = [
-			'HCAP_SITE_SECRET'      => (string) ($this->config['bbgatekeeper_hcap_site_secret'] ?? ''),
-			'HCAP_SITE_KEY'         => (string) ($this->config['bbgatekeeper_hcap_site_key'] ?? ''),
+			'CAPTCHA_PROVIDER'          => $provider,
+			'CAPTCHA_SITE_KEY'          => $captcha_site_key,
+			'CAPTCHA_SITE_SECRET'       => $captcha_site_secret,
+			'CAPTCHA_VERIFY_URL'        => $captcha_verify_url,
+			'CAPTCHA_RESPONSE_FIELD'    => $captcha_response_field,
+			'CAPTCHA_WIDGET_CLASS'      => $captcha_widget_class,
+			'CAPTCHA_WIDGET_SCRIPT_SRC' => $captcha_widget_script_src,
+
+			// Provider-agnostic: signs OUR OWN verification cookie, not
+			// tied to whichever captcha vendor issued the challenge.
 			'HCAP_SIGN_SECRET'      => (string) ($this->config['bbgatekeeper_hcap_sign_secret'] ?? ''),
 			'HCAP_COOKIE_NAME'      => (string) ($this->config['bbgatekeeper_cookie_name'] ?? 'fpc_verified_hcap'),
 			'HCAP_COOKIE_TTL'       => (int) ($this->config['bbgatekeeper_cookie_ttl'] ?? 86400),

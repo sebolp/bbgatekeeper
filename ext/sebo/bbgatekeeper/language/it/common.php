@@ -22,8 +22,8 @@ $lang = array_merge($lang, [
 	'ACP_BBGATEKEEPER_TITLE'        => 'Bad Bot Gatekeeper',
 	'ACP_BBGATEKEEPER_SETTINGS'     => 'Impostazioni',
 	'ACP_BBGATEKEEPER_LOGS'         => 'Log',
-	'ACP_BBGATEKEEPER_SETTINGS_PRE_EXPLAIN' => 'Benvenuto in BadBotGatekeeper!<br />Questa estensione necessita di una registrazione al sistema hCaptcha. Se non lo hai fatto, registrati ed ottieni le chiavi necessarie al link: %s',
-	'ACP_BBGATEKEEPER_SETTINGS_EXPLAIN' => 'Da questa pagina puoi: configurare la sfida hCaptcha, la blacklist User-Agent e la whitelist dei motori di ricerca che potranno visitare il tuo forum.<br />Dopo aver modificato queste impostazioni, utilizza "Salva e genera/distribuisci" per scrivere lo script di runtime.',
+	'ACP_BBGATEKEEPER_SETTINGS_PRE_EXPLAIN' => 'Questa estensione necessita di una registrazione a sistemi di sfida. Se non lo hai fatto, registrati ed ottieni le chiavi necessarie ai link (puoi scegliere quello che preferisci usare):<br />» %1$s<br />» %2$s',
+	'ACP_BBGATEKEEPER_SETTINGS_EXPLAIN' => 'Da questa pagina puoi: configurare la sfida, la blacklist User-Agent e la whitelist dei motori di ricerca che potranno visitare il tuo forum.<br />Dopo aver modificato queste impostazioni, utilizza "Salva e genera/distribuisci" per scrivere / sovrascrivere lo script di runtime.',
 	'ACP_BBGATEKEEPER_SETTINGS_LANGUAGE_FALLBACK' => 'Attenzione:',
 	'ACP_BBGATEKEEPER_SETTINGS_LANGUAGE_FALLBACK_EXPLAIN'   => 'I file generati saranno nella lingua dell\'utente SOLO SE esiste una traduzione completa dell\'estensione. In caso contrario, i file saranno generati in inglese.',
 
@@ -192,4 +192,14 @@ $lang = array_merge($lang, [
 	'BBGATEKEEPER_IP_PROBE_LINK' => 'Visualizza il tuo REMOTE_ADDR ed i tuoi indirizzi',
 	/* >=1.2.3 */
 	'LOG_BBGATEKEEPER_AUTOCLEAN' => '<strong>Pulizia automatica Bad Bot Gatekeeper:</strong><br />» %1$d ban(s) e %2$d hit(s) scaduti rimossi',
+
+	/* >=1.2.4*/
+	/* for translators: edited ACP_BBGATEKEEPER_SETTINGS_PRE_EXPLAIN key too */
+	'BBGATEKEEPER_CAPTCHA_PROVIDER'		=> 'Provider della sfida captcha',
+	'ACP_BBGATEKEEPER_CPRIGHTS_EXPLAIN' => 'I provider sono esterni a questa estensione.<br /><em class="copyright">© hCaptcha (e loghi) è un marchio registrato di Intuition Machines, Inc.</em><br /><em class="copyright">© Turnstile (e loghi) è un marchio registrato di Cloudflare, Inc.</em>',
+	'BBGATEKEEPER_CAPTCHA_PROVIDER_NOTE'	=> 'Entrambi i provider mantengono qui le proprie chiavi anche quando non sono selezionati, cosi puoi passare dall\'uno all\'altro senza doverle reinserire. Solo le chiavi della scheda selezionata vengono scritte nel file di runtime distribuito.',
+	'BBGATEKEEPER_TURNSTILE_SITE_KEY'		=> 'Chiave pubblica del sito',
+	'BBGATEKEEPER_TURNSTILE_SITE_KEY_EXPLAIN'	=> 'La trovi nella dashboard di Cloudflare, sotto Turnstile widgets.',
+	'BBGATEKEEPER_TURNSTILE_SITE_SECRET'		=> 'Chiave segreta del sito',
+	'BBGATEKEEPER_TURNSTILE_SITE_SECRET_EXPLAIN'	=> 'La trovi nella dashboard di Cloudflare, sotto Turnstile widgets.',
 ]);

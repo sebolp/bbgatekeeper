@@ -15,6 +15,68 @@
 	margin-bottom: 0;
 }
 
+/* Captcha provider tabs (hCaptcha / Turnstile) - pure CSS switch, no JS */
+.bbgk-tab-radio {
+	position: absolute;
+	opacity: 0;
+	pointer-events: none;
+}
+
+.bbgk-tabs {
+	display: flex;
+	gap: 2px;
+	margin-top: 10px;
+}
+
+.bbgk-tab {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 8px 18px;
+	font-size: 12px;
+	font-weight: bold;
+	text-transform: uppercase;
+	color: #5f6b72;
+	background: #e9edf0;
+	border-radius: 4px 4px 0 0;
+	cursor: pointer;
+}
+
+.bbgk-tab svg {
+	display: block;
+	flex-shrink: 0;
+}
+
+.bbgk-tab-hcaptcha svg {
+	width: 18px;
+	height: 18px;
+}
+
+.bbgk-tab-turnstile svg {
+	width: 20px;
+	height: 20px;
+}
+
+.bbgk-tab-panel {
+	display: none;
+	background: #fff;
+	border: 1px solid #d1d7db;
+	border-top: 2px solid #3a6ea5;
+	padding: 12px 15px 2px;
+	margin-bottom: 10px;
+}
+
+#bbgk_provider_hcaptcha:checked ~ .bbgk-tabs .bbgk-tab-hcaptcha,
+#bbgk_provider_turnstile:checked ~ .bbgk-tabs .bbgk-tab-turnstile {
+	background: #3a6ea5;
+	color: #fff;
+}
+
+#bbgk_provider_hcaptcha:checked ~ .bbgk-panel-hcaptcha,
+#bbgk_provider_turnstile:checked ~ .bbgk-panel-turnstile {
+	display: block;
+}
+
 /* larger button */
 .larger-button {
 	padding: 5px 12px !important ;

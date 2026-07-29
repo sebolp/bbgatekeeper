@@ -157,7 +157,6 @@ class deployer
 		$email_domain = isset($email_parts[1]) ? $email_parts[1] : '';
 
 		$lang_map = [
-			'BB_LOGGER_SITE_KEY_FOR_HTML'               => null,
 			'BB_LOGGER_LANG_SECURITY_CHECK'             => 'BBGATEKEEPER_TEMPLATE_LOGGER_SECURITY_CHECK',
 			'BB_LOGGER_LANG_SECURITY_CHECK_EXPLAIN'     => 'BBGATEKEEPER_TEMPLATE_LOGGER_SECURITY_CHECK_EXPLAIN',
 			'BB_LOGGER_LANG_SECURITY_CHECK_COOKIE'      => 'BBGATEKEEPER_TEMPLATE_LOGGER_COOKIE',
@@ -174,11 +173,7 @@ class deployer
 		$replacements = [];
 		foreach ($lang_map as $placeholder => $key)
 		{
-			if ($placeholder === 'BB_LOGGER_SITE_KEY_FOR_HTML')
-			{
-				$value = (string) $config['bbgatekeeper_hcap_site_key'];
-			}
-			else if ($placeholder === 'BB_LOGGER_TEMPLATE_EMAIL_NAME' || $placeholder === 'BB_LOGGER_TEMPLATE_EMAIL_DOMAIN')
+			if ($placeholder === 'BB_LOGGER_TEMPLATE_EMAIL_NAME' || $placeholder === 'BB_LOGGER_TEMPLATE_EMAIL_DOMAIN')
 			{
 				$value = (string) $key;
 			}

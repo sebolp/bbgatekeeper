@@ -229,10 +229,23 @@ class main_module
 		$samesite = (string) ($config['bbgatekeeper_cookie_samesite'] ?? 'Lax');
 		$ip_level = (int) ($config['bbgatekeeper_ip_binding_level'] ?? 1);
 
+		// Which captcha provider tab is active. Unknown/corrupted values
+		// fall back to hcaptcha, the only provider that existed before
+		// this option was introduced.
+		$captcha_provider = (string) ($config['bbgatekeeper_captcha_provider'] ?? 'hcaptcha');
+		$captcha_provider = in_array($captcha_provider, ['hcaptcha', 'turnstile'], true) ? $captcha_provider : 'hcaptcha';
+
 		$template->assign_vars([
 			'U_ACTION'          => $this->u_action,
 
 			'HCAP_EXTERNAL_LINK'    => '<a href="https://www.hcaptcha.com/" target="_blank" rel="noopener noreferrer"> https://www.hcaptcha.com/ <i class="fa fa-external-link" aria-hidden="true"></i></a>',
+			'TURNSTILE_EXTERNAL_LINK' => '<a href="https://www.cloudflare.com/products/turnstile/" target="_blank" rel="noopener noreferrer"> https://www.cloudflare.com/products/turnstile/ <i class="fa fa-external-link" aria-hidden="true"></i></a>',
+
+			'PROVIDER_HCAPTCHA'     => ($captcha_provider === 'hcaptcha'),
+			'PROVIDER_TURNSTILE'    => ($captcha_provider === 'turnstile'),
+
+			'TURNSTILE_SITE_KEY'    => (string) ($config['bbgatekeeper_turnstile_site_key'] ?? ''),
+			'TURNSTILE_SITE_SECRET' => (string) ($config['bbgatekeeper_turnstile_site_secret'] ?? ''),
 
 			'S_INI_PREPEND_OK'      => $checker->ini_has_prepend_line(),
 			'S_INI_STATUS'          => $checker->get_ini_status(),
@@ -292,8 +305,14 @@ class main_module
 	{
 		global $db, $table_prefix, $phpbb_container, $user;
 
+		$captcha_provider = $request->variable('captcha_provider', 'hcaptcha');
+		$config->set('bbgatekeeper_captcha_provider', in_array($captcha_provider, ['hcaptcha', 'turnstile'], true) ? $captcha_provider : 'hcaptcha');
+
 		$config->set('bbgatekeeper_hcap_site_key', $request->variable('hcap_site_key', ''));
 		$config->set('bbgatekeeper_hcap_site_secret', $request->variable('hcap_site_secret', ''));
+
+		$config->set('bbgatekeeper_turnstile_site_key', $request->variable('turnstile_site_key', ''));
+		$config->set('bbgatekeeper_turnstile_site_secret', $request->variable('turnstile_site_secret', ''));
 
 		// Field is fully visible/editable now; default to the current
 		// stored value so a missing POST field never blanks it out.

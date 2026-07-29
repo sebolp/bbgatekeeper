@@ -22,8 +22,8 @@ $lang = array_merge($lang, [
 	'ACP_BBGATEKEEPER_TITLE'        => 'Bad Bot Gatekeeper',
 	'ACP_BBGATEKEEPER_SETTINGS'     => 'Settings',
 	'ACP_BBGATEKEEPER_LOGS'         => 'Logs',
-	'ACP_BBGATEKEEPER_SETTINGS_PRE_EXPLAIN' => 'Welcome to BadBotGatekeeper!<br />This extension requires registration with the hCaptcha system. If you haven\'t already done so, register and obtain the necessary keys at this link: %s',
-	'ACP_BBGATEKEEPER_SETTINGS_EXPLAIN' => 'From this page, you can configure the hCaptcha challenge, the User-Agent blacklist, and the search engine whitelist that can visit your forum.<br />After modifying these settings, use "Save and Generate/Deploy" to write the runtime script.',
+	'ACP_BBGATEKEEPER_SETTINGS_PRE_EXPLAIN' => 'This extension requires registration with the challenge system your prefer. If you haven\'t already done so, register and obtain the necessary keys at those link (you can choose the one you prefer):<br />» %1$s<br />» %2$s',
+	'ACP_BBGATEKEEPER_SETTINGS_EXPLAIN' => 'From this page, you can configure the hCaptcha challenge, the User-Agent blacklist, and the search engine whitelist that can visit your forum.<br />After modifying these settings, use "Save and Generate/Deploy" to write / overwrite the runtime script.',
 	'ACP_BBGATEKEEPER_SETTINGS_LANGUAGE_FALLBACK' => 'WARNING: Language files output',
 	'ACP_BBGATEKEEPER_SETTINGS_LANGUAGE_FALLBACK_EXPLAIN'   => 'Generated files will be in user language only IF there is a complete translation of the extension. If there isn\'t, files will be generated in English.',
 
@@ -193,4 +193,15 @@ $lang = array_merge($lang, [
 	'BBGATEKEEPER_IP_PROBE_LINK' => 'View your REMOTE_ADDR and your addresses',
 	/* >=1.2.3 */
 	'LOG_BBGATEKEEPER_AUTOCLEAN' => '<strong>Bad Bot Gatekeeper automatic cleanup ran:</strong><br />» %1$d expired ban(s) and %2$d expired hit(s) removed',
+
+	/* */
+	/* for translators: edited ACP_BBGATEKEEPER_SETTINGS_PRE_EXPLAIN key too */
+	'BBGATEKEEPER_CAPTCHA_PROVIDER'     => 'Captcha challenge provider',
+	'ACP_BBGATEKEEPER_CPRIGHTS_EXPLAIN'	=> 'Providers are external to this extension.<br /><em class="copyright">© hCaptcha (and logos) is a registered trademark of Intuition Machines, Inc.</em><br /><em class="copyright">© Turnstile (and logos) is a registered trademark of Cloudflare, Inc.</em>',
+	'BBGATEKEEPER_CAPTCHA_PROVIDER_NOTE' => 'Both providers keep their keys saved here even when not selected, so you can switch back and forth without re-entering them. Only the keys of the selected tab are written into the deployed runtime file.',
+	'BBGATEKEEPER_TURNSTILE_SITE_KEY'          => 'Site key',
+	'BBGATEKEEPER_TURNSTILE_SITE_KEY_EXPLAIN'  => 'You can find it in the Cloudflare dashboard, under Turnstile widgets.',
+	'BBGATEKEEPER_TURNSTILE_SITE_SECRET'       => 'Secret key',
+	'BBGATEKEEPER_TURNSTILE_SITE_SECRET_EXPLAIN' => 'You can find it in the Cloudflare dashboard, under Turnstile widgets.',
+
 ]);
