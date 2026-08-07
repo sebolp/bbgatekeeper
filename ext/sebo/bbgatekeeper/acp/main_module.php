@@ -326,29 +326,29 @@ class main_module
 		$samesite = $request->variable('cookie_samesite', 'Lax');
 		$config->set('bbgatekeeper_cookie_samesite', in_array($samesite, ['Lax', 'Strict'], true) ? $samesite : 'Lax');
 
-		// English comment: Save textareas and ensure UTF-8 support
+		// Save textareas and ensure UTF-8 support
 		$ua_patterns_json = $this->textarea_to_json($request->variable('ua_patterns', '', true));
 		$bot_domains_json = $this->textarea_to_json($request->variable('bot_domains', '', true));
 
-	// English comment: Define the array with the column to update
+		// Define the array with the column to update
 		$sql_ary_ua = [
 		'setting_value' => $ua_patterns_json,
 		];
 
-	// English comment: Construct the UPDATE query using sql_build_array for the SET clause
+		// Construct the UPDATE query using sql_build_array for the SET clause
 		$sql = 'UPDATE ' . $table_prefix . 'sebo_bbgatekeeper_settings
 		SET ' . $db->sql_build_array('UPDATE', $sql_ary_ua) . "
 		WHERE setting_name = 'ua_patterns'";
 
-	// English comment: Execute the update query for UA patterns
+		// Execute the update query for UA patterns
 		$db->sql_query($sql);
 
-	// English comment: Define the array for the Bot domains update
+		// Define the array for the Bot domains update
 		$sql_ary_bot = [
 		'setting_value' => $bot_domains_json,
 		];
 
-	// English comment: Construct and execute the update query for Bot domains
+		// Construct and execute the update query for Bot domains
 		$sql = 'UPDATE ' . $table_prefix . 'sebo_bbgatekeeper_settings
 		SET ' . $db->sql_build_array('UPDATE', $sql_ary_bot) . "
 		WHERE setting_name = 'bot_domains'";
@@ -404,7 +404,7 @@ class main_module
 	*/
 	private function logs()
 	{
-		global $request, $template, $phpbb_container;
+		global $request, $template, $phpbb_container, $config;
 
 		/** @var \phpbb\controller\helper $helper */
 		$helper = $phpbb_container->get('controller.helper');
@@ -417,42 +417,110 @@ class main_module
 			$log_reader->clear();
 		}
 
-		// Pagination
+		// Status filter: '' (all), 'passed', or 'blocked'
+		$status_filter = $request->variable('status_filter', '');
+		$status_filter = in_array($status_filter, ['passed', 'blocked'], true) ? $status_filter : '';
+
+		// IP grouping toggle: clusters entries by the first two IP octets/hextets
+		// instead of showing a flat, row-by-row list
+		$group_by_ip = $request->variable('group_by_ip', false);
+
 		$start = $request->variable('start', 0);
-		$limit = 100;
 
-		// Extract all lines
-		$all_lines = $log_reader->tail(5000);
-		$total_lines = count($all_lines);
+		// Row limit for the flat view; group count and rows-per-group limits
+		// for the grouped view, so a highly fragmented attack (many distinct
+		// single-hit groups) never dumps thousands of rows on one page
+		$row_limit = 100;
+		$group_limit = 20;
+		// Safety cap only — the table itself scrolls, so this just protects
+		// against one pathological group (e.g. thousands of spoofed IPs in
+		// the same /16) from bloating the page
+		$rows_per_group_limit = 300;
 
-		// Only that page
-		$lines = array_slice($all_lines, $start, $limit);
+		$all_lines = $log_reader->tail(5000, $status_filter);
 
-		foreach ($lines as $line)
+		// Preserve the current filter/grouping state across pagination links
+		$u_action = $this->u_action;
+		if ($status_filter !== '')
 		{
-			// Add a check to ensure $line is an array before accessing offsets
-			if (!is_array($line))
-			{
-				continue;
-			}
-
-			$template->assign_block_vars('log_lines', [
-				'DATETIME'      => isset($line['datetime']) ? $line['datetime'] : '',
-				'IP'            => isset($line['ip']) ? $line['ip'] : '',
-				'STATUS'        => isset($line['status']) ? $line['status'] : '',
-				'URI'           => isset($line['uri']) ? $line['uri'] : '',
-				'USER_AGENT'    => isset($line['user_agent']) ? $line['user_agent'] : '',
-				'U_WHOIS' => $helper->route('sebo_bbgatekeeper_whois', ['ip' => isset($line['ip']) ? $line['ip'] : '']),
-			]);
+			$u_action .= '&status_filter=' . urlencode($status_filter);
+		}
+		if ($group_by_ip)
+		{
+			$u_action .= '&group_by_ip=1';
 		}
 
-		// Create Pagination
-		$pagination = $phpbb_container->get('pagination');
-		$pagination->generate_template_pagination($this->u_action, 'pagination', 'start', $total_lines, $limit, $start);
+		if ($group_by_ip)
+		{
+			$groups = $log_reader->group_by_ip_prefix($all_lines);
+			$total_groups = count($groups);
+
+			// Paginate by group, not by row
+			$page_groups = array_slice($groups, $start, $group_limit, true);
+
+			foreach ($page_groups as $prefix => $group_lines)
+			{
+				$group_count = count($group_lines);
+				$shown_lines = array_slice($group_lines, 0, $rows_per_group_limit);
+
+				$template->assign_block_vars('ip_groups', [
+					'PREFIX'      => $prefix,
+					'COUNT'       => $group_count,
+					'HIDDEN_COUNT' => $group_count - count($shown_lines),
+				]);
+
+				foreach ($shown_lines as $line)
+				{
+					$template->assign_block_vars('ip_groups.group_lines', [
+						'DATETIME'   => $line['datetime'] ?? '',
+						'IP'         => $line['ip'] ?? '',
+						'STATUS'     => $line['status'] ?? '',
+						'URI'        => $line['uri'] ?? '',
+						'USER_AGENT' => $line['user_agent'] ?? '',
+						'U_WHOIS'    => $helper->route('sebo_bbgatekeeper_whois', ['ip' => $line['ip'] ?? '']),
+					]);
+				}
+			}
+
+			$pagination = $phpbb_container->get('pagination');
+			$pagination->generate_template_pagination($u_action, 'pagination', 'start', $total_groups, $group_limit, $start);
+		}
+		else
+		{
+			$total_lines = count($all_lines);
+			$lines = array_slice($all_lines, $start, $row_limit);
+
+			foreach ($lines as $line)
+			{
+				if (!is_array($line))
+				{
+					continue;
+				}
+
+				$template->assign_block_vars('log_lines', [
+					'DATETIME'   => $line['datetime'] ?? '',
+					'IP'         => $line['ip'] ?? '',
+					'STATUS'     => $line['status'] ?? '',
+					'URI'        => $line['uri'] ?? '',
+					'USER_AGENT' => $line['user_agent'] ?? '',
+					'U_WHOIS'    => $helper->route('sebo_bbgatekeeper_whois', ['ip' => $line['ip'] ?? '']),
+				]);
+			}
+
+			$pagination = $phpbb_container->get('pagination');
+			$pagination->generate_template_pagination($u_action, 'pagination', 'start', $total_lines, $row_limit, $start);
+		}
 
 		$template->assign_vars([
-			'U_ACTION'  => $this->u_action,
-			'LOG_EMPTY' => empty($lines),
+			'LOG_REC_STATUS'   => (bool) ($config['bbgatekeeper_enable_access_log']),
+			'U_ACTION'         => $u_action,
+			'U_ACTION_BASE'    => $this->u_action,
+			'LOG_EMPTY'        => empty($all_lines),
+			'S_GROUPED'        => $group_by_ip,
+			'STATUS_FILTER'    => $status_filter,
+			'S_FILTER_ALL'     => ($status_filter === ''),
+			'S_FILTER_PASSED'  => ($status_filter === 'passed'),
+			'S_FILTER_BLOCKED' => ($status_filter === 'blocked'),
 		]);
 	}
 

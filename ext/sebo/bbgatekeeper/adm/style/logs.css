@@ -19,10 +19,10 @@
 
 /* width */
 .table-container th:nth-child(1) { width: 15%; } /* DATETIME */
-.table-container th:nth-child(2) { width: 10%; } /* IP */
-.table-container th:nth-child(3) { width: 30%; } /* URI */
-.table-container th:nth-child(4) { width: 10%; } /* STATUS */
-.table-container th:nth-child(5) { width: 35%; } /* USER_AGENT */
+.table-container th:nth-child(2) { width: 15%; } /* IP */
+.table-container th:nth-child(3) { width: 10%; } /* STATUS */
+.table-container th:nth-child(4) { width: 30%; } /* URI */
+.table-container th:nth-child(5) { width: 30%; } /* USER_AGENT */
 
 /* inline folder coding */
 code.inline {
@@ -31,9 +31,106 @@ code.inline {
 	color: #2E8B57;
 	display: inline;
 	font-family: Monaco, "Andale Mono", "Courier New", Courier, monospace;
-	font-size: 0.9em;
+	font-size: 1em;
 	font-style: normal;
 	line-height: 1.3em;
 	white-space: pre;
 	padding: 0 3px;
+	vertical-align: bottom;
+}
+
+.log-group-table-wrap {
+	max-height: 320px;
+	overflow-y: auto;
+}
+
+.log-group-table-wrap table thead th {
+	position: sticky;
+	top: 0;
+	z-index: 1;
+}
+
+.log-group-table-wrap.expanded {
+	max-height: none;
+	overflow-y: visible;
+}
+
+.log-group-expand-toggle {
+	display: inline-block;
+	margin-top: 0.4rem;
+	font-size: 0.85rem;
+	cursor: pointer;
+}
+
+.log-filters {
+	display: flex;
+	align-items: stretch;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+	margin: 1rem 0;
+}
+
+.log-filter-group {
+	display: flex;
+	align-items: center;
+	gap: 0.35rem;
+	background: #f2f4f6;
+	border: 1px solid #d5dae0;
+	border-radius: 6px;
+	padding: 0.25rem;
+}
+
+.log-filter-label {
+	font-weight: bold;
+	padding: 0 0.5rem;
+	color: #4a5568;
+	font-size: 0.9rem;
+}
+
+.log-filter-btn {
+	padding: 0.3rem 0.75rem;
+	border-radius: 4px;
+	font-size: 0.9rem;
+	text-decoration: none;
+	color: #3182ce;
+	transition: background 0.15s ease, color 0.15s ease;
+}
+
+.log-filter-btn:hover {
+	background: #e2e8f0;
+	text-decoration: none;
+}
+
+.log-filter-btn.active {
+	background: #3182ce;
+	color: #fff;
+	font-weight: bold;
+}
+
+.log-group-toggle {
+	display: flex;
+	align-items: center;
+}
+
+.log-group-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.3rem;
+	padding: 0.3rem 0.75rem;
+	border-radius: 4px;
+	background: transparent;
+	color: #3182ce;
+	text-decoration: none;
+	font-size: 0.9rem;
+	transition: background 0.15s ease, color 0.15s ease;
+}
+
+.log-group-btn:hover {
+	background: #e2e8f0;
+}
+
+.log-group-btn.active {
+	background: #3182ce;
+	color: #fff;
+	font-weight: bold;
 }

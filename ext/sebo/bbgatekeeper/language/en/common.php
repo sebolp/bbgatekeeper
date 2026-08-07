@@ -204,4 +204,18 @@ $lang = array_merge($lang, [
 	'BBGATEKEEPER_TURNSTILE_SITE_SECRET'       => 'Secret key',
 	'BBGATEKEEPER_TURNSTILE_SITE_SECRET_EXPLAIN' => 'You can find it in the Cloudflare dashboard, under Turnstile widgets.',
 
+	/* >=1.2.5 */
+	'ACP_BBGATEKEEPER_SETTINGS_LOG_RECORD_DISABLED' => 'Warning:',
+	'ACP_BBGATEKEEPER_SETTINGS_LOG_RECORD_DISABLED_EXPLAIN'	=> 'Log recording is disabled in the database saved configurations (this might differ from the file currently deployed if it was not been created with those settings).',
+	/* >=1.2.6 */
+	'BBGATEKEEPER_FILTER_VIEW'    => 'Show',
+	'BBGATEKEEPER_GROUP_ENABLE'     => 'Group by IP',
+	'BBGATEKEEPER_GROUP_DISABLE'    => 'Ungroup: complete list view',
+	'BBGATEKEEPER_GROUP_EXPAND'     => 'Expand',
+	'BBGATEKEEPER_GROUP_COLLAPSE'   => 'Collapse',
+	'BBGATEKEEPER_GROUP_TRUNCATED'  => '+%d entries not shown in this group',
+	'BBGATEKEEPER_LOG_ROWS' => [
+		1 => 'row',
+		2 => 'rows',
+	],
 ]);

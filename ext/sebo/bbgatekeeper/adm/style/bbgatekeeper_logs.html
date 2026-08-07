@@ -1,57 +1,124 @@
-{% INCLUDE 'overall_header.html' %}
+{% include 'overall_header.html' %}
 {% INCLUDECSS '@sebo_bbgatekeeper/logs.css' %}
+{% INCLUDEJS '@sebo_bbgatekeeper/opener_closer.js' %}
 
 <h1>{{ lang('ACP_BBGATEKEEPER_LOGS') }}</h1>
 <p>{{ lang('BBGATEKEEPER_LOGS_EXPLAIN') }}</p>
 
-<form id="bbgatekeeper_logs_clear" method="post" action="{U_ACTION}">
-	{S_FORM_TOKEN}
-	<input class="button2" type="submit" name="submit_clear" value="{L_BBGATEKEEPER_CLEAR_LOG}" onclick="return confirm('{LA_CONFIRM_OPERATION}');" />
-</form>
-<!-- IF .pagination -->
-<div class="pagination">
-	<!-- INCLUDE pagination.html -->
-</div>
-<!-- ENDIF -->
+<div class="log-filters">
+	<div class="log-filter-group">
+		<span class="log-group-toggle">
+			{% if S_GROUPED %}
+				<a class="log-group-btn active" href="{{ U_ACTION_BASE }}{% if not S_FILTER_ALL %}&status_filter={{ STATUS_FILTER }}{% endif %}"><i class="fa fa-list" aria-hidden="true"></i> {{ lang('BBGATEKEEPER_GROUP_DISABLE') }}</a>
+			{% else %}
+				<a class="log-group-btn" href="{{ U_ACTION_BASE }}{% if not S_FILTER_ALL %}&status_filter={{ STATUS_FILTER }}{% endif %}&group_by_ip=1"><i class="fa fa-object-group" aria-hidden="true"></i> {{ lang('BBGATEKEEPER_GROUP_ENABLE') }}</a>
+			{% endif %}
+		</span>
+	</div>
 
-<!-- IF LOG_EMPTY -->
-	<p>{L_BBGATEKEEPER_LOG_EMPTY}</p>
-<!-- ELSE -->
+	<div class="log-filter-group">
+		<span class="log-filter-label">{{ lang('BBGATEKEEPER_FILTER_VIEW') }}:</span>
+		<a class="log-filter-btn{% if S_FILTER_ALL %} active{% endif %}" href="{{ U_ACTION_BASE }}{% if S_GROUPED %}&group_by_ip=1{% endif %}">{{ lang('BBGATEKEEPER_FILTER_ALL') }}</a>
+		<a class="log-filter-btn{% if S_FILTER_PASSED %} active{% endif %}" href="{{ U_ACTION_BASE }}&status_filter=passed{% if S_GROUPED %}&group_by_ip=1{% endif %}">{{ lang('BBGATEKEEPER_FILTER_PASSED') }}</a>
+		<a class="log-filter-btn{% if S_FILTER_BLOCKED %} active{% endif %}" href="{{ U_ACTION_BASE }}&status_filter=blocked{% if S_GROUPED %}&group_by_ip=1{% endif %}">{{ lang('BBGATEKEEPER_FILTER_BLOCKED') }}</a>
+	</div>
+</div>
+
+<form id="bbgatekeeper_logs_clear" method="post" action="{{ U_ACTION }}">
+	{{ S_FORM_TOKEN }}
+	<input class="button2" type="submit" name="submit_clear" value="{{ lang('BBGATEKEEPER_CLEAR_LOG') }}" onclick="return confirm('{{ lang('CONFIRM_OPERATION') }}');" />
+</form>
+
+{% if loops.pagination is defined and loops.pagination|length %}
+<div class="pagination">
+	{% include 'pagination.html' %}
+</div>
+{% endif %}
+
+{% if not LOG_REC_STATUS %}
+<div class="errorbox">
+	<p><strong>{{ lang('ACP_BBGATEKEEPER_SETTINGS_LOG_RECORD_DISABLED') }}</strong><br />{{ lang('ACP_BBGATEKEEPER_SETTINGS_LOG_RECORD_DISABLED_EXPLAIN') }}</p>
+</div>
+{% endif %}
+
+{% if LOG_EMPTY %}
+	<p>{{ lang('BBGATEKEEPER_LOG_EMPTY') }}</p>
+{% elseif S_GROUPED %}
+	{% for group in loops.ip_groups %}
+	<div class="log-group">
+		<h3><code class="inline">{{ group.PREFIX }}.x.x</code> » <span class="log-group-count">{{ group.COUNT }} {{ lang('BBGATEKEEPER_LOG_ROWS', group.COUNT) }}</span></h3>
+		<div class="log-group-table-wrap table-container">
+		<table cellspacing="1">
+			<thead>
+				<tr>
+					<th>{{ lang('BBGATEKEEPER_DATETIME') }}</th>
+					<th>{{ lang('BBGATEKEEPER_IP') }}</th>
+					<th>{{ lang('BBGATEKEEPER_STATUS') }}</th>
+					<th>{{ lang('BBGATEKEEPER_URI') }}</th>
+					<th>{{ lang('BBGATEKEEPER_USER_AGENT') }}</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for row in group.group_lines %}
+				<tr>
+					<td>{{ row.DATETIME }}</td>
+					<td><a href="{{ row.U_WHOIS }}" onclick="popup(this.href, 750, 500); return false;">🔍</a> {{ row.IP }}</td>
+					<td title="{{ row.STATUS }}">{{ row.STATUS }}</td>
+					<td title="{{ row.URI }}">{{ row.URI }}</td>
+					<td title="{{ row.USER_AGENT }}">{{ row.USER_AGENT }}</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+		</div>
+		<a href="#" class="log-group-expand-toggle"
+			data-expand-label="{{ lang('BBGATEKEEPER_GROUP_EXPAND') }}"
+			data-collapse-label="{{ lang('BBGATEKEEPER_GROUP_COLLAPSE') }}"
+			data-expand-icon="fa-eye"
+			data-collapse-icon="fa-eye-slash">
+			<i class="fa fa-eye" aria-hidden="true"></i> {{ lang('BBGATEKEEPER_GROUP_EXPAND') }}
+		</a>
+		{% if group.HIDDEN_COUNT > 0 %}
+			<span class="log-group-truncated">{{ lang('BBGATEKEEPER_GROUP_TRUNCATED', group.HIDDEN_COUNT) }}</span>
+		{% endif %}
+	</div>
+	{% endfor %}
+{% else %}
  <div class="table-container">
 <table cellspacing="1">
 	<thead>
 		<tr>
-			<th>{L_BBGATEKEEPER_DATETIME}</th>
-			<th>{L_BBGATEKEEPER_IP}</th>
-			<th>{L_BBGATEKEEPER_URI}</th>
-			<th>{L_BBGATEKEEPER_STATUS}</th>
-			<th>{L_BBGATEKEEPER_USER_AGENT}</th>
+			<th>{{ lang('BBGATEKEEPER_DATETIME') }}</th>
+			<th>{{ lang('BBGATEKEEPER_IP') }}</th>
+			<th>{{ lang('BBGATEKEEPER_STATUS') }}</th>
+			<th>{{ lang('BBGATEKEEPER_URI') }}</th>
+			<th>{{ lang('BBGATEKEEPER_USER_AGENT') }}</th>
 		</tr>
 	</thead>
 	<tbody>
-		<!-- BEGIN log_lines -->
+		{% for row in loops.log_lines %}
 		<tr>
-			<td>{log_lines.DATETIME}</td>
-			<td><a href="{log_lines.U_WHOIS}" onclick="popup(this.href, 750, 500); return false;">🔍</a> {log_lines.IP}</td>
-			<td title="{log_lines.STATUS}">{log_lines.STATUS}</td>
-			<td title="{log_lines.URI}">{log_lines.URI}</td>
-			<td title="{log_lines.USER_AGENT}">{log_lines.USER_AGENT}</td>
+			<td>{{ row.DATETIME }}</td>
+			<td><a href="{{ row.U_WHOIS }}" onclick="popup(this.href, 750, 500); return false;">🔍</a> {{ row.IP }}</td>
+			<td title="{{ row.STATUS }}">{{ row.STATUS }}</td>
+			<td title="{{ row.URI }}">{{ row.URI }}</td>
+			<td title="{{ row.USER_AGENT }}">{{ row.USER_AGENT }}</td>
 		</tr>
-		<!-- END log_lines -->
+		{% endfor %}
 	</tbody>
 </table>
 </div>
-<!-- ENDIF -->
+{% endif %}
 
-<!-- IF .pagination -->
+{% if loops.pagination is defined and loops.pagination|length %}
 <div class="pagination">
-	<!-- INCLUDE pagination.html -->
+	{% include 'pagination.html' %}
 </div>
-<!-- ENDIF -->
+{% endif %}
 
-<form id="bbgatekeeper_logs_clear" method="post" action="{U_ACTION}">
-	{S_FORM_TOKEN}
-	<input class="button2" type="submit" name="submit_clear" value="{L_BBGATEKEEPER_CLEAR_LOG}" onclick="return confirm('{LA_CONFIRM_OPERATION}');" />
+<form id="bbgatekeeper_logs_clear_bottom" method="post" action="{{ U_ACTION }}">
+	{{ S_FORM_TOKEN }}
+	<input class="button2" type="submit" name="submit_clear" value="{{ lang('BBGATEKEEPER_CLEAR_LOG') }}" onclick="return confirm('{{ lang('CONFIRM_OPERATION') }}');" />
 </form>
 
-<!-- INCLUDE overall_footer.html -->
+{% include 'overall_footer.html' %}
