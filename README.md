@@ -50,8 +50,8 @@ v1.2.4
 
 v 1.2.6
 not to implement defense but to better study attacks:
--added the capability to group logs BY IP (choose from first 2 - 3 numbers)
--added the capability to view in logs passed vs blocked
+- added the capability to group logs BY IP (choose from first 2 - 3 numbers - 16-24-32 bit)
+- added the capability to view in logs passed vs blocked
 
 ## Installation
 
