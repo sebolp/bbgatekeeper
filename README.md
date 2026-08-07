@@ -39,6 +39,20 @@ v1.2.1
 v1.2.2
 - removed prestatic-check
 
+v1.2.3
+- enabled js to prevent double click of submit button (generates and invalidate hcaptcha result - error and generates ban)
+- enabled js to prevent pre-click before hcapthca solved
+- code fixed
+- autopurge admin-log registration
+
+v1.2.4
+- added Turnstile by cloudflare. just choose the tab you prefer to use.
+
+v 1.2.6
+not to implement defense but to better study attacks:
+-added the capability to group logs BY IP (choose from first 2 - 3 numbers)
+-added the capability to view in logs passed vs blocked
+
 ## Installation
 
 Copy the extension to phpBB/ext/sebo/bbgatekeeper
