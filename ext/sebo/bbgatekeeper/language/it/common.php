@@ -216,4 +216,7 @@ $lang = array_merge($lang, [
 		1 => 'riga',
 		2 => 'righe',
 	],
+	'BBGATEKEEPER_GROUP_DEPTH' => 'Raggruppa a',
+	'BBGATEKEEPER_GROUP_16BIT' => 'IPv4 /16 bit · IPv6 /32 bit',
+	'BBGATEKEEPER_GROUP_24BIT' => 'IPv4 /24 bit · IPv6 /48 bit',
 ]);

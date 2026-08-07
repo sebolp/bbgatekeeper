@@ -6,21 +6,33 @@
 <p>{{ lang('BBGATEKEEPER_LOGS_EXPLAIN') }}</p>
 
 <div class="log-filters">
-	<div class="log-filter-group">
-		<span class="log-group-toggle">
-			{% if S_GROUPED %}
-				<a class="log-group-btn active" href="{{ U_ACTION_BASE }}{% if not S_FILTER_ALL %}&status_filter={{ STATUS_FILTER }}{% endif %}"><i class="fa fa-list" aria-hidden="true"></i> {{ lang('BBGATEKEEPER_GROUP_DISABLE') }}</a>
-			{% else %}
-				<a class="log-group-btn" href="{{ U_ACTION_BASE }}{% if not S_FILTER_ALL %}&status_filter={{ STATUS_FILTER }}{% endif %}&group_by_ip=1"><i class="fa fa-object-group" aria-hidden="true"></i> {{ lang('BBGATEKEEPER_GROUP_ENABLE') }}</a>
-			{% endif %}
-		</span>
+	<div class="log-filters-row">
+		<div class="log-filter-group">
+			<span class="log-group-toggle">
+				{% if S_GROUPED %}
+					<a class="log-group-btn active" href="{{ U_ACTION_BASE }}{% if not S_FILTER_ALL %}&status_filter={{ STATUS_FILTER }}{% endif %}"><i class="fa fa-list" aria-hidden="true"></i> {{ lang('BBGATEKEEPER_GROUP_DISABLE') }}</a>
+				{% else %}
+					<a class="log-group-btn" href="{{ U_ACTION_BASE }}{% if not S_FILTER_ALL %}&status_filter={{ STATUS_FILTER }}{% endif %}&group_by_ip=1"><i class="fa fa-object-group" aria-hidden="true"></i> {{ lang('BBGATEKEEPER_GROUP_ENABLE') }}</a>
+				{% endif %}
+			</span>
+		</div>
+
+		{% if S_GROUPED %}
+		<div class="log-filter-group">
+			<span class="log-filter-label">{{ lang('BBGATEKEEPER_GROUP_DEPTH') }}:</span>
+			<a class="log-filter-btn{% if not S_IP_GROUP_DEPTH_3 %} active{% endif %}" href="{{ U_ACTION_BASE }}{% if not S_FILTER_ALL %}&status_filter={{ STATUS_FILTER }}{% endif %}&group_by_ip=1" title="{{ lang('BBGATEKEEPER_GROUP_16BIT') }}">{{ lang('BBGATEKEEPER_GROUP_16BIT') }}</a>
+<a class="log-filter-btn{% if S_IP_GROUP_DEPTH_3 %} active{% endif %}" href="{{ U_ACTION_BASE }}{% if not S_FILTER_ALL %}&status_filter={{ STATUS_FILTER }}{% endif %}&group_by_ip=1&ip_group_depth=3" title="{{ lang('BBGATEKEEPER_GROUP_24BIT') }}">{{ lang('BBGATEKEEPER_GROUP_24BIT') }}</a>
+		</div>
+		{% endif %}
 	</div>
 
-	<div class="log-filter-group">
-		<span class="log-filter-label">{{ lang('BBGATEKEEPER_FILTER_VIEW') }}:</span>
-		<a class="log-filter-btn{% if S_FILTER_ALL %} active{% endif %}" href="{{ U_ACTION_BASE }}{% if S_GROUPED %}&group_by_ip=1{% endif %}">{{ lang('BBGATEKEEPER_FILTER_ALL') }}</a>
-		<a class="log-filter-btn{% if S_FILTER_PASSED %} active{% endif %}" href="{{ U_ACTION_BASE }}&status_filter=passed{% if S_GROUPED %}&group_by_ip=1{% endif %}">{{ lang('BBGATEKEEPER_FILTER_PASSED') }}</a>
-		<a class="log-filter-btn{% if S_FILTER_BLOCKED %} active{% endif %}" href="{{ U_ACTION_BASE }}&status_filter=blocked{% if S_GROUPED %}&group_by_ip=1{% endif %}">{{ lang('BBGATEKEEPER_FILTER_BLOCKED') }}</a>
+	<div class="log-filters-row">
+		<div class="log-filter-group">
+			<span class="log-filter-label">{{ lang('BBGATEKEEPER_FILTER_VIEW') }}:</span>
+			<a class="log-filter-btn{% if S_FILTER_ALL %} active{% endif %}" href="{{ U_ACTION_BASE }}{% if S_GROUPED %}&group_by_ip=1{% endif %}">{{ lang('BBGATEKEEPER_FILTER_ALL') }}</a>
+			<a class="log-filter-btn{% if S_FILTER_PASSED %} active{% endif %}" href="{{ U_ACTION_BASE }}&status_filter=passed{% if S_GROUPED %}&group_by_ip=1{% endif %}">{{ lang('BBGATEKEEPER_FILTER_PASSED') }}</a>
+			<a class="log-filter-btn{% if S_FILTER_BLOCKED %} active{% endif %}" href="{{ U_ACTION_BASE }}&status_filter=blocked{% if S_GROUPED %}&group_by_ip=1{% endif %}">{{ lang('BBGATEKEEPER_FILTER_BLOCKED') }}</a>
+		</div>
 	</div>
 </div>
 
@@ -46,7 +58,7 @@
 {% elseif S_GROUPED %}
 	{% for group in loops.ip_groups %}
 	<div class="log-group">
-		<h3><code class="inline">{{ group.PREFIX }}.x.x</code> » <span class="log-group-count">{{ group.COUNT }} {{ lang('BBGATEKEEPER_LOG_ROWS', group.COUNT) }}</span></h3>
+		<h3><code class="inline">{{ group.PREFIX }}{{ group.SUFFIX }}</code> » <span class="log-group-count">{{ group.COUNT }} {{ lang('BBGATEKEEPER_LOG_ROWS', group.COUNT) }}</span></h3>
 		<div class="log-group-table-wrap table-container">
 		<table cellspacing="1">
 			<thead>

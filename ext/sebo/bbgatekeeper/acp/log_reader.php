@@ -116,19 +116,19 @@ class log_reader
 	}
 
 	/**
-	* Groups entries by the first two segments of their IP address (octets
-	* for IPv4, hextets for IPv6), to help spot clusters of related
+	* Groups entries by IP prefix to help spot clusters of related
 	* addresses behind repeated attacks.
 	*
 	* @param array<int, array{datetime: string, ip: string, uri: string, status: string, user_agent: string}> $entries
+	* @param int $depth number of leading address segments to group by (2 or 3) — octets for IPv4, hextets for IPv6
 	* @return array<string, array<int, array>> entries grouped by IP prefix, largest group first
 	*/
-	public function group_by_ip_prefix(array $entries): array
+	public function group_by_ip_prefix(array $entries, int $depth = 2): array
 	{
 		$groups = [];
 		foreach ($entries as $entry)
 		{
-			$groups[$this->ip_group_key($entry['ip'])][] = $entry;
+			$groups[$this->ip_group_key($entry['ip'], $depth)][] = $entry;
 		}
 
 		// Largest cluster first, so likely attack sources surface at the top
@@ -141,20 +141,25 @@ class log_reader
 
 	/**
 	* @param string $ip
+	* @param int    $depth number of leading address segments to group by (2 or 3) — octets for IPv4, hextets for IPv6
 	* @return string
 	*/
-	protected function ip_group_key(string $ip): string
+	protected function ip_group_key(string $ip, int $depth = 2): string
 	{
+		$depth = max(2, min(3, $depth));
+
 		if (strpos($ip, ':') !== false)
 		{
-			// IPv6: group by the first two hextets (e.g. "2001:db8")
+			// IPv6: depth 2 = /32 (ISP-level), depth 3 = /48 (typical
+			// per-customer allocation) — same depth toggle as IPv4, but the
+			// bit boundaries differ since each hextet is 16 bits, not 8
 			$hextets = explode(':', $ip);
-			return (count($hextets) >= 2) ? $hextets[0] . ':' . $hextets[1] : $ip;
+			return (count($hextets) >= $depth) ? implode(':', array_slice($hextets, 0, $depth)) : $ip;
 		}
 
-		// IPv4: group by the first two octets (e.g. "192.168")
+		// IPv4: depth 2 = /16, depth 3 = /24 (8 bits per octet)
 		$octets = explode('.', $ip);
-		return (count($octets) >= 2) ? $octets[0] . '.' . $octets[1] : $ip;
+		return (count($octets) >= $depth) ? implode('.', array_slice($octets, 0, $depth)) : $ip;
 	}
 
 	/**

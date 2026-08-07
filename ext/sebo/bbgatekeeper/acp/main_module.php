@@ -425,6 +425,11 @@ class main_module
 		// instead of showing a flat, row-by-row list
 		$group_by_ip = $request->variable('group_by_ip', false);
 
+		// IPv4 grouping depth: 2 octets (/16) or 3 octets (/24). Only affects
+		// IPv4 — IPv6 always groups by /32 regardless of this setting.
+		$ip_group_depth = $request->variable('ip_group_depth', 2);
+		$ip_group_depth = in_array($ip_group_depth, [2, 3], true) ? $ip_group_depth : 2;
+
 		$start = $request->variable('start', 0);
 
 		// Row limit for the flat view; group count and rows-per-group limits
@@ -449,11 +454,15 @@ class main_module
 		{
 			$u_action .= '&group_by_ip=1';
 		}
+		if ($ip_group_depth !== 2)
+		{
+			$u_action .= '&ip_group_depth=' . $ip_group_depth;
+		}
 
 		if ($group_by_ip)
 		{
-			$groups = $log_reader->group_by_ip_prefix($all_lines);
-			$total_groups = count($groups);
+		$groups = $log_reader->group_by_ip_prefix($all_lines, $ip_group_depth);
+		$total_groups = count($groups);
 
 			// Paginate by group, not by row
 			$page_groups = array_slice($groups, $start, $group_limit, true);
@@ -462,10 +471,12 @@ class main_module
 			{
 				$group_count = count($group_lines);
 				$shown_lines = array_slice($group_lines, 0, $rows_per_group_limit);
+				$is_ipv6 = strpos($prefix, ':') !== false;
 
 				$template->assign_block_vars('ip_groups', [
-					'PREFIX'      => $prefix,
-					'COUNT'       => $group_count,
+					'PREFIX'       => $prefix,
+					'SUFFIX' => str_repeat($is_ipv6 ? ':x' : '.x', 4 - $ip_group_depth),
+					'COUNT'        => $group_count,
 					'HIDDEN_COUNT' => $group_count - count($shown_lines),
 				]);
 
@@ -521,6 +532,7 @@ class main_module
 			'S_FILTER_ALL'     => ($status_filter === ''),
 			'S_FILTER_PASSED'  => ($status_filter === 'passed'),
 			'S_FILTER_BLOCKED' => ($status_filter === 'blocked'),
+			'S_IP_GROUP_DEPTH_3' => ($ip_group_depth === 3),
 		]);
 	}
 
