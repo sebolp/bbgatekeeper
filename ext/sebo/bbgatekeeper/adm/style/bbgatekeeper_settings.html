@@ -18,16 +18,16 @@
 				{% if check.S_OK %}
 					<div class="successbox">
 						<p><strong>{{ check.LABEL }}</strong><br />
-							{% if not S_INI_PREPEND_OK and S_INI_STATUS == 'ok' %}⚠️{% else %}🗹{% endif %}
+							{% if not S_INI_PREPEND_OK and S_INI_STATUS == 'ok' %}⚠️{% else %}✅{% endif %}
 							{{ lang('BBGATEKEEPER_FUNDAMENTAL_STEPS_ALL_OK') }}</p>
 					</div>
 				{% elseif check.S_BAD %}
 					<div class="errorbox">
-						<p><strong>{{ check.LABEL }}</strong><br />✗ {{ lang('BBGATEKEEPER_FUNDAMENTAL_STEPS_BAD') }}</p>
+						<p><strong>{{ check.LABEL }}</strong><br />❌ {{ lang('BBGATEKEEPER_FUNDAMENTAL_STEPS_BAD') }}</p>
 					</div>
 				{% elseif check.S_NO_PERMS %}
 					<div class="errorbox notice">
-						<p><strong>{{ check.LABEL }}</strong><br />⚠ {{ lang('BBGATEKEEPER_FUNDAMENTAL_STEPS_NO_RIGHT_PERMISSIONS') }}</p>
+						<p><strong>{{ check.LABEL }}</strong><br />⚠️ {{ lang('BBGATEKEEPER_FUNDAMENTAL_STEPS_NO_RIGHT_PERMISSIONS') }}</p>
 					</div>
 				{% endif %}
 			</div>
