@@ -30,6 +30,7 @@ define('HCAP_COOKIE_NAME', {{HCAP_COOKIE_NAME}});
 define('HCAP_COOKIE_TTL', {{HCAP_COOKIE_TTL}});
 define('HCAP_COOKIE_SAMESITE', {{HCAP_COOKIE_SAMESITE}});
 define('HCAP_COOKIE_DOMAIN', {{HCAP_COOKIE_DOMAIN}});
+define('HCAP_COOKIE_SECURE', {{HCAP_COOKIE_SECURE}});
 define('TRUSTED_PROXY_ENABLE', {{TRUSTED_PROXY_ENABLE}});
 define('TRUSTED_PROXY_REMOTE_ADDR', {{TRUSTED_PROXY_REMOTE_ADDR}});
 
@@ -376,7 +377,7 @@ function set_hcap_cookie(string $ip): void
 		'expires'  => time() + HCAP_COOKIE_TTL,
 		'path'     => '/',
 		'domain'   => HCAP_COOKIE_DOMAIN,
-		'secure'   => true,
+		'secure'   => HCAP_COOKIE_SECURE,
 		'httponly' => true,
 		'samesite' => HCAP_COOKIE_SAMESITE,
 	]);

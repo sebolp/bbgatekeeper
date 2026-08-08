@@ -162,6 +162,7 @@ class config_exporter
 			'HCAP_COOKIE_TTL'       => (int) ($this->config['bbgatekeeper_cookie_ttl'] ?? 86400),
 			'HCAP_COOKIE_SAMESITE'  => (string) ($this->config['bbgatekeeper_cookie_samesite'] ?? 'Lax'),
 			'HCAP_COOKIE_DOMAIN'    => (string) ($this->config['cookie_domain'] ?? ''),
+			'HCAP_COOKIE_SECURE'    => (bool) ($this->config['cookie_secure'] ?? 'true'),
 			'IP_BINDING_LEVEL'      => (int) ($this->config['bbgatekeeper_ip_binding_level'] ?? 2),
 			'DRY_RUN'               => (bool) ($this->config['bbgatekeeper_dry_run'] ?? true),
 			'ENABLE_ACCESS_LOG'     => (bool) ($this->config['bbgatekeeper_enable_access_log'] ?? true),
