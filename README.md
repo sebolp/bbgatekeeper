@@ -53,6 +53,11 @@ not to implement defense but to better study attacks:
 - added the capability to group logs BY IP (choose from first 2 - 3 numbers - 16-24-32 bit)
 - added the capability to view in logs passed vs blocked
 
+v 1.2.7
+- solved a bug for ipv6 login loop. now are read correctly and works fine
+- admin now choose if use secure/not secure cookie reflecting board preferences
+- added two logs voice to better understand the cookie-set and token fails
+
 ## Installation
 
 Copy the extension to phpBB/ext/sebo/bbgatekeeper
