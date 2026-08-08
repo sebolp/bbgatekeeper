@@ -74,7 +74,7 @@
 				{% for row in group.group_lines %}
 				<tr>
 					<td>{{ row.DATETIME }}</td>
-					<td><a href="{{ row.U_WHOIS }}" onclick="popup(this.href, 750, 500); return false;">🔍</a> {{ row.IP }}</td>
+					<td title="{{ row.IP }}"><a href="{{ row.U_WHOIS }}" onclick="popup(this.href, 750, 500); return false;">🔍</a> {{ row.IP }}</td>
 					<td title="{{ row.STATUS }}">{{ row.STATUS }}</td>
 					<td title="{{ row.URI }}">{{ row.URI }}</td>
 					<td title="{{ row.USER_AGENT }}">{{ row.USER_AGENT }}</td>
