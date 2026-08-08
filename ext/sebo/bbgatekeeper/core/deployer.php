@@ -156,28 +156,31 @@ class deployer
 		$email_user = isset($email_parts[0]) ? $email_parts[0] : '';
 		$email_domain = isset($email_parts[1]) ? $email_parts[1] : '';
 
+		// Placeholders that map to a lang key and go through $user->lang()
 		$lang_map = [
-			'BB_LOGGER_LANG_SECURITY_CHECK'             => 'BBGATEKEEPER_TEMPLATE_LOGGER_SECURITY_CHECK',
-			'BB_LOGGER_LANG_SECURITY_CHECK_EXPLAIN'     => 'BBGATEKEEPER_TEMPLATE_LOGGER_SECURITY_CHECK_EXPLAIN',
-			'BB_LOGGER_LANG_SECURITY_CHECK_COOKIE'      => 'BBGATEKEEPER_TEMPLATE_LOGGER_COOKIE',
-			'BB_LOGGER_LANG_SECURITY_CHECK_CLAUSE'      => 'BBGATEKEEPER_TEMPLATE_LOGGER_CLAUSE',
-			'BB_LOGGER_LANG_SECURITY_CHECK_JS'          => 'BBGATEKEEPER_TEMPLATE_LOGGER_JS',
+			'BB_LOGGER_LANG_SECURITY_CHECK'              => 'BBGATEKEEPER_TEMPLATE_LOGGER_SECURITY_CHECK',
+			'BB_LOGGER_LANG_SECURITY_CHECK_EXPLAIN'      => 'BBGATEKEEPER_TEMPLATE_LOGGER_SECURITY_CHECK_EXPLAIN',
+			'BB_LOGGER_LANG_SECURITY_CHECK_COOKIE'       => 'BBGATEKEEPER_TEMPLATE_LOGGER_COOKIE',
+			'BB_LOGGER_LANG_SECURITY_CHECK_CLAUSE'       => 'BBGATEKEEPER_TEMPLATE_LOGGER_CLAUSE',
+			'BB_LOGGER_LANG_SECURITY_CHECK_JS'           => 'BBGATEKEEPER_TEMPLATE_LOGGER_JS',
 			'BB_LOGGER_LANG_SECURITY_CHECK_DO_NOT_AGREE' => 'BBGATEKEEPER_TEMPLATE_LOGGER_DO_NOT_AGREE',
-			'BB_LOGGER_LANG_TEMPLATE_ASSISTANCE'        => 'BBGATEKEEPER_TEMPLATE_LOGGER_ASSISTANCE',
-			'BB_LOGGER_TEMPLATE_BUTTON'                 => 'BBGATEKEEPER_TEMPLATE_LOGGER_BUTTON',
+			'BB_LOGGER_LANG_TEMPLATE_ASSISTANCE'         => 'BBGATEKEEPER_TEMPLATE_LOGGER_ASSISTANCE',
+			'BB_LOGGER_TEMPLATE_BUTTON'                  => 'BBGATEKEEPER_TEMPLATE_LOGGER_BUTTON',
 			'BB_LOGGER_TEMPLATE_ERROR_TOO_MANY_REQUESTS' => 'BBGATEKEEPER_TEMPLATE_LOGGER_ERROR_TOO_MANY_REQUESTS',
-			'BB_LOGGER_TEMPLATE_EMAIL_NAME'             => $email_user,
-			'BB_LOGGER_TEMPLATE_EMAIL_DOMAIN'           => $email_domain,
+		];
+
+		// Placeholders that are already resolved values, no translation needed
+		$raw_map = [
+			'BB_LOGGER_TEMPLATE_EMAIL_NAME'   => $email_user,
+			'BB_LOGGER_TEMPLATE_EMAIL_DOMAIN' => $email_domain,
+			'BB_LOGGER_LANG_CONFIG'           => $user->data['user_lang'],
 		];
 
 		$replacements = [];
+
 		foreach ($lang_map as $placeholder => $key)
 		{
-			if ($placeholder === 'BB_LOGGER_TEMPLATE_EMAIL_NAME' || $placeholder === 'BB_LOGGER_TEMPLATE_EMAIL_DOMAIN')
-			{
-				$value = (string) $key;
-			}
-			else if ($key === 'BBGATEKEEPER_TEMPLATE_LOGGER_CLAUSE')
+			if ($key === 'BBGATEKEEPER_TEMPLATE_LOGGER_CLAUSE')
 			{
 				$ttl = (int) ($config['bbgatekeeper_cookie_ttl'] ?? 0);
 				// Pass the formatted duration to the lang string
@@ -189,6 +192,11 @@ class deployer
 			}
 
 			$replacements['{{' . $placeholder . '}}'] = $value;
+		}
+
+		foreach ($raw_map as $placeholder => $value)
+		{
+			$replacements['{{' . $placeholder . '}}'] = (string) $value;
 		}
 
 		return $replacements;

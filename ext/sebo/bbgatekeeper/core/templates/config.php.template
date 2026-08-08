@@ -240,12 +240,12 @@ function decode_multi_entries(?string $token): array
 	{
 		foreach (explode(',', $entries_str) as $raw_entry)
 		{
-			$pieces = explode(':', $raw_entry, 2);
-			if (count($pieces) !== 2 || !ctype_digit($pieces[1]))
+			$sep = strrpos($raw_entry, ':');
+			if ($sep === false || !ctype_digit(substr($raw_entry, $sep + 1)))
 			{
 				continue;
 			}
-			$entries[] = ['bound' => $pieces[0], 'expires' => (int) $pieces[1]];
+			$entries[] = ['bound' => substr($raw_entry, 0, $sep), 'expires' => (int) substr($raw_entry, $sep + 1)];
 		}
 	}
 
@@ -328,12 +328,14 @@ function verify_hcap_token(?string $token, string $ip): bool
 
 		foreach (explode(',', $entries_str) as $raw_entry)
 		{
-			$pieces = explode(':', $raw_entry, 2);
-			if (count($pieces) !== 2 || !ctype_digit($pieces[1]))
+			$sep = strrpos($raw_entry, ':');
+			if ($sep === false || !ctype_digit(substr($raw_entry, $sep + 1)))
 			{
 				continue;
 			}
-			if ($pieces[1] > $now && hash_equals($pieces[0], $current_bound))
+			$expires_part = (int) substr($raw_entry, $sep + 1);
+			$bound_part = substr($raw_entry, 0, $sep);
+			if ($expires_part > $now && hash_equals($bound_part, $current_bound))
 			{
 				return true;
 			}
