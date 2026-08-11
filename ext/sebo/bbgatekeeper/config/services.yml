@@ -58,3 +58,17 @@ services:
             - '%core.root_path%'
         tags:
             - { name: cron.task }
+
+    sebo.bbgatekeeper.fallback_packager:
+        class: sebo\bbgatekeeper\core\fallback_packager
+        arguments:
+            - '@sebo.bbgatekeeper.config_exporter'
+            - '@sebo.bbgatekeeper.deployer'
+
+    sebo.bbgatekeeper.controller.download_package:
+        class: sebo\bbgatekeeper\controller\download_package_controller
+        arguments:
+            - '@auth'
+            - '@user'
+            - '@sebo.bbgatekeeper.fallback_packager'
+            - '@log'

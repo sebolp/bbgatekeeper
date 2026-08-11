@@ -80,6 +80,9 @@ class main_module
 	{
 		global $config, $request, $template, $user, $phpbb_container, $db, $table_prefix;
 
+		/** @var \phpbb\controller\helper $helper */
+		$helper = $phpbb_container->get('controller.helper');
+
 		$do_save = $request->is_set_post('submit_save');
 		$do_deploy = $request->is_set_post('submit_deploy');
 		$do_reset = $request->is_set_post('submit_reset');
@@ -156,11 +159,38 @@ class main_module
 				'deploy_logger' => $user->lang('BBGATEKEEPER_LOGGER_AND_INI_DEPLOY'),
 			];
 
+			// Technical reason for each failed step, gathered from the
+			// exporter/deployer's own last_error - shown inline (much
+			// more useful than a generic "✗ Errore") and persisted in
+			// the admin log for later investigation.
+			$reasons = [];
+
 			$lines = [];
 			foreach ($results as $key => $ok)
 			{
 				$label = $labels[$key] ?? $key;
 				$lines[] = $label . ': ' . ($ok ? $user->lang('BBGATEKEEPER_FUNCTION_DONE') : $user->lang('BBGATEKEEPER_FUNCTION_ERROR'));
+
+				if (!$ok)
+				{
+					$reason = ($key === 'export_config') ? $exporter->get_last_error() : $deployer->get_last_error();
+					if ($reason !== '')
+					{
+						$reasons[$key] = $reason;
+						$lines[] = '<em>' . htmlspecialchars($reason) . '</em>';
+					}
+				}
+			}
+
+			if (!$success)
+			{
+				$reason_text = implode(' | ', $reasons) ?: 'unknown error';
+
+				/** @var \phpbb\log\log_interface $log */
+				$log = $phpbb_container->get('log');
+				$log->add('admin', $user->data['user_id'], $user->ip, 'LOG_BBGATEKEEPER_DEPLOY_FAILED', time(), [$reason_text]);
+
+				$lines[] = '<br>' . $user->lang('BBGATEKEEPER_DOWNLOAD_PACKAGE_HINT');
 			}
 
 			trigger_error(
@@ -235,6 +265,8 @@ class main_module
 		$captcha_provider = (string) ($config['bbgatekeeper_captcha_provider'] ?? 'hcaptcha');
 		$captcha_provider = in_array($captcha_provider, ['hcaptcha', 'turnstile'], true) ? $captcha_provider : 'hcaptcha';
 
+		$deploy_ok = $checker->all_ok();
+
 		$template->assign_vars([
 			'U_ACTION'          => $this->u_action,
 
@@ -289,10 +321,13 @@ class main_module
 			// admin in a new tab, no deploy/config needed.
 			'U_IP_PROBE' => generate_board_url() . '/ext/sebo/bbgatekeeper/sebo-bbgatekeeper-ip-probe.php',
 
-			'DEPLOY_OK'         => $checker->all_ok(),
+			'DEPLOY_OK'         => $deploy_ok,
 			'LAST_DEPLOY_TIME'      => !empty($config['bbgatekeeper_last_deploy_time']) ? $user->format_date((int) $config['bbgatekeeper_last_deploy_time']) : '-',
 
 			'SHOW_PERMISSIONS_WARNING'  => $checker->config_permissions_warning(),
+
+			// Manual fallback ZIP
+			'U_DOWNLOAD_PACKAGE' => $helper->route('sebo_bbgatekeeper_download_package'),
 		]);
 	}
 
@@ -533,6 +568,17 @@ class main_module
 			'S_FILTER_PASSED'  => ($status_filter === 'passed'),
 			'S_FILTER_BLOCKED' => ($status_filter === 'blocked'),
 			'S_IP_GROUP_DEPTH_3' => ($ip_group_depth === 3),
+		]);
+
+		// get stats
+		$stats = $log_reader->get_stats($all_lines);
+
+		$template->assign_vars([
+			'TOTAL_PASSED'		=> $stats['TOTAL_PASSED'],
+			'TOTAL_BLOCKED'		=> $stats['TOTAL_BLOCKED'],
+			'PERCENT_PASSED'	=> $stats['PERCENT_PASSED'],
+			'PERCENT_BLOCKED'	=> $stats['PERCENT_BLOCKED'],
+			'TOTAL_ENTRIES'		=> $stats['TOTAL_ENTRIES'],
 		]);
 	}
 

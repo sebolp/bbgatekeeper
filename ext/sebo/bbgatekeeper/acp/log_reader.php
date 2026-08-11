@@ -177,4 +177,44 @@ class log_reader
 
 		return @file_put_contents($path, '') !== false;
 	}
+
+	/**
+	 * Calculate statistics for the visual bar based on current log entries.
+	 *
+	 * @param array $entries
+	 * @return array
+	 */
+	public function get_stats(array $entries): array
+	{
+		$passed = 0;
+		$blocked = 0;
+
+		foreach ($entries as $entry)
+		{
+			$category = $this->classify_status($entry['status']);
+
+			if ($category === 'passed')
+			{
+				$passed++;
+			}
+			else if ($category === 'blocked')
+			{
+				$blocked++;
+			}
+		}
+
+		$total = $passed + $blocked;
+
+		// Calculate percentages, preventing division by zero
+		$percent_passed = ($total > 0) ? round(($passed / $total) * 100) : 0;
+		$percent_blocked = ($total > 0) ? round(($blocked / $total) * 100) : 0;
+
+		return [
+			'TOTAL_PASSED'		=> $passed,
+			'TOTAL_BLOCKED'		=> $blocked,
+			'PERCENT_PASSED'	=> $percent_passed,
+			'PERCENT_BLOCKED'	=> $percent_blocked,
+			'TOTAL_ENTRIES'		=> $total,
+		];
+	}
 }

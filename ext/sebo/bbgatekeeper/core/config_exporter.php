@@ -13,8 +13,12 @@ namespace sebo\bbgatekeeper\core;
 use phpbb\config\config;
 
 /**
-* Renders store/runtime/config.php from the current phpBB config values
-* and the static template in templates/config.php.template.
+* Renders store/bbgatekeeper_config.php from the current phpBB config
+* values and the static template in templates/config.php.template.
+*
+* render() only builds the string in memory and never touches disk - it
+* is reused both by export() (normal deploy) and by fallback_packager
+* (manual ZIP download when store/ isn't writable).
 */
 class config_exporter
 {
@@ -26,6 +30,9 @@ class config_exporter
 
 	/** @var string absolute path to the rendering template */
 	protected $template_path;
+
+	/** @var string last technical error, for logs - not translated, not shown to end users directly */
+	protected $last_error = '';
 
 	/**
 	* @param config $config
@@ -39,29 +46,75 @@ class config_exporter
 	}
 
 	/**
-	* Renders and writes store/bbgatekeeper_config.php
-	*
-	* @return bool true on success
+	* @return string technical reason for the last failure of render()
+	*                or export(), empty string if the last call succeeded
 	*/
-	public function export(): bool
+	public function get_last_error(): string
 	{
+		return $this->last_error;
+	}
+
+	/**
+	* Renders the full bbgatekeeper_config.php content in memory, without
+	* writing anything to disk.
+	*
+	* @return string|null null on failure - check get_last_error()
+	*/
+	public function render(): ?string
+	{
+		global $user;
+
+		$user->add_lang_ext('sebo/bbgatekeeper', 'config_lang');
+
 		if (!is_readable($this->template_path))
 		{
-			return false;
+			$this->last_error = sprintf($user->lang('BBGATEKEEPER_CONFIG_TEMPLATE_NOT_READABLE', $this->template_path));
+			return null;
 		}
 
 		$template = file_get_contents($this->template_path);
 		if ($template === false)
 		{
-			return false;
+			$this->last_error = sprintf($user->lang('BBGATEKEEPER_CONFIG_FAILED_TO_READ_TEMPLATE', $this->template_path));
+			return null;
 		}
 
 		$replacements = $this->build_replacements();
-		$rendered = str_replace(array_keys($replacements), array_values($replacements), $template);
+
+		return str_replace(array_keys($replacements), array_values($replacements), $template);
+	}
+
+	/**
+	* Renders and writes store/bbgatekeeper_config.php.
+	*
+	* @return bool true on success - check get_last_error() on failure
+	*/
+	public function export(): bool
+	{
+		global $user;
+
+		$user->add_lang_ext('sebo/bbgatekeeper', 'config_lang');
+
+		$this->last_error = '';
+
+		$rendered = $this->render();
+		if ($rendered === null)
+		{
+			// last_error already set by render()
+			return false;
+		}
+
+		if (!is_dir($this->store_path) && !@mkdir($this->store_path, 0750, true))
+		{
+			$this->last_error = sprintf($user->lang('BBGATEKEEPER_CONFIG_CANNOT_CREATE_STORE_DIR', $this->store_path));
+			return false;
+		}
 
 		$target = $this->store_path . 'bbgatekeeper_config.php';
 		if (@file_put_contents($target, $rendered) === false)
 		{
+			$error = error_get_last();
+			$this->last_error = sprintf($user->lang('BBGATEKEEPER_CONFIG_FAILED_TO_WRITE', $target, $error['message'] ?? 'unknown error'));
 			return false;
 		}
 

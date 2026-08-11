@@ -276,6 +276,12 @@
 			{% endif %}
 			&mdash; {{ lang('BBGATEKEEPER_LAST_DEPLOY') }}: {{ LAST_DEPLOY_TIME }}
 		</p>
+
+			<div class="errorbox notice">
+				<p>{{ lang('BBGATEKEEPER_DOWNLOAD_PACKAGE_EXPLAIN') }}</p>
+				<p><strong>{{ lang('BBGATEKEEPER_DOWNLOAD_PACKAGE_WARNING') }}</strong></p>
+				<input id="bbgatekeeper-download-btn" class="button1 larger-button" type="button" value="📦 {{ lang('BBGATEKEEPER_DOWNLOAD_PACKAGE') }}" data-url="{{ U_DOWNLOAD_PACKAGE }}" />
+			</div>
 	</fieldset>
 
 	<fieldset style="background-color: #ffe5ca;">
@@ -298,11 +304,26 @@
 		<h3>{{ lang('BBGATEKEEPER_SAVE_MODAL_TITLE') }}</h3>
 		<p>{{ lang('BBGATEKEEPER_SAVE_MODAL_TEXT') }} {{ lang('BBGATEKEEPER_GENERATE_DEPLOY') }}</p>
 		<div class="bbgatekeeper-modal-actions">
-			<button type="button" id="bbgatekeeper-modal-cancel" class="button2 larger-button">
+			<button type="button" id="bbgatekeeper-save-modal-cancel" class="button2 larger-button">
 				{{ lang('CANCEL') }}
 			</button>
-			<button type="button" class="button1 larger-button" id="bbgatekeeper-modal-confirm">
+			<button type="button" class="button1 larger-button" id="bbgatekeeper-save-modal-confirm">
 				{{ lang('BBGATEKEEPER_SAVE_MODAL_CONFIRM') }}
+			</button>
+		</div>
+	</div>
+</div>
+
+<div id="bbgatekeeper-download-modal" class="bbgatekeeper-modal-overlay" style="display:none;">
+	<div class="bbgatekeeper-modal-box submit-buttons">
+		<h3>{{ lang('BBGATEKEEPER_DOWNLOAD_MODAL_TITLE') }}</h3>
+		<p>{{ lang('BBGATEKEEPER_DOWNLOAD_MODAL_TEXT') }}</p>
+		<div class="bbgatekeeper-modal-actions">
+			<button type="button" id="bbgatekeeper-download-modal-cancel" class="button2 larger-button">
+				{{ lang('CANCEL') }}
+			</button>
+			<button type="button" class="button1 larger-button" id="bbgatekeeper-download-modal-confirm">
+				{{ lang('BBGATEKEEPER_DOWNLOAD_MODAL_CONFIRM') }}
 			</button>
 		</div>
 	</div>

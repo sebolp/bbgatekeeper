@@ -2,3 +2,8 @@ sebo_bbgatekeeper_whois:
     path: /bbgatekeeper/whois
     methods: [GET]
     defaults: { _controller: sebo.bbgatekeeper.controller.whois:handle }
+
+sebo_bbgatekeeper_download_package:
+    path: /bbgatekeeper/download-package
+    methods: [GET]
+    defaults: { _controller: sebo.bbgatekeeper.controller.download_package:handle }

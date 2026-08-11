@@ -5,6 +5,22 @@
 <h1>{{ lang('ACP_BBGATEKEEPER_LOGS') }}</h1>
 <p>{{ lang('BBGATEKEEPER_LOGS_EXPLAIN') }}</p>
 
+{% if TOTAL_ENTRIES > 0 %}
+<div class="bbgatekeeper-stats-bar"{% if PERCENT_PASSED > 0 and PERCENT_BLOCKED > 0 %} style="background: linear-gradient(to right, #228b22 calc({{ PERCENT_PASSED }}% - 7%), #b22222 calc({{ PERCENT_PASSED }}% + 7%));"{% endif %}>
+	{% if PERCENT_PASSED > 0 %}
+	<div class="stat-passed{% if PERCENT_BLOCKED == 0 %} stat-full{% endif %}" style="width: {{ PERCENT_PASSED }}%;" title="{{ lang('BBGATEKEEPER_FILTER_PASSED') }}">
+		{{ lang('BBGATEKEEPER_PERC_PASSED') }}: {{ TOTAL_PASSED }} ({{ PERCENT_PASSED }}%)
+	</div>
+	{% endif %}
+	
+	{% if PERCENT_BLOCKED > 0 %}
+	<div class="stat-blocked{% if PERCENT_PASSED == 0 %} stat-full{% endif %}" style="width: {{ PERCENT_BLOCKED }}%;" title="{{ lang('BBGATEKEEPER_FILTER_BLOCKED') }}">
+		{{ lang('BBGATEKEEPER_PERC_BLOCKED') }}: {{ TOTAL_BLOCKED }} ({{ PERCENT_BLOCKED }}%)
+	</div>
+	{% endif %}
+</div>
+{% endif %}
+
 <div class="log-filters">
 	<div class="log-filters-row">
 		<div class="log-filter-group">
