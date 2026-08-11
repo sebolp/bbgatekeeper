@@ -149,6 +149,12 @@ class fallback_packager
 	protected function build_readme(): string
 	{
 		return <<<TXT
+/**
+ * Bad Bot Gatekeeper extension for the phpBB Forum Software package.
+ * @copyright (c) 2026 sebo, fiatpandaclub.org
+ * @license GNU General Public License, version 2 (GPL-2.0)
+ * https://github.com/sebolp/bbgatekeeper/
+ */
 ======================================================================
 Bad Bot Gatekeeper — manual deploy package
 ======================================================================
@@ -215,6 +221,7 @@ INSTALLATION DONE
 Once files are in place and .user.ini is updated, go back to
 ACP > Customise > Bad Bot Gatekeeper > Settings 
 the "Minimal required deployment steps" box in the page now shows all green.
+
 TXT;
 	}
 }
