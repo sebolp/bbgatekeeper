@@ -177,7 +177,7 @@ class main_module
 					if ($reason !== '')
 					{
 						$reasons[$key] = $reason;
-						$lines[] = '<em>' . htmlspecialchars($reason) . '</em>';
+						$lines[] = '<em>' . $reason . '</em>';
 					}
 				}
 			}

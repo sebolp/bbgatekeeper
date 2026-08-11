@@ -11,6 +11,8 @@
 namespace sebo\bbgatekeeper\controller;
 
 use sebo\bbgatekeeper\core\fallback_packager;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
 class download_package_controller
 {
@@ -63,28 +65,24 @@ class download_package_controller
 			trigger_error('BBGATEKEEPER_PACKAGE_FAILED', E_USER_WARNING);
 		}
 
-		header('Content-Type: application/zip');
-		header('Content-Disposition: attachment; filename="bbgatekeeper_deploy_package.zip"');
-		header('Content-Length: ' . filesize($zip_path));
+		// Create a Symfony BinaryFileResponse for phpBB
+		$response = new BinaryFileResponse($zip_path);
 
-		// The ZIP contains plaintext secrets (captcha keys, cookie
-		// signing secret): make sure no intermediate proxy/cache stores
-		// a copy of the response.
-		header('Cache-Control: private, no-store, no-cache, must-revalidate');
-		header('Pragma: no-cache');
-		header('X-Content-Type-Options: nosniff');
+		// Set filename and attachment disposition
+		$response->setContentDisposition(
+			ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+			'bbgatekeeper_deploy_package.zip'
+		);
 
-		// Guarantee cleanup of the temp file even if readfile() fails
-		// partway through (interrupted connection, permission error).
-		try
-		{
-			readfile($zip_path);
-		}
-		finally
-		{
-			@unlink($zip_path);
-		}
+		// The ZIP contains plaintext secrets: make sure no intermediate
+		// proxy/cache stores a copy of the response.
+		$response->headers->set('Cache-Control', 'private, no-store, no-cache, must-revalidate');
+		$response->headers->set('Pragma', 'no-cache');
+		$response->headers->set('X-Content-Type-Options', 'nosniff');
 
-		exit;
+		// Guarantee cleanup of the temp file automatically after sending
+		$response->deleteFileAfterSend(true);
+
+		return $response;
 	}
 }
