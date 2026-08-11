@@ -64,27 +64,27 @@ class download_package_controller
 		}
 
 		header('Content-Type: application/zip');
-        header('Content-Disposition: attachment; filename="bbgatekeeper_deploy_package.zip"');
-        header('Content-Length: ' . filesize($zip_path));
+		header('Content-Disposition: attachment; filename="bbgatekeeper_deploy_package.zip"');
+		header('Content-Length: ' . filesize($zip_path));
 
-        // The ZIP contains plaintext secrets (captcha keys, cookie
-        // signing secret): make sure no intermediate proxy/cache stores
-        // a copy of the response.
-        header('Cache-Control: private, no-store, no-cache, must-revalidate');
-        header('Pragma: no-cache');
-        header('X-Content-Type-Options: nosniff');
+		// The ZIP contains plaintext secrets (captcha keys, cookie
+		// signing secret): make sure no intermediate proxy/cache stores
+		// a copy of the response.
+		header('Cache-Control: private, no-store, no-cache, must-revalidate');
+		header('Pragma: no-cache');
+		header('X-Content-Type-Options: nosniff');
 
-        // Guarantee cleanup of the temp file even if readfile() fails
-        // partway through (interrupted connection, permission error).
-        try
-        {
-            readfile($zip_path);
-        }
-        finally
-        {
-            @unlink($zip_path);
-        }
+		// Guarantee cleanup of the temp file even if readfile() fails
+		// partway through (interrupted connection, permission error).
+		try
+		{
+			readfile($zip_path);
+		}
+		finally
+		{
+			@unlink($zip_path);
+		}
 
-        exit;
+		exit;
 	}
 }
