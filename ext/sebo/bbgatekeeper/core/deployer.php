@@ -246,14 +246,8 @@ class deployer
 			$replacements['{{' . $placeholder . '}}'] = (string) $value;
 		}
 
-		// {SITENAME} / {SITE_DESCRIPTION} - single-brace placeholders
-		// (deliberately not wrapped in {{ }}, since they come straight
-		// from phpBB's own core board config, not from an extension lang
-		// key), so the challenge page shows the real forum name/tagline.
-		// Escaped here since they land directly in static HTML with no
-		// further templating step.
-		$replacements['{SITENAME}'] = htmlspecialchars((string) ($config['sitename'] ?? ''), ENT_QUOTES, 'UTF-8');
-		$replacements['{SITE_DESCRIPTION}'] = htmlspecialchars((string) ($config['site_desc'] ?? ''), ENT_QUOTES, 'UTF-8');
+		$replacements['{SITENAME}'] = $config['sitename'];
+		$replacements['{SITE_DESCRIPTION}'] = $config['site_desc'];
 
 		return $replacements;
 	}
