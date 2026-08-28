@@ -57,7 +57,7 @@ $lang = array_merge($lang, [
 	'BBGATEKEEPER_MODE'         => 'Operating mode',
 	'BBGATEKEEPER_DRY_RUN'          => 'Dry run',
 	'BBGATEKEEPER_DRY_RUN_EXPLAIN'      => 'Log what would be blocked without actually blocking anything.<br />To block needs to be disabled.',
-	
+
 	'BBGATEKEEPER_DEPLOY_STATUS'        => 'Deployment status',
 	'BBGATEKEEPER_DEPLOY_OK'        => 'Deployed and active',
 	'BBGATEKEEPER_DEPLOY_NOT_OK'        => 'Not deployed / not verified',
