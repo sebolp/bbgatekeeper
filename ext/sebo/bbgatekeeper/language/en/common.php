@@ -42,7 +42,7 @@ $lang = array_merge($lang, [
 	'BBGATEKEEPER_COOKIE_TTL'       => 'Cookie lifetime',
 	'BBGATEKEEPER_COOKIE_TTL_EXPLAIN'       => 'How long your cookie allows access to the website before resetting.<br />Expressed in seconds. Default 86400 (24 hours). You can use the time you prefer.<br />Examples: 3600 (1 hour), 86400 (1 day), 604800 (1 week), 2629800 (1 month)',
 	'BBGATEKEEPER_COOKIE_DOMAIN'        => 'Cookie domain',
-	'BBGATEKEEPER_COOKIE_DOMAIN_EXPLAIN'        => 'It is the same of the board configuration.<br />Use <em>.example.com</em> to include all subdomains.<br />Use <em>.subdomain.example.com</em> to use only in one subdomain.',
+	'BBGATEKEEPER_COOKIE_DOMAIN_EXPLAIN'        => 'By default it is the same of the board configuration.<br />Use <em>.example.com</em> to include all subdomains.<br />Use <em>.subdomain.example.com</em> to use only in one subdomain.',
 	'BBGATEKEEPER_COOKIE_SAMESITE'      => 'SameSite policy',
 	'BBGATEKEEPER_COOKIE_SAMESITE_EXPLAIN'      => 'Different cookie policy.<br /><em>LAX</em>: (default) sends cookies only during top-level navigation like clicking an external link.<br /><em>STRICT</em>: (more secure) sends cookies exclusively when you are browsing directly within the origin site.',
 
@@ -57,7 +57,7 @@ $lang = array_merge($lang, [
 	'BBGATEKEEPER_MODE'         => 'Operating mode',
 	'BBGATEKEEPER_DRY_RUN'          => 'Dry run',
 	'BBGATEKEEPER_DRY_RUN_EXPLAIN'      => 'Log what would be blocked without actually blocking anything.<br />To block needs to be disabled.',
-
+	
 	'BBGATEKEEPER_DEPLOY_STATUS'        => 'Deployment status',
 	'BBGATEKEEPER_DEPLOY_OK'        => 'Deployed and active',
 	'BBGATEKEEPER_DEPLOY_NOT_OK'        => 'Not deployed / not verified',
@@ -235,4 +235,11 @@ $lang = array_merge($lang, [
 	'BBGATEKEEPER_DOWNLOAD_MODAL_CONFIRM' => 'Download. I have read and understand.',
 	'BBGATEKEEPER_DOWNLOAD_MODAL_TITLE' => 'Download files',
 	'BBGATEKEEPER_DOWNLOAD_MODAL_TEXT' => 'You are downloading 3 files. Use this method only if automatic deploy fails.<br />To ensure the correct installation you have to read the readme.txt file inside the .zip download file.<br />- WARNING: files must be uploaded in different path.<br>- PAY EXTREME ATTENTION: You will have to check if you already have a .user.ini in your root website path (not only the forum path, but the entire domain path). You must not overwrite it if you already have one, but you will have to download, backup, update and re-upload in the same position. Read instructions in txt file. The extension author is not responsible for any damage you make deleting/corrupting .user.ini file.',
+	/* >=1.3.0 */
+	'BBGATEKEEPER_AUTOLOGIN'         => 'Autologin (invisible challenge)',
+	'BBGATEKEEPER_AUTOLOGIN_EXPLAIN' => 'Automatically runs the challenge on page load and submits it without the visitor clicking "Verify and Continue".<br />- hCaptcha: the site key configured above must be set to <em>invisible</em> type in the hCaptcha dashboard, otherwise the widget will not run on its own.<br />- Turnstile: works automatically, no dashboard change needed.<br />- If the automatic flow fails for any reason, the manual button is shown as a fallback.<br /><strong>Note:</strong> removing the manual click also removes the visitor\'s explicit action of agreeing to the verification cookie described above - consider this before enabling on boards with strict cookie-consent requirements.',
+
+	'BBGATEKEEPER_EXCLUDED_PATHS'         => 'Excluded paths',
+	'BBGATEKEEPER_EXCLUDED_PATHS_EXPLAIN' => 'One path (or path fragment) per line. Any request whose URI path contains one of these values skips the challenge (User-Agent blocklist and logging still apply). Matched against the path only, not the query string.<br />Example: <code class="inline">/ext/vendor/extension-name/</code> exclude the entire extension "@vendor-extension" from the challenge.',
+
 ]);

@@ -28,8 +28,8 @@ namespace sebo\bbgatekeeper\core;
  */
 class hits_ban_manager
 {
-	public const BAN_TTL = 1800; // 30 minuti, deve combaciare con is_ip_banned()
-	public const HIT_TTL = 60;   // 1 minuto, deve combaciare con la finestra hit
+	public const BAN_TTL = 1800; // 30 minutes, must match is_ip_banned()
+	public const HIT_TTL = 60;   // 1 minute, must match the hit window
 
 	/** @var string */
 	protected $bans_dir;

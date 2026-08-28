@@ -40,8 +40,19 @@ define('IP_BINDING_LEVEL', {{IP_BINDING_LEVEL}});
 
 define('DRY_RUN', {{DRY_RUN}});
 
+// Autologin: runs the challenge automatically on page load and
+// submits it without the visitor clicking the button. See ACP
+// explanation for the per-provider setup requirement and the
+// cookie-consent trade-off.
+define('AUTOLOGIN_ENABLE', {{AUTOLOGIN_ENABLE}});
+
 define('BLOCKED_UA_PATTERNS', {{BLOCKED_UA_PATTERNS}});
 define('ALLOWED_BOT_DOMAINS', {{ALLOWED_BOT_DOMAINS}});
+
+// Paths whose challenge is bypassed (UA blocklist and logging still
+// apply). Matched with strpos() against the REQUEST_URI path only,
+// not the query string. One entry per line in ACP.
+define('EXCLUDED_PATHS', {{EXCLUDED_PATHS}});
 
 // Fixed policy: level 3 (medium-multi) remembers at most this many
 // distinct network locations at once (e.g. home + work + a friend's

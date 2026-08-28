@@ -222,6 +222,7 @@ class main_module
 		/** Retrieve variables */
 		$ua_patterns = [];
 		$bot_domains = [];
+		$excluded_paths = [];
 
 		// Build the SQL query using the array method per phpBB standards
 		$sql_array = [
@@ -229,7 +230,7 @@ class main_module
 			'FROM'      => [
 				$table_prefix . 'sebo_bbgatekeeper_settings' => 's'
 			],
-			'WHERE'     => $db->sql_in_set('setting_name', ['ua_patterns', 'bot_domains'])
+			'WHERE'     => $db->sql_in_set('setting_name', ['ua_patterns', 'bot_domains', 'excluded_paths'])
 		];
 
 		// Execute the query
@@ -247,6 +248,10 @@ class main_module
 			{
 				$bot_domains = json_decode((string) $row['setting_value'], true);
 			}
+			else if ($row['setting_name'] === 'excluded_paths')
+			{
+				$excluded_paths = json_decode((string) $row['setting_value'], true);
+			}
 		}
 
 		// Always free the result
@@ -255,6 +260,7 @@ class main_module
 		// Ensure they are arrays in case json_decode fails
 		$ua_patterns = is_array($ua_patterns) ? $ua_patterns : [];
 		$bot_domains = is_array($bot_domains) ? $bot_domains : [];
+		$excluded_paths = is_array($excluded_paths) ? $excluded_paths : [];
 
 		$samesite = (string) ($config['bbgatekeeper_cookie_samesite'] ?? 'Lax');
 		$ip_level = (int) ($config['bbgatekeeper_ip_binding_level'] ?? 1);
@@ -285,7 +291,7 @@ class main_module
 			'HCAP_SITE_KEY'         => (string) ($config['bbgatekeeper_hcap_site_key'] ?? ''),
 			'HCAP_SITE_SECRET'      => (string) ($config['bbgatekeeper_hcap_site_secret'] ?? ''),
 			'HCAP_SIGN_SECRET'      => (string) ($config['bbgatekeeper_hcap_sign_secret'] ?? ''),
-			'COOKIE_DOMAIN'         => (string) ($config['cookie_domain'] ?? ''),
+			'COOKIE_DOMAIN'         => (string) ($config['bbgatekeeper_cookie_domain'] ?? ''),
 			'COOKIE_NAME'           => (string) ($config['bbgatekeeper_cookie_name'] ?? 'sebo_bbgatekeeper_verified_hcap'),
 			'COOKIE_TTL'            => (int) ($config['bbgatekeeper_cookie_ttl'] ?? 86400),
 			'COOKIE_SAMESITE_LAX'       => ($samesite === 'Lax'),
@@ -293,6 +299,7 @@ class main_module
 
 			'UA_PATTERNS'           => implode("\n", (array) $ua_patterns),
 			'BOT_DOMAINS'           => implode("\n", (array) $bot_domains),
+			'EXCLUDED_PATHS'        => implode("\n", (array) $excluded_paths),
 
 			'IP_LEVEL_1'            => ($ip_level === 1),
 			'IP_LEVEL_2'            => ($ip_level === 2),
@@ -300,6 +307,7 @@ class main_module
 			'IP_LEVEL_4'			=> ($ip_level === 4),
 
 			'DRY_RUN'           => (bool) ($config['bbgatekeeper_dry_run'] ?? true),
+			'AUTOLOGIN_ENABLE'  => (bool) ($config['bbgatekeeper_autologin_enable'] ?? false),
 
 			// Toggle to enable/disable the access log write
 			// (store/logs/access.log) from the auto_prepend logger, to
@@ -356,7 +364,7 @@ class main_module
 
 		$config->set('bbgatekeeper_cookie_name', $request->variable('cookie_name', 'fpc_verified_hcap'));
 		$config->set('bbgatekeeper_cookie_ttl', (string) max(60, $request->variable('cookie_ttl', 86400)));
-		$config->set('cookie_domain', $request->variable('cookie_domain', ''));
+		$config->set('bbgatekeeper_cookie_domain', $request->variable('cookie_domain', ''));
 
 		$samesite = $request->variable('cookie_samesite', 'Lax');
 		$config->set('bbgatekeeper_cookie_samesite', in_array($samesite, ['Lax', 'Strict'], true) ? $samesite : 'Lax');
@@ -364,6 +372,7 @@ class main_module
 		// Save textareas and ensure UTF-8 support
 		$ua_patterns_json = $this->textarea_to_json($request->variable('ua_patterns', '', true));
 		$bot_domains_json = $this->textarea_to_json($request->variable('bot_domains', '', true));
+		$excluded_paths_json = $this->textarea_to_json($request->variable('excluded_paths', '', true));
 
 		// Define the array with the column to update
 		$sql_ary_ua = [
@@ -390,10 +399,23 @@ class main_module
 
 		$db->sql_query($sql);
 
+		// Define the array for the Excluded paths update
+		$sql_ary_paths = [
+		'setting_value' => $excluded_paths_json,
+		];
+
+		// Construct and execute the update query for Excluded paths
+		$sql = 'UPDATE ' . $table_prefix . 'sebo_bbgatekeeper_settings
+		SET ' . $db->sql_build_array('UPDATE', $sql_ary_paths) . "
+		WHERE setting_name = 'excluded_paths'";
+
+		$db->sql_query($sql);
+
 		$ip_level = $request->variable('ip_binding_level', 2);
 		$config->set('bbgatekeeper_ip_binding_level', (string) (in_array($ip_level, [1, 2, 3, 4], true) ? $ip_level : 2));
 
 		$config->set('bbgatekeeper_dry_run', $request->variable('dry_run', false) ? '1' : '0');
+		$config->set('bbgatekeeper_autologin_enable', $request->variable('autologin_enable', false) ? '1' : '0');
 
 		// If not yet present in the form (older bbgatekeeper_settings.html
 		// not updated yet), the default stays "enabled" so we don't

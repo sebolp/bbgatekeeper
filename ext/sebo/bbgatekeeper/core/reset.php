@@ -50,7 +50,7 @@ class reset
 
 		if (!$ok_ini)
 		{
-			// non procediamo con la cancellazione dello store per sicurezza
+			// do not proceed with deleting the store, for safety
 			$this->results['delete_store_contents'] = false;
 			return false;
 		}

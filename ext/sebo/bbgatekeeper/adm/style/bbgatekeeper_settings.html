@@ -241,6 +241,19 @@
 	</fieldset>
 
 	<fieldset>
+		<legend>🚧 {{ lang('BBGATEKEEPER_EXCLUDED_PATHS') }}</legend>
+		<dl>
+			<dt>
+				<label for="excluded_paths">{{ lang('BBGATEKEEPER_EXCLUDED_PATHS') }}</label>
+				<p>{{ lang('BBGATEKEEPER_EXCLUDED_PATHS_EXPLAIN') }}</p>
+			</dt>
+			<dd>
+				<textarea id="excluded_paths" name="excluded_paths" rows="6" cols="40">{{ EXCLUDED_PATHS }}</textarea>
+			</dd>
+		</dl>
+	</fieldset>
+
+	<fieldset>
 		<legend>⚙️ {{ lang('BBGATEKEEPER_MODE') }}</legend>
 		<dl>
 			<dt>
@@ -249,6 +262,15 @@
 			</dt>
 			<dd>
 				<input type="checkbox" id="dry_run" name="dry_run" value="1" {% if DRY_RUN %}checked="checked"{% endif %} />
+			</dd>
+		</dl>
+		<dl>
+			<dt>
+				<label for="autologin_enable">{{ lang('BBGATEKEEPER_AUTOLOGIN') }}</label>
+				<p>{{ lang('BBGATEKEEPER_AUTOLOGIN_EXPLAIN') }}</p>
+			</dt>
+			<dd>
+				<input type="checkbox" id="autologin_enable" name="autologin_enable" value="1" {% if AUTOLOGIN_ENABLE %}checked="checked"{% endif %} />
 			</dd>
 		</dl>
 	</fieldset>

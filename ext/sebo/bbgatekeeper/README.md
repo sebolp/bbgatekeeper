@@ -39,6 +39,20 @@ v1.2.1
 v1.2.2
 - removed prestatic-check
 
+v1.3.0
+- fixed a stored XSS in the ACP Logs page (URI/User-Agent were not escaped)
+- fixed a bypass of the static-asset exemption via query string (e.g. "?x=.css")
+- added Autologin: runs the challenge automatically on page load and submits it without a manual click (hCaptcha requires an "invisible" site key on the hCaptcha dashboard; Turnstile works automatically)
+- added Excluded paths: an admin-configurable list of internal paths that always skip the challenge
+- the FCrDNS search-engine whitelist check now only runs when a challenge would otherwise be shown, instead of on every request
+- the challenge page now shows the real forum name and description, resolved from phpBB's own board settings
+- fixed the challenge page's cookie domain being written to phpBB's core "cookie_domain" instead of a namespaced key
+- fixed a missing translation key that left a raw placeholder in the "challenge not completed" alert
+- fixed the admin-only forum index warning (dead event name, missing template)
+- the .user.ini auto_prepend_file line is now removed automatically when the extension is disabled or purged
+- composer.json phpBB version constraint corrected
+- misc: remaining Italian code comments translated to English; a migration now registers all config keys used by the ACP
+
 ## Installation
 
 Copy the extension to phpBB/ext/sebo/bbgatekeeper

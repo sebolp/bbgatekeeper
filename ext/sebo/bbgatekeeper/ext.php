@@ -35,4 +35,52 @@ class ext extends \phpbb\extension\base
 			&& phpbb_version_compare(PHPBB_VERSION, '5.0.0-dev', '<')
 			&& version_compare(PHP_VERSION, '7.4.0', '>=');
 	}
+
+	/**
+	* {@inheritdoc}
+	*
+	* Best-effort cleanup: if the admin disables the extension without
+	* first using the ACP "Reset" button, the .user.ini auto_prepend_file
+	* line would otherwise keep pointing at a logger that may no longer
+	* be readable, producing a PHP warning on every request.
+	*/
+	public function disable_step($old_state)
+	{
+		if ($old_state === false)
+		{
+			try
+			{
+				$this->container->get('sebo.bbgatekeeper.deployer')->remove_ini_line();
+			}
+			catch (\Exception $e)
+			{
+				// Best effort only - never block disabling the extension
+			}
+		}
+
+		return parent::disable_step($old_state);
+	}
+
+	/**
+	* {@inheritdoc}
+	*
+	* Same cleanup as disable_step(), in case the admin purges directly
+	* without disabling first.
+	*/
+	public function purge_step($old_state)
+	{
+		if ($old_state === false)
+		{
+			try
+			{
+				$this->container->get('sebo.bbgatekeeper.deployer')->remove_ini_line();
+			}
+			catch (\Exception $e)
+			{
+				// Best effort only
+			}
+		}
+
+		return parent::purge_step($old_state);
+	}
 }

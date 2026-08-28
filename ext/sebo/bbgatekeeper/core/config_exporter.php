@@ -139,6 +139,7 @@ class config_exporter
 		/** Retrieve variables */
 		$ua_patterns = [];
 		$bot_domains = [];
+		$excluded_paths = [];
 
 		// Build the SQL query using the array method per phpBB standards
 		$sql_array = [
@@ -146,7 +147,7 @@ class config_exporter
 			'FROM'      => [
 				$table_prefix . 'sebo_bbgatekeeper_settings' => 's'
 			],
-			'WHERE'     => $db->sql_in_set('setting_name', ['ua_patterns', 'bot_domains'])
+			'WHERE'     => $db->sql_in_set('setting_name', ['ua_patterns', 'bot_domains', 'excluded_paths'])
 		];
 
 		// Execute the query
@@ -164,6 +165,10 @@ class config_exporter
 			{
 				$bot_domains = json_decode((string) $row['setting_value'], true);
 			}
+			else if ($row['setting_name'] === 'excluded_paths')
+			{
+				$excluded_paths = json_decode((string) $row['setting_value'], true);
+			}
 		}
 
 		// Always free the result
@@ -172,6 +177,7 @@ class config_exporter
 		// Ensure they are arrays in case json_decode fails
 		$ua_patterns = is_array($ua_patterns) ? $ua_patterns : [];
 		$bot_domains = is_array($bot_domains) ? $bot_domains : [];
+		$excluded_paths = is_array($excluded_paths) ? $excluded_paths : [];
 
 		// Only the active provider's site key/secret are baked into the
 		// deployed config.php - the other provider's keys stay in the
@@ -214,13 +220,15 @@ class config_exporter
 			'HCAP_COOKIE_NAME'      => (string) ($this->config['bbgatekeeper_cookie_name'] ?? 'fpc_verified_hcap'),
 			'HCAP_COOKIE_TTL'       => (int) ($this->config['bbgatekeeper_cookie_ttl'] ?? 86400),
 			'HCAP_COOKIE_SAMESITE'  => (string) ($this->config['bbgatekeeper_cookie_samesite'] ?? 'Lax'),
-			'HCAP_COOKIE_DOMAIN'    => (string) ($this->config['cookie_domain'] ?? ''),
+			'HCAP_COOKIE_DOMAIN'    => (string) ($this->config['bbgatekeeper_cookie_domain'] ?? ''),
 			'HCAP_COOKIE_SECURE'    => (bool) ($this->config['cookie_secure'] ?? 'true'),
 			'IP_BINDING_LEVEL'      => (int) ($this->config['bbgatekeeper_ip_binding_level'] ?? 2),
 			'DRY_RUN'               => (bool) ($this->config['bbgatekeeper_dry_run'] ?? true),
+			'AUTOLOGIN_ENABLE'      => (bool) ($this->config['bbgatekeeper_autologin_enable'] ?? false),
 			'ENABLE_ACCESS_LOG'     => (bool) ($this->config['bbgatekeeper_enable_access_log'] ?? true),
 			'BLOCKED_UA_PATTERNS'   => is_array($ua_patterns) ? $ua_patterns : [],
 			'ALLOWED_BOT_DOMAINS'   => is_array($bot_domains) ? $bot_domains : [],
+			'EXCLUDED_PATHS'        => $excluded_paths,
 			'TRUSTED_PROXY_ENABLE'      => (bool) ($this->config['bbgatekeeper_trusted_proxy_enable'] ?? false),
 			'TRUSTED_PROXY_REMOTE_ADDR' => (string) ($this->config['bbgatekeeper_trusted_proxy_remote_addr'] ?? ''),
 		];

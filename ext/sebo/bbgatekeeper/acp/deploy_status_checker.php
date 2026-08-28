@@ -106,7 +106,7 @@ class deploy_status_checker
 	{
 		foreach ($this->fundamental_checks() as $check)
 		{
-			// Controlla che lo status sia esattamente 'ok'
+			// Check that the status is exactly 'ok'
 			if ($check['status'] !== 'ok')
 			{
 				return false;

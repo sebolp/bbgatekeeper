@@ -37,6 +37,8 @@ $lang = array_merge($lang, [
 	'BBGATEKEEPER_TEMPLATE_LOGGER_WORD_WEEK'                => 'week',
 	'BBGATEKEEPER_TEMPLATE_LOGGER_WORD_WEEKS'               => 'weeks',
 	/* >= 1.2.2 */
-	'BB_LOGGER_TEMPLATE_ERROR_CHALLENGE_NOT_COMPLETED'		=> 'Challenge not completed. Retry.',
+	'BBGATEKEEPER_TEMPLATE_LOGGER_ERROR_CHALLENGE_NOT_COMPLETED'		=> 'Challenge not completed. Retry.',
+	/* > 1.2.9 */
+	'BBGATEKEEPER_TEMPLATE_LOGGER_PROTECTION' 					=> 'check page by:',
 
 ]);

@@ -212,6 +212,8 @@ class deployer
 			'BB_LOGGER_LANG_TEMPLATE_ASSISTANCE'         => 'BBGATEKEEPER_TEMPLATE_LOGGER_ASSISTANCE',
 			'BB_LOGGER_TEMPLATE_BUTTON'                  => 'BBGATEKEEPER_TEMPLATE_LOGGER_BUTTON',
 			'BB_LOGGER_TEMPLATE_ERROR_TOO_MANY_REQUESTS' => 'BBGATEKEEPER_TEMPLATE_LOGGER_ERROR_TOO_MANY_REQUESTS',
+			'BB_LOGGER_TEMPLATE_ERROR_CHALLENGE_NOT_COMPLETED' => 'BBGATEKEEPER_TEMPLATE_LOGGER_ERROR_CHALLENGE_NOT_COMPLETED',
+			'BB_LOGGER_LANG_TEMPLATE_PROTECTION'		=> 'BBGATEKEEPER_TEMPLATE_LOGGER_PROTECTION',
 		];
 
 		// Placeholders that are already resolved values, no translation needed
@@ -243,6 +245,15 @@ class deployer
 		{
 			$replacements['{{' . $placeholder . '}}'] = (string) $value;
 		}
+
+		// {SITENAME} / {SITE_DESCRIPTION} - single-brace placeholders
+		// (deliberately not wrapped in {{ }}, since they come straight
+		// from phpBB's own core board config, not from an extension lang
+		// key), so the challenge page shows the real forum name/tagline.
+		// Escaped here since they land directly in static HTML with no
+		// further templating step.
+		$replacements['{SITENAME}'] = htmlspecialchars((string) ($config['sitename'] ?? ''), ENT_QUOTES, 'UTF-8');
+		$replacements['{SITE_DESCRIPTION}'] = htmlspecialchars((string) ($config['site_desc'] ?? ''), ENT_QUOTES, 'UTF-8');
 
 		return $replacements;
 	}

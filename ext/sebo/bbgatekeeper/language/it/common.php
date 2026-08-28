@@ -42,7 +42,7 @@ $lang = array_merge($lang, [
 	'BBGATEKEEPER_COOKIE_TTL'		=> 'Durata del cookie',
 	'BBGATEKEEPER_COOKIE_TTL_EXPLAIN'	=> 'Per quanto tempo il cookie consente l\'accesso al sito prima di resettarsi.<br />Espresso in secondi. Predefinito 86400 (24 ore). Puoi usare il tempo che preferisci.<br />Esempi: 3600 (1 ora), 86400 (1 giorno), 604800 (1 settimana), 2629800 (1 mese)',
 	'BBGATEKEEPER_COOKIE_DOMAIN'		=> 'Dominio del cookie',
-	'BBGATEKEEPER_COOKIE_DOMAIN_EXPLAIN'	=> 'È lo stesso della configurazione della board.<br />Usa <em>.example.com</em> per includere tutti i sottodomini.<br />Usa <em>.subdomain.example.com</em> per usarlo solo in un sottodominio.',
+	'BBGATEKEEPER_COOKIE_DOMAIN_EXPLAIN'	=> 'Come impostazione iniziale è lo stesso della configurazione della board.<br />Usa <em>.example.com</em> per includere tutti i sottodomini.<br />Usa <em>.subdomain.example.com</em> per usarlo solo in un sottodominio.',
 	'BBGATEKEEPER_COOKIE_SAMESITE'		=> 'Policy SameSite',
 	'BBGATEKEEPER_COOKIE_SAMESITE_EXPLAIN'	=> 'Differenti policy per i cookie.<br /><em>LAX</em>: (predefinito) invia i cookie solo durante la navigazione di primo livello, come cliccare su un link esterno.<br /><em>STRICT</em>: (più sicuro) invia i cookie esclusivamente quando navighi direttamente all\'interno del sito di origine.',
 
@@ -233,4 +233,11 @@ $lang = array_merge($lang, [
 	'BBGATEKEEPER_DOWNLOAD_MODAL_CONFIRM' => 'Scarica. Ho letto e compreso.',
 	'BBGATEKEEPER_DOWNLOAD_MODAL_TITLE' => 'Download dei file',
 	'BBGATEKEEPER_DOWNLOAD_MODAL_TEXT' => 'Stai scaricando 3 file. Usa questo metodo solo se il deploy automatico non va a buon fine.<br />Per garantire la corretta installazione devi leggere il file readme.txt all\'interno del file .zip scaricato.<br />- ATTENZIONE: i file devono essere caricati in percorsi differenti.<br>- ESTREMAMENTE IMPORTANTE: Devi verificare se possiedi già un file .user.ini nel percorso radice del tuo sito web (non solo nel percorso del forum, ma nell\'intero percorso del dominio). Non devi sovrascriverlo se ne hai già uno, ma dovrai scaricarlo, fare un backup, aggiornarlo e ricaricarlo nella stessa posizione. Leggi le istruzioni.',
+	/* >=1.3.0 */
+	'BBGATEKEEPER_AUTOLOGIN'         => 'Autologin (sfida invisibile)',
+	'BBGATEKEEPER_AUTOLOGIN_EXPLAIN' => 'Esegue automaticamente la sfida al caricamento della pagina e la invia senza che il visitatore debba cliccare "Verifica e Prosegui".<br />- hCaptcha: la chiave del sito configurata sopra deve essere impostata come tipo <em>invisible</em> nella dashboard di hCaptcha, altrimenti il widget non partirà da solo.<br />- Turnstile: funziona automaticamente, nessuna modifica necessaria nella dashboard.<br />- Se il flusso automatico fallisce per qualsiasi motivo, viene mostrato il pulsante manuale come fallback.<br /><strong>Nota:</strong> rimuovere il click manuale rimuove anche l\'azione esplicita con cui il visitatore accetta il cookie di verifica descritto sopra - valutalo se il tuo forum ha requisiti stringenti di consenso cookie.',
+
+	'BBGATEKEEPER_EXCLUDED_PATHS'         => 'Path esclusi',
+	'BBGATEKEEPER_EXCLUDED_PATHS_EXPLAIN' => 'Un path (o frammento di path) per riga. Ogni richiesta il cui percorso URI contiene uno di questi valori salta la sfida (la blacklist User-Agent e il logging restano attivi). Il confronto avviene solo sul percorso, non sulla query string.<br />Esempio: <code class="inline">/ext/vendor/extension-name/</code> esclude tutto il path dell\'estensione "@vendor-extension" in modo che non debba affrontare il challenge.',
+
 ]);

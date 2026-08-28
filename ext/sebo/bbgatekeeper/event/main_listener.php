@@ -68,13 +68,11 @@ class main_listener implements EventSubscriberInterface
 	/**
 	* {@inheritdoc}
 	*
-	* TODO: 'core.acp_main_notices' for add_acp_overview_notice() still
-	* needs verification against the live phpBB 3.3.17 event list.
 	*/
 	public static function getSubscribedEvents()
 	{
 		return [
-			'core.acp_main_notices' => 'add_acp_overview_notice',
+			'core.acp_main_notice' => 'add_acp_overview_notice',
 			'core.page_header'		=> 'add_index_admin_warning',
 			'core.user_setup'		=> 'load_language_on_setup',
 		];

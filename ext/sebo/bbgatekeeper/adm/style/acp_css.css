@@ -128,3 +128,18 @@
     from { opacity: 0; transform: translateY(-8px); }
     to   { opacity: 1; transform: translateY(0); }
 }
+
+/* inline folder coding */
+code.inline {
+	background: #FFF;
+	border: 1px solid #C9D2D8;
+	color: #2E8B57;
+	display: inline;
+	font-family: Monaco, "Andale Mono", "Courier New", Courier, monospace;
+	font-size: 1em;
+	font-style: normal;
+	line-height: 1.3em;
+	white-space: pre;
+	padding: 0 3px;
+	vertical-align: bottom;
+}

@@ -235,7 +235,14 @@ $uri = $_SERVER['REQUEST_URI'] ?? '-';
 $ua_raw = $_SERVER['HTTP_USER_AGENT'] ?? '-';
 $now_str = date('Y-m-d H:i:s');
 
-$is_bot_whitelist = is_search_engine_bot($ip);
+// Path only, no query string - used below for the static asset
+// exemption and the excluded paths list, so neither can be bypassed by
+// appending an innocuous-looking query parameter (e.g. "?x=.css").
+$request_path = parse_url($uri, PHP_URL_PATH);
+if (!is_string($request_path))
+{
+	$request_path = '';
+}
 
 $reason = check_user_agent_block(BLOCKED_UA_PATTERNS);
 
@@ -245,19 +252,42 @@ $reason = check_user_agent_block(BLOCKED_UA_PATTERNS);
 // deploy time by core/config_exporter.php from the ACP provider tab.
 
 $hc_challenge_failed = false;
+$is_bot_whitelist = false;
 
-if (!$is_bot_whitelist && $reason === null)
+if ($reason === null)
 {
 	$bypass_challenge = false;
-	if (preg_match('/\.(jpg|jpeg|png|gif|css|js|webp)$/i', $uri))
+
+	if (preg_match('/\.(jpg|jpeg|png|gif|css|js|webp)$/i', $request_path))
 	{
 		$bypass_challenge = true;
 	}
 
+	if (!$bypass_challenge && defined('EXCLUDED_PATHS') && !empty(EXCLUDED_PATHS))
+	{
+		foreach (EXCLUDED_PATHS as $excluded_path)
+		{
+			if ($excluded_path !== '' && strpos($request_path, $excluded_path) !== false)
+			{
+				$bypass_challenge = true;
+				break;
+			}
+		}
+	}
+
 	if (!$bypass_challenge && !verify_hcap_token($_COOKIE[HCAP_COOKIE_NAME] ?? null, $ip))
 	{
-		$reason = 'captcha-required';
-		$hc_challenge_failed = true;
+		// The FCrDNS whitelist check does a blocking reverse+forward DNS
+		// lookup, so it only runs here - once we already know a
+		// challenge would otherwise be shown - instead of on every
+		// single request regardless of cookie state.
+		$is_bot_whitelist = is_search_engine_bot($ip);
+
+		if (!$is_bot_whitelist)
+		{
+			$reason = 'captcha-required';
+			$hc_challenge_failed = true;
+		}
 	}
 }
 
@@ -342,6 +372,17 @@ if ($reason !== null && !DRY_RUN)
 		$captcha_widget_class = CAPTCHA_WIDGET_CLASS;
 		$captcha_site_key = CAPTCHA_SITE_KEY;
 		$captcha_response_field = CAPTCHA_RESPONSE_FIELD;
+		$captcha_provider_js = CAPTCHA_PROVIDER;
+
+		// Autologin (invisible challenge): Turnstile auto-runs once
+		// rendered with this attribute; hCaptcha instead needs an
+		// explicit hcaptcha.execute() call below, and its site key must
+		// be set to "invisible" in the hCaptcha dashboard (see ACP
+		// explanation text) or the widget will never fire on its own.
+		$autologin_enabled = defined('AUTOLOGIN_ENABLE') && AUTOLOGIN_ENABLE;
+		$autologin_widget_attr = ($autologin_enabled && $captcha_provider_js === 'turnstile') ? ' data-appearance="interaction-only"' : '';
+		$autologin_button_style = $autologin_enabled ? ' style="display:none;"' : '';
+		$autologin_js_flag = $autologin_enabled ? 'true' : 'false';
 
 		echo
 		<<<HTML
@@ -574,9 +615,11 @@ if ($reason !== null && !DRY_RUN)
 
 					<!-- Main card -->
 					<div class="card">
+						<h1>{SITENAME}</h1>
+						<p>{SITE_DESCRIPTION}</p>
 						<form action="" method="POST" onsubmit="return checkCaptchaBeforeSubmit();">
-							<div class="{$captcha_widget_class}" data-sitekey="{$captcha_site_key}" data-callback="onCaptchaSuccess"></div>
-							<input type="submit" id="submitBtn" value="{{BB_LOGGER_TEMPLATE_BUTTON}}" disabled />
+							<div class="{$captcha_widget_class}" data-sitekey="{$captcha_site_key}" data-callback="onCaptchaSuccess" data-error-callback="onCaptchaError"{$autologin_widget_attr}></div>
+							<input type="submit" id="submitBtn" value="{{BB_LOGGER_TEMPLATE_BUTTON}}" disabled{$autologin_button_style} />
 						</form>
 
 						<p>{{BB_LOGGER_LANG_SECURITY_CHECK_COOKIE}}</p>
@@ -585,7 +628,7 @@ if ($reason !== null && !DRY_RUN)
 						<p class="important-text">{{BB_LOGGER_LANG_SECURITY_CHECK_DO_NOT_AGREE}}</p>
 
 						<div class="footer-links">
-							<p><a href="https://github.com/sebolp" target="_blank">sebo - bbgatekeeper</a></p>
+							<p>{{BB_LOGGER_LANG_TEMPLATE_PROTECTION}} <a href="https://github.com/sebolp" target="_blank">sebo - bbgatekeeper</a></p>
 							<p>{{BB_LOGGER_LANG_TEMPLATE_ASSISTANCE}}
 								<span id="email-area">
 									<a href="#" style="text-decoration:none !important;" onclick="showEmail(event);">📧</a>
@@ -596,20 +639,34 @@ if ($reason !== null && !DRY_RUN)
 				</div>
 
 				<script>
+					window.bbgkAutologin = {$autologin_js_flag};
+
 					function onCaptchaSuccess(token) {
-					document.getElementById('submitBtn').disabled = false;
-				}
-				function checkCaptchaBeforeSubmit() {
-					// prevent click before challenge
-					var response = document.querySelector('[name="{$captcha_response_field}"]');
-					if (!response || response.value.trim() === '') {
-						alert('{{BB_LOGGER_TEMPLATE_ERROR_CHALLENGE_NOT_COMPLETED}}');
-						return false;
+						document.getElementById('submitBtn').disabled = false;
+						if (window.bbgkAutologin) {
+							document.getElementById('submitBtn').click();
+						}
 					}
-					// prevent double click
-					document.getElementById('submitBtn').disabled = true;
-					return true;
-				}
+					function onCaptchaError() {
+						// Fallback: the automatic flow failed (dashboard not
+						// set to invisible mode, transient network error,
+						// etc). Fall back to the manual button instead of
+						// stranding the visitor on a stuck page.
+						window.bbgkAutologin = false;
+						var btn = document.getElementById('submitBtn');
+						btn.style.display = '';
+					}
+					function checkCaptchaBeforeSubmit() {
+						// prevent click before challenge
+						var response = document.querySelector('[name="{$captcha_response_field}"]');
+						if (!response || response.value.trim() === '') {
+							alert('{{BB_LOGGER_TEMPLATE_ERROR_CHALLENGE_NOT_COMPLETED}}');
+							return false;
+						}
+						// prevent double click
+						document.getElementById('submitBtn').disabled = true;
+						return true;
+					}
 					function showEmail(event) {
 						event.preventDefault();
 						var user = "{{BB_LOGGER_TEMPLATE_EMAIL_NAME}}";
@@ -617,6 +674,11 @@ if ($reason !== null && !DRY_RUN)
 						var area = document.getElementById('email-area');
 						area.innerHTML = '<a href="mailto:' + user + '@' + domain + '">' + user + '@' + domain + '</a>';
 					}
+					window.addEventListener('load', function () {
+						if (window.bbgkAutologin && '{$captcha_provider_js}' === 'hcaptcha' && typeof hcaptcha !== 'undefined') {
+							hcaptcha.execute();
+						}
+					});
 				</script>
 			</body>
 			</html>
