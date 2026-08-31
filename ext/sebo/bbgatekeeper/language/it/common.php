@@ -82,7 +82,7 @@ $lang = array_merge($lang, [
 	'BBGATEKEEPER_USER_AGENT'		=> 'User-Agent',
 	'BBGATEKEEPER_LOG_EMPTY'		=> 'Nessuna voce di log da mostrare.',
 	'BBGATEKEEPER_CLEAR_LOG'		=> 'Pulisci log',
-	'BBGATEKEEPER_LOGS_EXPLAIN'		=> 'Qui puoi leggere le prime <strong>500</strong> righe dei log. Per leggere il file completo devi controllare il file <code class="inline">access.log</code> nella cartella <code class="inline">ext/sebo/bbgatekeeper/store/logs</code>.',
+	'BBGATEKEEPER_LOGS_EXPLAIN'		=> 'Qui puoi leggere le prime <strong>500</strong> righe dei log. Per leggere il file completo devi controllare il file <code class="inline">access.log</code> nella cartella <code class="inline">store/sebo-bbgatekeeper/logs</code>.',
 
 	'BBGATEKEEPER_FUNDAMENTAL_STEPS'	=> 'Passaggi minimi necessari per il deployment',
 	'BBGATEKEEPER_CHECK_CONFIG'		=> 'config.php',
@@ -224,6 +224,7 @@ $lang = array_merge($lang, [
 	'BBGATEKEEPER_PERC_BLOCKED' => 'Bloccati',
 	/* >=1.2.8 */
 	'LOG_BBGATEKEEPER_DEPLOY_FAILED'		=> '<strong>Deployment Bad Bot Gatekeeper fallito:</strong><br />» %1$s',
+	'LOG_BBGATEKEEPER_DISABLE_CLEANUP_FAILED'	=> '<strong>Bad Bot Gatekeeper: impossibile rimuovere la riga auto_prepend_file da .user.ini alla disabilitazione:</strong><br />» %1$s',
 	'LOG_BBGATEKEEPER_PACKAGE_FAILED'		=> '<strong>Generazione del pacchetto di fallback Bad Bot Gatekeeper fallita:</strong><br />» %1$s',
 	'BBGATEKEEPER_PACKAGE_FAILED'			=> 'Impossibile generare il pacchetto di deploy manuale (estensione php-zip mancante o file template non leggibili). Controlla il log admin per i dettagli.',
 	'BBGATEKEEPER_DOWNLOAD_PACKAGE'		=> 'Scarica pacchetto di deploy manuale (.zip)',

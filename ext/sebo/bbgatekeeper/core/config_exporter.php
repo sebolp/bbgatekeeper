@@ -97,6 +97,19 @@ class config_exporter
 
 		$this->last_error = '';
 
+		// Self-healing: re-verify the base store/sebo-bbgatekeeper/
+		// directory and its .htaccess on every export, not just at
+		// migration/update time - covers a directory deleted by mistake
+		// or restored from an old backup without it. Checked explicitly
+		// (rather than just letting the write below fail) so the admin
+		// gets a clear, specific reason instead of a generic write error.
+		$base_dir = dirname(rtrim($this->store_path, '/')) . '/';
+		if (!store_guard::ensure($base_dir))
+		{
+			$this->last_error = sprintf($user->lang('BBGATEKEEPER_CONFIG_CANNOT_CREATE_BASE_STORE_DIR', $base_dir));
+			return false;
+		}
+
 		$rendered = $this->render();
 		if ($rendered === null)
 		{

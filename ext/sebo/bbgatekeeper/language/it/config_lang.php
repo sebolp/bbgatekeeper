@@ -22,6 +22,7 @@ $lang = array_merge($lang, [
 	'BBGATEKEEPER_CONFIG_TEMPLATE_NOT_READABLE'   => 'Template non leggibile: %s',
 	'BBGATEKEEPER_CONFIG_FAILED_TO_READ_TEMPLATE'   => 'Impossibile leggere il template: %s',
 	'BBGATEKEEPER_CONFIG_CANNOT_CREATE_STORE_DIR'   => 'Impossibile creare la directory di memorizzazione: %s',
+	'BBGATEKEEPER_CONFIG_CANNOT_CREATE_BASE_STORE_DIR' => 'Impossibile creare o scrivere in %s — verifica che la cartella store/ di phpBB (nella root del forum, NON dentro ext/) sia scrivibile da PHP',
 	'BBGATEKEEPER_CONFIG_FAILED_TO_WRITE'   => 'Impossibile scrivere %s (%s)',
 	'BBGATEKEEPER_CONFIG_CANNOT_SOLVE_BASE_PATH'   => 'Impossibile risolvere il percorso di base tramite realpath()',
 	'BBGATEKEEPER_CONFIG_DOCUMENT_ROOT_UNAVAILABLE'   => 'DOCUMENT_ROOT è vuoto o non disponibile',

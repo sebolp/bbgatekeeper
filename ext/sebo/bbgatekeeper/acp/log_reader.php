@@ -11,7 +11,7 @@
 namespace sebo\bbgatekeeper\acp;
 
 /**
-* Reads and parses store/logs/access.log for the ACP "Logs" tab.
+* Reads and parses store/sebo-bbgatekeeper/logs/access.log for the ACP "Logs" tab.
 */
 class log_reader
 {
@@ -36,7 +36,7 @@ class log_reader
 		global $request;
 
 		$phpbb_root = dirname($request->server('SCRIPT_FILENAME', ''), 2);
-		$path = $phpbb_root . '/ext/sebo/bbgatekeeper/store/logs/access.log';
+		$path = $phpbb_root . '/store/sebo-bbgatekeeper/logs/access.log';
 
 		if (!is_readable($path))
 		{
@@ -169,7 +169,7 @@ class log_reader
 	{
 		global $request;
 		$phpbb_root = dirname($request->server('SCRIPT_FILENAME', ''), 2);
-		$path = $phpbb_root . '/ext/sebo/bbgatekeeper/store/logs/access.log';
+		$path = $phpbb_root . '/store/sebo-bbgatekeeper/logs/access.log';
 		if (!file_exists($path))
 		{
 			return true;

@@ -21,12 +21,12 @@ namespace sebo\bbgatekeeper\core;
 class fallback_packager
 {
 	/**
-	* Relative path (inside the ZIP) matching the extension's own fixed
-	* location under a phpBB installation: ext/sebo/bbgatekeeper/. This
-	* is not configurable - composer/installers always places phpBB
-	* extensions at ext/<vendor>/<name>/.
+	* Relative path (inside the ZIP) matching the runtime files' fixed
+	* location under a phpBB installation: store/sebo-bbgatekeeper/bbgatekeeper/,
+	* inside phpBB's own store/ directory - not the extension's ext/
+	* folder, so that a future extension update never touches it.
 	*/
-	protected const EXT_RELATIVE_PATH = 'ext/sebo/bbgatekeeper/store/bbgatekeeper/';
+	protected const STORE_RELATIVE_PATH = 'store/sebo-bbgatekeeper/bbgatekeeper/';
 
 	/** @var config_exporter */
 	protected $config_exporter;
@@ -125,8 +125,8 @@ class fallback_packager
 			return null;
 		}
 
-		$zip->addFromString(self::EXT_RELATIVE_PATH . 'bbgatekeeper_config.php', $config_content);
-		$zip->addFromString(self::EXT_RELATIVE_PATH . 'bbgatekeeper_logger.php', $logger_content);
+		$zip->addFromString(self::STORE_RELATIVE_PATH . 'bbgatekeeper_config.php', $config_content);
+		$zip->addFromString(self::STORE_RELATIVE_PATH . 'bbgatekeeper_logger.php', $logger_content);
 		// Placed under a clearly separate top-level folder, since its
 		// real destination (the website/domain root) is a different
 		// base directory than the phpBB/ext path above and can't be
@@ -170,12 +170,13 @@ root not writable by PHP).
 ======================================================================
 
 This ZIP already contains the correct folder structure:
-   ext/sebo/bbgatekeeper/store/bbgatekeeper/bbgatekeeper_config.php
-   ext/sebo/bbgatekeeper/store/bbgatekeeper/bbgatekeeper_logger.php
+   store/sebo-bbgatekeeper/bbgatekeeper/bbgatekeeper_config.php
+   store/sebo-bbgatekeeper/bbgatekeeper/bbgatekeeper_logger.php
 
-Upload the whole "ext" folder into your forum root via FTP/SFTP,
-merging it with the existing ext/ folder already there (do NOT
-replace the entire ext/ directory - only these two files go in).
+Upload the whole "store" folder into your forum root via FTP/SFTP,
+merging it with the existing store/ folder already there (do NOT
+replace the entire store/ directory - only these two files go in).
+This is phpBB's own store/ folder, NOT the ext/ folder.
 Recommended permissions: 0640 (owner read/write, group read only).
 Don't worry about your password and keys: the store path is secured
 by an .htaccess file too.

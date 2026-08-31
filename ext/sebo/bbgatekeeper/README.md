@@ -11,7 +11,7 @@ You will need "site key" and "secret key"
 
 HOW IT WORKS
 This ext generate 3 files:
-ext/sebo/bbgatekeeper/store/bbgatekeeper folder
+store/sebo-bbgatekeeper/bbgatekeeper folder
 - bbgatekeeper_config.php (configuration file needed for bbgatekeeper_logger.php file)
 - bbgatekeeper_logger.php file (the worker of this ext, that blocks, make the challenge, leave passing throug...)
 
@@ -52,6 +52,11 @@ v1.3.0
 - the .user.ini auto_prepend_file line is now removed automatically when the extension is disabled or purged
 - composer.json phpBB version constraint corrected
 - misc: remaining Italian code comments translated to English; a migration now registers all config keys used by the ACP
+
+v1.3.1
+- fixed a critical bug where the common "delete ext/ folder, upload the new one" update procedure wiped the runtime store directory (bbgatekeeper_config.php, bbgatekeeper_logger.php, access.log, hits/bans), causing an immediate site-wide 500 even with the extension disabled
+- the runtime store directory now lives at store/sebo-bbgatekeeper/ (phpBB's own store/ folder) instead of inside ext/sebo/bbgatekeeper/, so it's never touched by future extension updates
+- a new migration moves any existing deployment to the new location automatically; a self-healing check also re-verifies the directory and its .htaccess on every "Deploy" in ACP
 
 ## Installation
 

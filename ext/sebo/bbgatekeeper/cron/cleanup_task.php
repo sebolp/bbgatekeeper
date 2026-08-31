@@ -12,7 +12,7 @@ namespace sebo\bbgatekeeper\cron;
 
 /**
  * Cron task: automatic cleanup of no-longer-active .ban/.hit files in
- * store/logs/bans/. Enabled/configured (interval in minutes) from the
+ * store/sebo-bbgatekeeper/logs/bans/. Enabled/configured (interval in minutes) from the
  * "Hits & Ban" ACP page (bbgatekeeper_autoclean_enable / _interval).
  *
  * Register as a service tagged cron.task (see services_cron_snippet.yml).
@@ -72,27 +72,30 @@ class cleanup_task extends \phpbb\cron\task\base
 		return (time() - $last_run) >= ($interval_minutes * 60);
 	}
 
-	/**
-	* @return void
-	*/
 	public function run()
 	{
 		$manager = new \sebo\bbgatekeeper\core\hits_ban_manager(
-			$this->phpbb_root_path . 'ext/sebo/bbgatekeeper/store/logs/bans'
+			$this->phpbb_root_path . 'store/sebo-bbgatekeeper/logs/bans'
 		);
 
-		$deleted_bans = $manager->delete_expired_bans();
-		$deleted_hits = $manager->delete_expired_hits();
+		$deleted_bans = (int) $manager->delete_expired_bans();
+		$deleted_hits = (int) $manager->delete_expired_hits();
 
 		$this->config->set('bbgatekeeper_autoclean_last_run', (string) time());
 
-		$this->log->add(
-			'admin',
-			ANONYMOUS,
-			'',
-			'LOG_BBGATEKEEPER_AUTOCLEAN',
-			time(),
-			array((int) $deleted_bans, (int) $deleted_hits)
-		);
+		// Only write an admin log entry when the cleanup actually
+		// removed something - otherwise every scheduled run (even a
+		// no-op one) would flood the ACP admin log.
+		if ($deleted_bans > 0 || $deleted_hits > 0)
+		{
+			$this->log->add(
+				'admin',
+				ANONYMOUS,
+				'',
+				'LOG_BBGATEKEEPER_AUTOCLEAN',
+				time(),
+				array($deleted_bans, $deleted_hits)
+			);
+		}
 	}
 }

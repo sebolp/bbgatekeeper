@@ -15,29 +15,29 @@ services:
     sebo.bbgatekeeper.config_exporter:
         class: sebo\bbgatekeeper\core\config_exporter
         bind:
-            $store_path: '%core.root_path%ext/sebo/bbgatekeeper/store/bbgatekeeper/'
+            $store_path: '%core.root_path%store/sebo-bbgatekeeper/bbgatekeeper/'
 
     sebo.bbgatekeeper.deployer:
         class: sebo\bbgatekeeper\core\deployer
         bind:
-            $store_path: '%core.root_path%ext/sebo/bbgatekeeper/store/bbgatekeeper/'
+            $store_path: '%core.root_path%store/sebo-bbgatekeeper/bbgatekeeper/'
             $root_path: '%core.root_path%'
 
     sebo.bbgatekeeper.reset:
         class: sebo\bbgatekeeper\core\reset
         bind:
-            $store_path: '%core.root_path%ext/sebo/bbgatekeeper/store/bbgatekeeper/'
+            $store_path: '%core.root_path%store/sebo-bbgatekeeper/bbgatekeeper/'
 
     sebo.bbgatekeeper.acp.deploy_status_checker:
         class: sebo\bbgatekeeper\acp\deploy_status_checker
         bind:
-            $store_path: '%core.root_path%ext/sebo/bbgatekeeper/store/bbgatekeeper/'
+            $store_path: '%core.root_path%store/sebo-bbgatekeeper/bbgatekeeper/'
             $root_path: '%core.root_path%'
 
     sebo.bbgatekeeper.acp.log_reader:
         class: sebo\bbgatekeeper\acp\log_reader
         bind:
-            $store_path: '%core.root_path%ext/sebo/bbgatekeeper/store/bbgatekeeper/'
+            $store_path: '%core.root_path%store/sebo-bbgatekeeper/bbgatekeeper/'
 
     sebo.bbgatekeeper.controller.whois:
         class: sebo\bbgatekeeper\controller\whois_controller

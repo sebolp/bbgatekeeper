@@ -43,6 +43,12 @@ class ext extends \phpbb\extension\base
 	* first using the ACP "Reset" button, the .user.ini auto_prepend_file
 	* line would otherwise keep pointing at a logger that may no longer
 	* be readable, producing a PHP warning on every request.
+	*
+	* The ACP "Extensions" page has no per-extension, customizable
+	* user-facing message for this step - it only shows phpBB's own
+	* generic confirmation. So a failure here is recorded in the admin
+	* log instead (same channel already used for deploy failures in
+	* acp/main_module.php), rather than silently swallowed.
 	*/
 	public function disable_step($old_state)
 	{
@@ -50,7 +56,11 @@ class ext extends \phpbb\extension\base
 		{
 			try
 			{
-				$this->container->get('sebo.bbgatekeeper.deployer')->remove_ini_line();
+				$deployer = $this->container->get('sebo.bbgatekeeper.deployer');
+				if (!$deployer->remove_ini_line())
+				{
+					$this->log_ini_cleanup_failure($deployer->get_last_error());
+				}
 			}
 			catch (\Exception $e)
 			{
@@ -73,7 +83,11 @@ class ext extends \phpbb\extension\base
 		{
 			try
 			{
-				$this->container->get('sebo.bbgatekeeper.deployer')->remove_ini_line();
+				$deployer = $this->container->get('sebo.bbgatekeeper.deployer');
+				if (!$deployer->remove_ini_line())
+				{
+					$this->log_ini_cleanup_failure($deployer->get_last_error());
+				}
 			}
 			catch (\Exception $e)
 			{
@@ -82,5 +96,33 @@ class ext extends \phpbb\extension\base
 		}
 
 		return parent::purge_step($old_state);
+	}
+
+	/**
+	* @param string $reason
+	* @return void
+	*/
+	private function log_ini_cleanup_failure(string $reason): void
+	{
+		try
+		{
+			/** @var \phpbb\user $user */
+			$user = $this->container->get('user');
+			/** @var \phpbb\log\log_interface $log */
+			$log = $this->container->get('log');
+
+			$log->add(
+				'admin',
+				$user->data['user_id'] ?? ANONYMOUS,
+				$user->ip ?? '',
+				'LOG_BBGATEKEEPER_DISABLE_CLEANUP_FAILED',
+				time(),
+				[$reason !== '' ? $reason : 'unknown error']
+			);
+		}
+		catch (\Exception $e)
+		{
+			// Best effort only - this is already a fallback path
+		}
 	}
 }

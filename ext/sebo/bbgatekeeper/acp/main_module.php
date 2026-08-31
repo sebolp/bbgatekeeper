@@ -608,7 +608,7 @@ class main_module
 	* Shows two tables: currently banned IPs, and IPs with a pending hCaptcha
 	* failure hit that hasn't escalated to a ban yet. Both come from the flat
 	* .ban / .hit marker files written by bbgatekeeper_logger.php in
-	* store/logs/bans/. Supports:
+	* store/sebo-bbgatekeeper/logs/bans/. Supports:
 	*  - deleting a single entry or wiping a whole category
 	*  - cleaning up only the entries that are no longer active (expired)
 	*  - configuring an automatic cleanup interval (executed by the real
@@ -625,7 +625,7 @@ class main_module
 		$helper = $phpbb_container->get('controller.helper');
 
 		/** @var \sebo\bbgatekeeper\core\hits_ban_manager $manager */
-		$manager = new \sebo\bbgatekeeper\core\hits_ban_manager($phpbb_root_path . 'ext/sebo/bbgatekeeper/store/logs/bans');
+		$manager = new \sebo\bbgatekeeper\core\hits_ban_manager($phpbb_root_path . 'store/sebo-bbgatekeeper/logs/bans');
 
 		// ============ Auto-cleanup settings (form at the top of the page) ============
 		if ($request->is_set_post('submit_autoclean_save'))
