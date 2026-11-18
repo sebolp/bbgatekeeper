@@ -360,7 +360,7 @@
 		{% else %}
 			{# Manual mode: .user.ini is never touched, so reset stays disabled until the automatic mode consent is given #}
 			<input class="button1 larger-button" type="submit" name="submit_deploy" value="{{ lang('BBGATEKEEPER_GENERATE_DEPLOY') }}" />
-			<input class="button2 larger-button" type="submit" name="submit_reset" value="{{ lang('BBGATEKEEPER_RESET') }}" disabled="disabled" title="{{ lang('BBGATEKEEPER_RESET_DISABLED_HINT')|e('html_attr') }}" />
+			<input class="button2 larger-button bbgk-btn-disabled" type="submit" name="submit_reset" value="{{ lang('BBGATEKEEPER_RESET') }}" disabled="disabled" title="{{ lang('BBGATEKEEPER_RESET_DISABLED_HINT')|e('html_attr') }}" />
 			<p class="bbgk-hint">{{ lang('BBGATEKEEPER_RESET_DISABLED_HINT') }}</p>
 		{% endif %}
 	</fieldset>

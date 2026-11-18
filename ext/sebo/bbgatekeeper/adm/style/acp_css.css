@@ -72,6 +72,12 @@
 	color: #fff;
 }
 
+/* Disabled reset button (manual mode): show a "forbidden" cursor */
+.bbgk-btn-disabled {
+	cursor: not-allowed;
+	opacity: 0.55;
+}
+
 #bbgk_provider_hcaptcha:checked ~ .bbgk-panel-hcaptcha,
 #bbgk_provider_turnstile:checked ~ .bbgk-panel-turnstile {
 	display: block;
