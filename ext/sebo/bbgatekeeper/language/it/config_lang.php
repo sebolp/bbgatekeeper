@@ -32,4 +32,8 @@ $lang = array_merge($lang, [
 	'BBGATEKEEPER_CONFIG_FILE_RENDER_FAILED'   => 'Rendering di %s non riuscito:',
 	'BBGATEKEEPER_CONFIG_TEMPNAME_FAILED'      => 'tempnam() non riuscita su %s',
 	'BBGATEKEEPER_CONFIG_ZIP_OPEN_FAILED'      => 'ZipArchive::open() non riuscito per %s',
+
+	/* >= 1.3.2 */
+	'BBGATEKEEPER_CONFIG_EMPTY_SIGN_SECRET' => 'Il segreto di firma del cookie è vuoto: una chiave vuota renderebbe falsificabile ogni cookie di verifica. Genera un nuovo segreto nella sezione Cookie e salva di nuovo.',
+
 ]);

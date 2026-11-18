@@ -11,11 +11,11 @@
 namespace sebo\bbgatekeeper\migrations;
 
 /**
-* Initial install migration: default config keys, the store/bbgatekeeper/
+* Initial install migration: default config keys, the store/sebo-bbgatekeeper/
 * runtime directory tree (with a deny-all .htaccess), and the ACP module
 * registration (Settings + Logs modes).
 *
-* Note: the store/bbgatekeeper/ directory created here is NOT removed
+* Note: the store/sebo-bbgatekeeper/ directory created here is NOT removed
 * automatically if the extension is later disabled/purged - that is a
 * deliberate choice, see the "Reset deployment" button in ACP for the
 * explicit, user-triggered equivalent.

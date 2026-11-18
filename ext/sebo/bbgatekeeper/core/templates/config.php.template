@@ -1,6 +1,6 @@
 <?php
 /**
- * store/bbgatekeeper_config.php.template — rendered into store/bbgatekeeper_config.php
+ * store/sebo-bbgatekeeper/bbgatekeeper/bbgatekeeper_config.php.template — rendered into store/sebo-bbgatekeeper/bbgatekeeper/bbgatekeeper_config.php
  * by core/config_exporter.php. The {{PLACEHOLDER}} tokens below are
  * replaced with var_export()-safe PHP literals; everything else in this
  * file is copied through unchanged.
@@ -15,44 +15,47 @@
 // Only the active challenge provider's keys ever reach this file - see
 // core/config_exporter.php. The other provider's keys stay in the ACP
 // database only.
-define('CAPTCHA_PROVIDER', {{CAPTCHA_PROVIDER}});
-define('CAPTCHA_SITE_KEY', {{CAPTCHA_SITE_KEY}});
-define('CAPTCHA_SITE_SECRET', {{CAPTCHA_SITE_SECRET}});
-define('CAPTCHA_VERIFY_URL', {{CAPTCHA_VERIFY_URL}});
-define('CAPTCHA_RESPONSE_FIELD', {{CAPTCHA_RESPONSE_FIELD}});
-define('CAPTCHA_WIDGET_CLASS', {{CAPTCHA_WIDGET_CLASS}});
-define('CAPTCHA_WIDGET_SCRIPT_SRC', {{CAPTCHA_WIDGET_SCRIPT_SRC}});
+define('BBGATEKEEPER_CAPTCHA_PROVIDER', {{CAPTCHA_PROVIDER}});
+define('BBGATEKEEPER_CAPTCHA_SITE_KEY', {{CAPTCHA_SITE_KEY}});
+define('BBGATEKEEPER_CAPTCHA_SITE_SECRET', {{CAPTCHA_SITE_SECRET}});
+define('BBGATEKEEPER_CAPTCHA_VERIFY_URL', {{CAPTCHA_VERIFY_URL}});
+define('BBGATEKEEPER_CAPTCHA_RESPONSE_FIELD', {{CAPTCHA_RESPONSE_FIELD}});
+define('BBGATEKEEPER_CAPTCHA_WIDGET_CLASS', {{CAPTCHA_WIDGET_CLASS}});
+define('BBGATEKEEPER_CAPTCHA_WIDGET_SCRIPT_SRC', {{CAPTCHA_WIDGET_SCRIPT_SRC}});
 
 // Provider-agnostic: signs our own verification cookie regardless of
 // which challenge provider issued it.
-define('HCAP_SIGN_SECRET', {{HCAP_SIGN_SECRET}});
-define('HCAP_COOKIE_NAME', {{HCAP_COOKIE_NAME}});
-define('HCAP_COOKIE_TTL', {{HCAP_COOKIE_TTL}});
-define('HCAP_COOKIE_SAMESITE', {{HCAP_COOKIE_SAMESITE}});
-define('HCAP_COOKIE_DOMAIN', {{HCAP_COOKIE_DOMAIN}});
-define('HCAP_COOKIE_SECURE', {{HCAP_COOKIE_SECURE}});
-define('TRUSTED_PROXY_ENABLE', {{TRUSTED_PROXY_ENABLE}});
-define('TRUSTED_PROXY_REMOTE_ADDR', {{TRUSTED_PROXY_REMOTE_ADDR}});
+define('BBGATEKEEPER_HCAP_SIGN_SECRET', {{HCAP_SIGN_SECRET}});
+define('BBGATEKEEPER_HCAP_COOKIE_NAME', {{HCAP_COOKIE_NAME}});
+define('BBGATEKEEPER_HCAP_COOKIE_TTL', {{HCAP_COOKIE_TTL}});
+define('BBGATEKEEPER_HCAP_COOKIE_SAMESITE', {{HCAP_COOKIE_SAMESITE}});
+define('BBGATEKEEPER_HCAP_COOKIE_DOMAIN', {{HCAP_COOKIE_DOMAIN}});
+define('BBGATEKEEPER_HCAP_COOKIE_SECURE', {{HCAP_COOKIE_SECURE}});
+define('BBGATEKEEPER_TRUSTED_PROXY_ENABLE', {{TRUSTED_PROXY_ENABLE}});
+define('BBGATEKEEPER_TRUSTED_PROXY_REMOTE_ADDR', {{TRUSTED_PROXY_REMOTE_ADDR}});
 
 // 1 = strict (bind to exact IP), 2 = relaxed (bind to network prefix),
-// 4 = disabled (no IP binding at all). See get_ip_binding_value() below.
-define('IP_BINDING_LEVEL', {{IP_BINDING_LEVEL}});
+// 4 = disabled (no IP binding at all). See bbgatekeeper_get_ip_binding_value() below.
+define('BBGATEKEEPER_IP_BINDING_LEVEL', {{IP_BINDING_LEVEL}});
 
-define('DRY_RUN', {{DRY_RUN}});
+define('BBGATEKEEPER_DRY_RUN', {{DRY_RUN}});
+
+// Access log on/off, read by the logger before every write.
+define('BBGATEKEEPER_ENABLE_ACCESS_LOG', {{ENABLE_ACCESS_LOG}});
 
 // Autologin: runs the challenge automatically on page load and
 // submits it without the visitor clicking the button. See ACP
 // explanation for the per-provider setup requirement and the
 // cookie-consent trade-off.
-define('AUTOLOGIN_ENABLE', {{AUTOLOGIN_ENABLE}});
+define('BBGATEKEEPER_AUTOLOGIN_ENABLE', {{AUTOLOGIN_ENABLE}});
 
-define('BLOCKED_UA_PATTERNS', {{BLOCKED_UA_PATTERNS}});
-define('ALLOWED_BOT_DOMAINS', {{ALLOWED_BOT_DOMAINS}});
+define('BBGATEKEEPER_BLOCKED_UA_PATTERNS', {{BLOCKED_UA_PATTERNS}});
+define('BBGATEKEEPER_ALLOWED_BOT_DOMAINS', {{ALLOWED_BOT_DOMAINS}});
 
 // Paths whose challenge is bypassed (UA blocklist and logging still
 // apply). Matched with strpos() against the REQUEST_URI path only,
 // not the query string. One entry per line in ACP.
-define('EXCLUDED_PATHS', {{EXCLUDED_PATHS}});
+define('BBGATEKEEPER_EXCLUDED_PATHS', {{EXCLUDED_PATHS}});
 
 // Fixed policy: level 3 (medium-multi) remembers at most this many
 // distinct network locations at once (e.g. home + work + a friend's
@@ -64,19 +67,12 @@ define('BBGATEKEEPER_MULTI_BINDING_MAX', 5);
 
 /**
 * Verifies, via Forward-Confirmed reverse DNS, that an IP genuinely
-* belongs to a search engine whitelisted in ALLOWED_BOT_DOMAINS. Plain
+* belongs to a search engine whitelisted in BBGATEKEEPER_ALLOWED_BOT_DOMAINS. Plain
 * reverse DNS alone is spoofable; the forward-confirm step closes that
 * gap. Handles both IPv4 and IPv6.
 */
-function is_search_engine_bot(string $ip): bool
+function bbgatekeeper_is_search_engine_bot(string $ip): bool
 {
-	// lighthouse can go through
-	$user_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
-	$is_lighthouse = (strpos($user_agent, 'Lighthouse') !== false);
-	if ($is_lighthouse) {
-		return true;
-	}
-
 	$host = gethostbyaddr($ip);
 	if ($host === false || $host === $ip)
 	{
@@ -85,7 +81,7 @@ function is_search_engine_bot(string $ip): bool
 
 	$host_lower = strtolower($host);
 	$matched = false;
-	foreach (ALLOWED_BOT_DOMAINS as $domain)
+	foreach (BBGATEKEEPER_ALLOWED_BOT_DOMAINS as $domain)
 	{
 		if (substr($host_lower, -strlen($domain)) === strtolower($domain))
 		{
@@ -99,14 +95,14 @@ function is_search_engine_bot(string $ip): bool
 		return false;
 	}
 
-	return forward_confirms_hostname($host, $ip);
+	return bbgatekeeper_forward_confirms_hostname($host, $ip);
 }
 
 /**
 * Confirms that the hostname found via reverse lookup resolves back to
 * the original IP (A record for IPv4, AAAA for IPv6).
 */
-function forward_confirms_hostname(string $host, string $ip): bool
+function bbgatekeeper_forward_confirms_hostname(string $host, string $ip): bool
 {
 	$is_ipv6 = filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) !== false;
 
@@ -137,20 +133,20 @@ function forward_confirms_hostname(string $host, string $ip): bool
 
 /**
 * Computes the "shape" of the value an hCaptcha token binds to, given
-* IP_BINDING_LEVEL:
+* BBGATEKEEPER_IP_BINDING_LEVEL:
 *  1 = exact IP (strictest)
 *  2 = network prefix, single binding (tolerates IP rotation within the
 *      same network, but a location change still forces a new challenge)
 *  3 = network prefix, MULTI binding - up to BBGATEKEEPER_MULTI_BINDING_MAX
 *      locations remembered at once (e.g. home + work), each with its
-*      own expiry (see make_hcap_token() / verify_hcap_token())
+*      own expiry (see bbgatekeeper_make_hcap_token() / bbgatekeeper_verify_hcap_token())
 *  4 = no binding at all (weakest - token usable from any IP)
 *
 * Levels 2 and 3 share the same prefix computation; the difference
 * between them is entirely in how many such values the cookie can hold
 * simultaneously, handled below.
 */
-function get_ip_binding_value(string $ip, int $level): string
+function bbgatekeeper_get_ip_binding_value(string $ip, int $level): string
 {
 	if ($level === 4)
 	{
@@ -185,16 +181,16 @@ function get_ip_binding_value(string $ip, int $level): string
 * instead of discarding them. Pass null/omit if there is no existing
 * cookie, or for any other level.
 */
-function make_hcap_token(string $ip, ?string $existing_raw_token = null): string
+function bbgatekeeper_make_hcap_token(string $ip, ?string $existing_raw_token = null): string
 {
-	$level = IP_BINDING_LEVEL;
-	$bound = get_ip_binding_value($ip, $level);
-	$expires = time() + HCAP_COOKIE_TTL;
+	$level = BBGATEKEEPER_IP_BINDING_LEVEL;
+	$bound = bbgatekeeper_get_ip_binding_value($ip, $level);
+	$expires = time() + BBGATEKEEPER_HCAP_COOKIE_TTL;
 
 	if ($level === 3)
 	{
-		$entries = decode_multi_entries($existing_raw_token);
-		$entries = prune_and_merge_multi_entries($entries, $bound, $expires);
+		$entries = bbgatekeeper_decode_multi_entries($existing_raw_token);
+		$entries = bbgatekeeper_prune_and_merge_multi_entries($entries, $bound, $expires);
 
 		$entries_str = implode(',', array_map(
 			function ($entry) { return $entry['bound'] . ':' . $entry['expires']; },
@@ -202,12 +198,12 @@ function make_hcap_token(string $ip, ?string $existing_raw_token = null): string
 		));
 
 		$payload = 'M|' . $entries_str;
-		$sig = hash_hmac('sha256', $payload, HCAP_SIGN_SECRET);
+		$sig = hash_hmac('sha256', $payload, BBGATEKEEPER_HCAP_SIGN_SECRET);
 		return base64_encode($payload . '|' . $sig);
 	}
 
 	$payload = $bound . '|' . $expires;
-	$sig = hash_hmac('sha256', $payload, HCAP_SIGN_SECRET);
+	$sig = hash_hmac('sha256', $payload, BBGATEKEEPER_HCAP_SIGN_SECRET);
 	return base64_encode($payload . '|' . $sig);
 }
 
@@ -220,7 +216,7 @@ function make_hcap_token(string $ip, ?string $existing_raw_token = null): string
 *
 * @return array<int, array{bound: string, expires: int}>
 */
-function decode_multi_entries(?string $token): array
+function bbgatekeeper_decode_multi_entries(?string $token): array
 {
 	if ($token === null || $token === '')
 	{
@@ -241,7 +237,7 @@ function decode_multi_entries(?string $token): array
 
 	[, $entries_str, $sig] = $parts;
 
-	$expected_sig = hash_hmac('sha256', 'M|' . $entries_str, HCAP_SIGN_SECRET);
+	$expected_sig = hash_hmac('sha256', 'M|' . $entries_str, BBGATEKEEPER_HCAP_SIGN_SECRET);
 	if (!hash_equals($expected_sig, $sig))
 	{
 		return [];
@@ -272,7 +268,7 @@ function decode_multi_entries(?string $token): array
 * @param array<int, array{bound: string, expires: int}> $entries
 * @return array<int, array{bound: string, expires: int}>
 */
-function prune_and_merge_multi_entries(array $entries, string $new_bound, int $new_expires): array
+function bbgatekeeper_prune_and_merge_multi_entries(array $entries, string $new_bound, int $new_expires): array
 {
 	$now = time();
 
@@ -294,11 +290,11 @@ function prune_and_merge_multi_entries(array $entries, string $new_bound, int $n
 /**
 * Verifies that the token in the cookie is valid for the current
 * request: correct format, signature intact, and - depending on
-* IP_BINDING_LEVEL - either the single bound value or ANY still-valid
+* BBGATEKEEPER_IP_BINDING_LEVEL - either the single bound value or ANY still-valid
 * entry in the multi-binding list matches the current request's binding
 * value.
 */
-function verify_hcap_token(?string $token, string $ip): bool
+function bbgatekeeper_verify_hcap_token(?string $token, string $ip, ?int &$expires_at = null): bool
 {
 	if ($token === null || $token === '')
 	{
@@ -324,14 +320,14 @@ function verify_hcap_token(?string $token, string $ip): bool
 	{
 		[, $entries_str, $sig] = $parts;
 
-		$expected_sig = hash_hmac('sha256', 'M|' . $entries_str, HCAP_SIGN_SECRET);
+		$expected_sig = hash_hmac('sha256', 'M|' . $entries_str, BBGATEKEEPER_HCAP_SIGN_SECRET);
 		if (!hash_equals($expected_sig, $sig))
 		{
 			return false;
 		}
 
 		$now = time();
-		$current_bound = get_ip_binding_value($ip, 3);
+		$current_bound = bbgatekeeper_get_ip_binding_value($ip, 3);
 
 		if ($entries_str === '')
 		{
@@ -349,6 +345,7 @@ function verify_hcap_token(?string $token, string $ip): bool
 			$bound_part = substr($raw_entry, 0, $sep);
 			if ($expires_part > $now && hash_equals($bound_part, $current_bound))
 			{
+				$expires_at = $expires_part;
 				return true;
 			}
 		}
@@ -364,14 +361,20 @@ function verify_hcap_token(?string $token, string $ip): bool
 		return false;
 	}
 
-	$expected_sig = hash_hmac('sha256', $tok_bound . '|' . $expires, HCAP_SIGN_SECRET);
+	$expected_sig = hash_hmac('sha256', $tok_bound . '|' . $expires, BBGATEKEEPER_HCAP_SIGN_SECRET);
 	if (!hash_equals($expected_sig, $sig))
 	{
 		return false;
 	}
 
-	$current_bound = get_ip_binding_value($ip, IP_BINDING_LEVEL);
-	return hash_equals($tok_bound, $current_bound);
+	$current_bound = bbgatekeeper_get_ip_binding_value($ip, BBGATEKEEPER_IP_BINDING_LEVEL);
+	if (!hash_equals($tok_bound, $current_bound))
+	{
+		return false;
+	}
+
+	$expires_at = (int) $expires;
+	return true;
 }
 
 /**
@@ -380,16 +383,16 @@ function verify_hcap_token(?string $token, string $ip): bool
 * it, so level 3 (medium-multi) can carry forward still-valid entries
 * for other locations instead of discarding them.
 */
-function set_hcap_cookie(string $ip): void
+function bbgatekeeper_set_hcap_cookie(string $ip): void
 {
-	$existing = $_COOKIE[HCAP_COOKIE_NAME] ?? null;
-	$token = make_hcap_token($ip, $existing);
-	setcookie(HCAP_COOKIE_NAME, $token, [
-		'expires'  => time() + HCAP_COOKIE_TTL,
+	$existing = $_COOKIE[BBGATEKEEPER_HCAP_COOKIE_NAME] ?? null;
+	$token = bbgatekeeper_make_hcap_token($ip, $existing);
+	setcookie(BBGATEKEEPER_HCAP_COOKIE_NAME, $token, [
+		'expires'  => time() + BBGATEKEEPER_HCAP_COOKIE_TTL,
 		'path'     => '/',
-		'domain'   => HCAP_COOKIE_DOMAIN,
-		'secure'   => HCAP_COOKIE_SECURE,
+		'domain'   => BBGATEKEEPER_HCAP_COOKIE_DOMAIN,
+		'secure'   => BBGATEKEEPER_HCAP_COOKIE_SECURE,
 		'httponly' => true,
-		'samesite' => HCAP_COOKIE_SAMESITE,
+		'samesite' => BBGATEKEEPER_HCAP_COOKIE_SAMESITE,
 	]);
 }

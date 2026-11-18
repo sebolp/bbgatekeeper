@@ -42,6 +42,7 @@ class move_store_v131 extends \phpbb\db\migration\migration
 	{
 		return [
 			['custom', [[$this, 'move_store_directory']]],
+			['custom', [[$this, 'repoint_ini_line']]],
 		];
 	}
 
@@ -81,6 +82,94 @@ class move_store_v131 extends \phpbb\db\migration\migration
 		// logs/ are (re)created lazily on demand by
 		// config_exporter/deployer/the runtime logger.
 		\sebo\bbgatekeeper\core\store_guard::ensure($new_dir);
+	}
+
+	/**
+	* Updates the auto_prepend_file line written by v1.3.0 (or earlier),
+	* which still points at the old logger under ext/sebo/bbgatekeeper/store/
+	* that move_store_directory() has just removed. Without this every request
+	* would keep failing until the admin deploys again.
+	*
+	* - new logger present: the line is rewritten to the new path.
+	* - new logger missing (old store deleted before uploading): the line is
+	*   removed instead, so the site fails open rather than pointing at a
+	*   missing file. The admin then has to deploy again from the ACP.
+	*
+	* A .user.ini without a bbgatekeeper line (fresh install) is left alone.
+	*
+	* NOTE: \phpbb\db\migration\migration does NOT expose a $container
+	* property (only $config, $db, $tools, $phpbb_root_path, $php_ext,
+	* $table_prefix), so $this->container->get('request') raises
+	* "Undefined property ...::$container". The phpBB request service
+	* also disables superglobals, so $_SERVER cannot be used directly.
+	* The .user.ini lives in the document root, which always contains
+	* $this->phpbb_root_path (or is one of its ancestors): walk up the
+	* tree to locate it without needing either the container or $_SERVER.
+	*
+	* @return void
+	*/
+	public function repoint_ini_line()
+	{
+		$base_path = realpath($this->phpbb_root_path);
+		if ($base_path === false)
+		{
+			return;
+		}
+
+		// Walk up from phpbb_root_path looking for the .user.ini that
+		// lives in the document root. Stop at filesystem root.
+		$ini_path = false;
+		$dir = $base_path;
+		while ($dir !== false && $dir !== '/')
+		{
+			$candidate = $dir . '/.user.ini';
+			if (is_readable($candidate))
+			{
+				$ini_path = $candidate;
+				break;
+			}
+
+			$parent = dirname($dir);
+			if ($parent === $dir)
+			{
+				break;
+			}
+			$dir = $parent;
+		}
+
+		if ($ini_path === false)
+		{
+			return;
+		}
+
+		$current = @file_get_contents($ini_path);
+		if ($current === false || !preg_match('/^\s*auto_prepend_file\s*=.*bbgatekeeper_logger\.php/mi', $current))
+		{
+			return;
+		}
+
+		$new_logger = str_replace('\\', '/', $base_path) . '/store/sebo-bbgatekeeper/bbgatekeeper/bbgatekeeper_logger.php';
+		$logger_present = is_file($new_logger);
+
+		$lines = preg_split('/\r\n|\r|\n/', rtrim($current, "\r\n"));
+		$new_lines = [];
+
+		foreach ($lines as $line)
+		{
+			if (preg_match('/^\s*auto_prepend_file\s*=.*bbgatekeeper_logger\.php/i', $line))
+			{
+				if ($logger_present)
+				{
+					$new_lines[] = 'auto_prepend_file = "' . $new_logger . '"';
+				}
+
+				continue;
+			}
+
+			$new_lines[] = $line;
+		}
+
+		@file_put_contents($ini_path, implode("\n", $new_lines) . "\n");
 	}
 
 	/**

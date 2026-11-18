@@ -1,5 +1,5 @@
 {# bbgatekeeper_hits_and_bans.html — ACP: banned IPs + pending hCaptcha-fail hits #}
-{% INCLUDE 'overall_header.html' %}
+{% include 'overall_header.html' %}
 
 <h1>{{ lang('ACP_BBGATEKEEPER_HITS_AND_BANS') }}</h1>
 
@@ -49,7 +49,7 @@
 				</tr>
 			</thead>
 			<tbody>
-				{% for ban in bans %}
+				{% for ban in loops.bans %}
 					<tr>
 						<td>
 							{% if ban.ACTIVE %}
@@ -109,7 +109,7 @@
 				</tr>
 			</thead>
 			<tbody>
-				{% for hit in hits %}
+				{% for hit in loops.hits %}
 					<tr>
 						<td>
 							{% if hit.ACTIVE %}
@@ -161,4 +161,4 @@
 	{% endif %}
 </fieldset>
 
-{% INCLUDE 'overall_footer.html' %}
+{% include 'overall_footer.html' %}

@@ -32,4 +32,8 @@ $lang = array_merge($lang, [
 	'BBGATEKEEPER_CONFIG_FILE_RENDER_FAILED'   => '%s render failed:',
 	'BBGATEKEEPER_CONFIG_TEMPNAME_FAILED' => 'tempnam() failed on %s',
 	'BBGATEKEEPER_CONFIG_ZIP_OPEN_FAILED'        => 'ZipArchive::open() failed for %s',
+
+	/* >= 1.3.2 */
+	'BBGATEKEEPER_CONFIG_EMPTY_SIGN_SECRET' => 'The cookie signing secret is empty: an empty key would make every verification cookie forgeable. Generate a new one in the Cookie section and save again.',
+
 ]);

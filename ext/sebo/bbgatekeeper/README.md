@@ -58,6 +58,31 @@ v1.3.1
 - the runtime store directory now lives at store/sebo-bbgatekeeper/ (phpBB's own store/ folder) instead of inside ext/sebo/bbgatekeeper/, so it's never touched by future extension updates
 - a new migration moves any existing deployment to the new location automatically; a self-healing check also re-verifies the directory and its .htaccess on every "Deploy" in ACP
 
+v1.3.2 (validation fixes)
+- fixed a fatal error in the ACP dashboard (core.acp_main_notice carries no data): the deploy warning is now a template variable rendered by the acp_main_notice_after template event
+- removed the static asset exemption (genuine static files never reach PHP) and the Lighthouse User-Agent shortcut: both let a client skip the challenge
+- the excluded paths list is now matched against the executed script path (SCRIPT_NAME), so appending extra path info cannot skip the challenge
+- the ACP now proves that the prepended logger really runs on the current request (it never does under mod_php) instead of only checking that the files exist
+- REMOTE_ADDR is always used unless Trusted Proxy is enabled; X-Forwarded-For is no longer trusted by default
+- only a captcha token that was submitted and rejected counts as a hit; a plain POST without cookie no longer does, and valid cookies are renewed once past half of their lifetime
+- updating from 1.3.0 now rewrites the .user.ini auto_prepend_file line to the new store path (or removes it if the new logger is missing, so the board stays up)
+- all functions, constants and variables of the generated runtime files are prefixed/scoped to avoid collisions with other applications under the same document root
+- the access log switch is now really honoured by the runtime files
+- an empty cookie signing secret is never stored or deployed
+- fixed an empty confirmation dialog on the Reset button, missing/stale language strings, English titles in the Italian ACP module names
+- Twig: legacy uppercase INCLUDE tags replaced, template loops accessed through loops.*
+- composer.json phpBB constraint aligned with ext.php (>=3.3.0,<3.9.0)
+- the extension no longer edits the website root .user.ini by default: the ACP shows the exact auto_prepend_file line to add by hand (manual mode). Editing it ("automatic mode") is optional and needs an explicit consent, recorded server side with date, time and administrator (also in the admin log). The "Delete generated files" button is available only in automatic mode.
+
+## Requirements
+
+- phpBB 3.3.x
+- PHP running as CGI, FastCGI or PHP-FPM. PHP running as an Apache module (mod_php) ignores .user.ini, so the filter would never run: the ACP warns about it.
+
+## Uninstalling
+
+In automatic mode, disabling or purging the extension removes the auto_prepend_file line from .user.ini. In manual mode the line is yours and is never touched: the filter keeps running (the generated files stay in place) until you remove it by hand. In both modes the extension deliberately leaves the store/sebo-bbgatekeeper/ folder in place. It contains the generated config (captcha secret and cookie signing secret), the access log and the ban files: delete it manually (or use the ACP "Delete generated files" button before uninstalling) if you do not plan to reinstall.
+
 ## Installation
 
 Copy the extension to phpBB/ext/sebo/bbgatekeeper

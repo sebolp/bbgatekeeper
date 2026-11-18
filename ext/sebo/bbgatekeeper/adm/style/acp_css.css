@@ -143,3 +143,32 @@ code.inline {
 	padding: 0 3px;
 	vertical-align: bottom;
 }
+
+/* not so success*/
+.successbox.not-full-success {
+	background-color: #e38b2d !important;
+}
+
+/* .user.ini line to copy (manual mode) */
+.bbgk-ini-line {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	align-items: center;
+	margin: 10px 0;
+}
+
+.bbgk-ini-line-input {
+	flex: 1 1 420px;
+	font-family: Monaco, "Andale Mono", "Courier New", Courier, monospace;
+	font-size: 12px;
+	padding: 6px 8px;
+	background: #fff;
+	border: 1px solid #c9d2d8;
+}
+
+.bbgk-hint {
+	margin: 8px 0 0;
+	font-size: 12px;
+	color: #5f6b72;
+}

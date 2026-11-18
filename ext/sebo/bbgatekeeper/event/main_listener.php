@@ -23,7 +23,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 *
 * Runs AFTER phpBB has already bootstrapped (DB, container, session).
 * It is NOT part of the request filtering chain - that is handled
-* entirely by the standalone script in store/bbgatekeeper/runtime/,
+* entirely by the standalone script in store/sebo-bbgatekeeper/bbgatekeeper/,
 * deployed via core/deployer.php. This listener only surfaces status
 * information inside the ACP and, for admins only, on the forum index.
 */
@@ -102,19 +102,22 @@ class main_listener implements EventSubscriberInterface
 	/**
 	* ACP overview notice when the deployment looks unhealthy.
 	*
-	* @param \phpbb\event\data $event
+	* core.acp_main_notice is dispatched without any data, so nothing can be
+	* read from or written to the event. The warning is assigned as a
+	* template variable instead and rendered by the template event
+	* adm/style/event/acp_main_notice_after.html.
+	*
 	* @return void
 	*/
-	public function add_acp_overview_notice($event)
+	public function add_acp_overview_notice()
 	{
-		if (!$this->deploy_status_checker->all_ok())
+		if ($this->deploy_status_checker->all_ok())
 		{
-			$this->language->add_lang('common', 'sebo/bbgatekeeper');
-
-			$notices = $event['notices'];
-			$notices[] = $this->language->lang('BBGATEKEEPER_DEPLOY_WARNING');
-			$event['notices'] = $notices;
+			return;
 		}
+
+		$this->language->add_lang('common', 'sebo/bbgatekeeper');
+		$this->template->assign_var('BBGATEKEEPER_ACP_NOTICE', $this->language->lang('BBGATEKEEPER_DEPLOY_WARNING'));
 	}
 
 	/**

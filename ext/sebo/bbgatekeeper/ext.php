@@ -15,7 +15,7 @@ namespace sebo\bbgatekeeper;
 *
 * Note: this extension does NOT perform request filtering itself. The
 * actual edge filter (hCaptcha challenge, UA blocklist, FCrDNS bot check)
-* runs as a standalone auto_prepend_file script under store/runtime/, so
+* runs as a standalone auto_prepend_file script under store/sebo-bbgatekeeper/bbgatekeeper/, so
 * it executes before phpBB bootstraps on every request - including
 * requests that never even reach phpBB. This extension only provides the
 * ACP control panel used to configure and (re)generate that script.
@@ -32,17 +32,19 @@ class ext extends \phpbb\extension\base
 	public function is_enableable()
 	{
 		return phpbb_version_compare(PHPBB_VERSION, '3.3.0', '>=')
-			&& phpbb_version_compare(PHPBB_VERSION, '5.0.0-dev', '<')
+			&& phpbb_version_compare(PHPBB_VERSION, '3.9.0', '<')
 			&& version_compare(PHP_VERSION, '7.4.0', '>=');
 	}
 
 	/**
 	* {@inheritdoc}
 	*
-	* Best-effort cleanup: if the admin disables the extension without
-	* first using the ACP "Reset" button, the .user.ini auto_prepend_file
-	* line would otherwise keep pointing at a logger that may no longer
-	* be readable, producing a PHP warning on every request.
+	* Best-effort cleanup, automatic mode only: if the admin disables the
+	* extension without first using the ACP "Reset" button, the .user.ini
+	* auto_prepend_file line would otherwise keep pointing at a logger
+	* that may no longer be readable, producing a PHP warning on every
+	* request. In manual mode the line belongs to the admin and is left
+	* untouched (the generated files stay in store/ and keep working).
 	*
 	* The ACP "Extensions" page has no per-extension, customizable
 	* user-facing message for this step - it only shows phpBB's own
@@ -52,7 +54,7 @@ class ext extends \phpbb\extension\base
 	*/
 	public function disable_step($old_state)
 	{
-		if ($old_state === false)
+		if ($old_state === false && $this->ini_auto_enabled())
 		{
 			try
 			{
@@ -79,7 +81,7 @@ class ext extends \phpbb\extension\base
 	*/
 	public function purge_step($old_state)
 	{
-		if ($old_state === false)
+		if ($old_state === false && $this->ini_auto_enabled())
 		{
 			try
 			{
@@ -96,6 +98,28 @@ class ext extends \phpbb\extension\base
 		}
 
 		return parent::purge_step($old_state);
+	}
+
+	/**
+	* True only when the admin gave the consent to the automatic mode.
+	* In manual mode the .user.ini line was written by the admin, so it
+	* is never removed by the extension.
+	*
+	* @return bool
+	*/
+	private function ini_auto_enabled(): bool
+	{
+		try
+		{
+			/** @var \phpbb\config\config $config */
+			$config = $this->container->get('config');
+
+			return (bool) ($config['bbgatekeeper_ini_auto_enable'] ?? false);
+		}
+		catch (\Exception $e)
+		{
+			return false;
+		}
 	}
 
 	/**

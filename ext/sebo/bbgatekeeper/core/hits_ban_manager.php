@@ -12,7 +12,7 @@ namespace sebo\bbgatekeeper\core;
 
 /**
  * Reads and manages the .ban / .hit marker files written by
- * bbgatekeeper_logger.php (record_block_and_check_ban()).
+ * bbgatekeeper_logger.php (bbgatekeeper_record_block_and_check_ban()).
  *
  * File formats on disk (see bbgatekeeper_logger.php.template):
  *   *.ban  ->  "{ip}|{ban_unix_time}"   (older files may be empty)
@@ -20,15 +20,15 @@ namespace sebo\bbgatekeeper\core;
  *
  * "Active" means: still enforced by the gatekeeper logic right now.
  *   - a .ban is active for BAN_TTL seconds from its ban_time (matches
- *     is_ip_banned()'s 1800s window in the logger).
+ *     bbgatekeeper_is_ip_banned()'s 1800s window in the logger).
  *   - a .hit is active for HIT_TTL seconds from its window start_time
- *     (matches the 60s rolling window in record_block_and_check_ban()).
+ *     (matches the 60s rolling window in bbgatekeeper_record_block_and_check_ban()).
  * Past that, the file is a stale leftover: the logger itself would
  * ignore/reset it on the next request, so it's safe to delete.
  */
 class hits_ban_manager
 {
-	public const BAN_TTL = 1800; // 30 minutes, must match is_ip_banned()
+	public const BAN_TTL = 1800; // 30 minutes, must match bbgatekeeper_is_ip_banned()
 	public const HIT_TTL = 60;   // 1 minute, must match the hit window
 
 	/** @var string */

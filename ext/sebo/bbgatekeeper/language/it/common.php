@@ -65,9 +65,9 @@ $lang = array_merge($lang, [
 	'BBGATEKEEPER_GENERATE_DEPLOY'		=> 'Salva impostazioni &amp; genera file',
 
 	'BBGATEKEEPER_SETTINGS_SAVED'		=> 'Impostazioni salvate.',
-	'BBGATEKEEPER_DEPLOY_SUCCESS'		=> 'Impostazioni salvate, script di runtime generato con successo. Controlla la cartella store/bbagatekeeper nel percorso ext/sebo/bbgatekeeper e il file .user.ini nella cartella root del sito per confermare.',
+	'BBGATEKEEPER_DEPLOY_SUCCESS' => 'Impostazioni salvate, script di runtime generato con successo. Controlla la cartella store/sebo-bbgatekeeper/bbgatekeeper nella root del forum e il file .user.ini nella cartella root del sito per confermare.',
 	'BBGATEKEEPER_DEPLOY_FAILED'		=> 'Impostazioni salvate, ma la generazione o la distribuzione dello script di runtime è fallita. Controlla i permessi di scrittura sulla cartella store/.',
-	'BBGATEKEEPER_DEPLOY_WARNING'		=> 'Bad Bot Gatekeeper non è ancora stato attivato (o l\'ultimo deployment è fallito). Visita la pagina delle impostazioni ACP.',
+	'BBGATEKEEPER_DEPLOY_WARNING' => 'L\'estensione <b>Bad Bot Gatekeeper</b> è stata installata ma non è ancora stata attivata (o l\'ultimo deployment è fallito). Visita la pagina "Estensioni" delle impostazioni ACP.',
 
 	'BBGATEKEEPER_FILTER'			=> 'Filtro',
 	'BBGATEKEEPER_FILTER_ALL'		=> 'Tutte le voci',
@@ -82,7 +82,7 @@ $lang = array_merge($lang, [
 	'BBGATEKEEPER_USER_AGENT'		=> 'User-Agent',
 	'BBGATEKEEPER_LOG_EMPTY'		=> 'Nessuna voce di log da mostrare.',
 	'BBGATEKEEPER_CLEAR_LOG'		=> 'Pulisci log',
-	'BBGATEKEEPER_LOGS_EXPLAIN'		=> 'Qui puoi leggere le prime <strong>500</strong> righe dei log. Per leggere il file completo devi controllare il file <code class="inline">access.log</code> nella cartella <code class="inline">store/sebo-bbgatekeeper/logs</code>.',
+	'BBGATEKEEPER_LOGS_EXPLAIN' => 'Qui puoi leggere le voci di log più recenti (fino a <strong>5000</strong>). Per leggere il file completo devi controllare il file <code class="inline">access.log</code> nella cartella <code class="inline">store/sebo-bbgatekeeper/logs</code>.',
 
 	'BBGATEKEEPER_FUNDAMENTAL_STEPS'	=> 'Passaggi minimi necessari per il deployment',
 	'BBGATEKEEPER_CHECK_CONFIG'		=> 'config.php',
@@ -91,7 +91,7 @@ $lang = array_merge($lang, [
 	'BBGATEKEEPER_FUNDAMENTAL_STEPS_ALL_OK'	=> 'OK',
 	'BBGATEKEEPER_FUNDAMENTAL_STEPS_BAD'	=> 'File mancante',
 	'BBGATEKEEPER_FUNDAMENTAL_STEPS_NO_RIGHT_PERMISSIONS'	=> 'Il file ha permessi chmod errati',
-	'BBGATEKEEPER_INI_PREPEND_INCORRECT'	=> 'Il file .user.ini esiste ma non contiene il percorso previsto. Dai un\'occhiata.',
+	'BBGATEKEEPER_INI_PREPEND_INCORRECT' => 'Il file .user.ini esiste ma non contiene il percorso previsto. Dai un\'occhiata. (un percorso corretto dovrebbe essere: "cartella-principale-phpBB/store/sebo-bbgatekeeper/bbgatekeeper/bbgatekeeper_logger.php")',
 
 	'BBGATEKEEPER_PERMISSIONS_WARNING'	=> 'Il tuo file di configurazione (config.php) è attualmente scrivibile da chiunque (world-writable). Ti consigliamo vivamente di cambiare i permessi a 640 o almeno a 644 (per esempio: chmod 640 config.php).',
 
@@ -104,10 +104,10 @@ $lang = array_merge($lang, [
 
 	'BBGATEKEEPER_SAVE_CHANGES'		=> 'Salva impostazioni',
 	'BBGATEKEEPER_RESET'			=> 'Elimina i file generati e pulisci il file .user.ini',
-	'BBGATEKEEPER_RESET_EXPLAIN'		=> 'Se vuoi eliminare i file e il file .user.ini, usa il relativo pulsante.<br />Rimuove auto_prepend_file da .user.ini ed elimina i file PHP generati sotto store/gatekeeper.<br />Le impostazioni salvate vengono mantenute.<br />',
+	'BBGATEKEEPER_RESET_EXPLAIN' => 'Se vuoi eliminare i file e il file .user.ini, usa il relativo pulsante.<br />Rimuove auto_prepend_file da .user.ini ed elimina i file PHP generati sotto store/sebo-bbgatekeeper/bbgatekeeper.<br />Le impostazioni salvate vengono mantenute.<br />',
 	'BBGATEKEEPER_RESET_EXPLAIN_WARNING'	=> 'Questo comando potrebbe fallire a causa dei permessi di scrittura/accesso. Se fallisce, devi modificare manualmente o eliminare/ricaricare i file.',
 	'BBGATEKEEPER_RESET_SUCCESS'		=> 'Reset del deployment eseguito con successo.',
-	'BBGATEKEEPER_RESET_FAILED'		=> 'Reset fallito - controlla i permessi dei file su .user.ini e store/.',
+	'BBGATEKEEPER_RESET_FAILED' => 'Reset fallito - controlla i permessi dei file su .user.ini e store/sebo-bbgatekeeper/.',
 
 	'BBGATEKEEPER_GENERATE'			=> 'Genera',
 	'BBGATEKEEPER_HCAP_SIGN_SECRET_EXPLAIN'	=> 'Questa è una chiave di verifica dell\'estensione autogenerata per il cookie.<br />Visibile qui per scopi di backup/ripristino. Mantieni questa chiave riservata agli amministratori fidati.<br />Cambiarla (manualmente o tramite Genera) invalida ogni cookie hCaptcha già rilasciato ai visitatori.<br />Rigenerala se sospetti che non sia più segreta.',
@@ -119,9 +119,9 @@ $lang = array_merge($lang, [
 	'BBGATEKEEPER_FUNCTION_DONE'		=> '🗹 Fatto',
 	'BBGATEKEEPER_FUNCTION_ERROR'		=> '✗ Errore. Impossibile eseguire questa operazione.',
 	'BBGATEKEEPER_CONFIRM_REMOVE_INI_LINE'	=> 'Eliminazione della riga "auto_prepend_file" dal file .user.ini nella cartella root del sito',
-	'BBGATEKEEPER_CONFIRM_REMOVE_STORE_FILES'	=> 'Rimozione dei file config.php e logger.php dalla cartella store/bbgatekeeper',
-	'BBGATEKEEPER_CONFIG_FILE_GENERATING'	=> 'Creazione del file <strong>bbgatekeeper_config.php</strong> nella cartella store/bbgatekeeper',
-	'BBGATEKEEPER_LOGGER_AND_INI_DEPLOY'	=> 'Creazione del file <strong>bbgatekeeper_logger.php</strong> nella cartella store/bbgatekeeper e del file <strong>.user.ini</strong> nella cartella root del sito',
+	'BBGATEKEEPER_CONFIRM_REMOVE_STORE_FILES' => 'Rimozione dei file generati dalla cartella store/sebo-bbgatekeeper/bbgatekeeper',
+	'BBGATEKEEPER_CONFIG_FILE_GENERATING' => 'Creazione del file <strong>bbgatekeeper_config.php</strong> nella cartella store/sebo-bbgatekeeper/bbgatekeeper',
+	'BBGATEKEEPER_LOGGER_AND_INI_DEPLOY' => 'Creazione del file <strong>bbgatekeeper_logger.php</strong> nella cartella store/sebo-bbgatekeeper/bbgatekeeper e del file <strong>.user.ini</strong> nella cartella root del sito',
 
 	// >= 1.1
 	'BBGATEKEEPER_WHOIS' => 'IP WHOIS',
@@ -129,7 +129,7 @@ $lang = array_merge($lang, [
 	'BBGATEKEEPER_SAVE_MODAL_TEXT'    => 'Questa azione salva le impostazioni ma non genera il file di configurazione. Per applicare le modifiche definitivamente devi cliccare sull\'altro pulsante:',
 	'BBGATEKEEPER_SAVE_MODAL_CONFIRM' => 'Salva comunque',
 	// >= 1.2
-	'ACP_BBGATEKEEPER_HITS_AND_BANS'	=> 'Hits &amp; Ban',
+	'ACP_BBGATEKEEPER_HITS_AND_BANS' => 'Hit e ban',
 
 	'BBGATEKEEPER_HITSBANS_EXPLAIN'	=> 'Elenco degli indirizzi IP con hCaptcha fallito (HIT, non ancora bannati) e di quelli attualmente bannati (BAN). Puoi rimuovere singolarmente una voce o svuotare l\'intera categoria.',
 
@@ -170,7 +170,7 @@ $lang = array_merge($lang, [
 
 	'BBGATEKEEPER_LOGGING'			=> 'Log di accesso',
 	'BBGATEKEEPER_ENABLE_ACCESS_LOG'	=> 'Registra access log',
-	'BBGATEKEEPER_ENABLE_ACCESS_LOG_EXPLAIN' => 'Se disattivato, il logger auto_prepend non scrive più su store/logs/access.log ad ogni richiesta (risparmia una operazione di I/O per request). Non influisce sui file .ban/.hit, che restano sempre attivi.',
+	'BBGATEKEEPER_ENABLE_ACCESS_LOG_EXPLAIN' => 'Se disattivato, il logger auto_prepend non scrive più su store/sebo-bbgatekeeper/logs/access.log ad ogni richiesta (risparmia una operazione di I/O per request). Non influisce sui file .ban/.hit, che restano sempre attivi.',
 
 	'BBGATEKEEPER_ACTIVE'			=> 'Attivo',
 	'BBGATEKEEPER_EXPIRED'			=> 'Scaduto',
@@ -184,7 +184,7 @@ $lang = array_merge($lang, [
 	// >= 1.2.1
 	'BBGATEKEEPER_TRUSTED_PROXY' => 'Proxy fidato',
 	'BBGATEKEEPER_TRUSTED_PROXY_ENABLE' => 'Abilita: usa X_FORWARDED_FOR solo da proxy fidato',
-	'BBGATEKEEPER_TRUSTED_PROXY_ENABLE_EXPLAIN' => 'Abilitalo solo se il forum è dietro Nginx, Cloudflare o un reverse proxy. Se disattivato viene usato sempre <samp class="error">X_FORWARDED_FOR</samp>.',
+	'BBGATEKEEPER_TRUSTED_PROXY_ENABLE_EXPLAIN' => 'Abilitalo solo se il forum è dietro Nginx, Cloudflare o un reverse proxy. Se disattivato viene usato sempre <samp class="error">REMOTE_ADDR</samp> e <samp class="error">X_FORWARDED_FOR</samp> viene ignorato.',
 	'BBGATEKEEPER_TRUSTED_PROXY_REMOTE_ADDR' => 'REMOTE_ADDR del proxy fidato',
 	'BBGATEKEEPER_TRUSTED_PROXY_REMOTE_ADDR_EXPLAIN' => 'Inserisci il valore <samp class="error">REMOTE_ADDR</samp> visto dal pulsante utilizzato sopra nel riquadro di spiegazione.',
 	'BBGATEKEEPER_CURRENT_REQUEST_PRE_EXPLAIN' => '<samp class="error">REMOTE_ADDR</samp> e <samp class="error"><samp class="error">X_FORWARDED_FOR</samp></samp> vengono sempre forniti entrambi e letti insieme, ma hanno un\'affidabilità molto diversa.<br />• <samp class="error">REMOTE_ADDR</samp> è l\'indirizzo IP che il server vede realmente collegarsi: nessun visitatore può falsificarlo.<br />• <samp class="error">X_FORWARDED_FOR</samp> invece è un semplice header HTTP che chiunque può scrivere a piacere, quindi di per sé non è affidabile.',
@@ -239,6 +239,40 @@ $lang = array_merge($lang, [
 	'BBGATEKEEPER_AUTOLOGIN_EXPLAIN' => 'Esegue automaticamente la sfida al caricamento della pagina e la invia senza che il visitatore debba cliccare "Verifica e Prosegui".<br />- hCaptcha: la chiave del sito configurata sopra deve essere impostata come tipo <em>invisible</em> nella dashboard di hCaptcha, altrimenti il widget non partirà da solo.<br />- Turnstile: funziona automaticamente, nessuna modifica necessaria nella dashboard.<br />- Se il flusso automatico fallisce per qualsiasi motivo, viene mostrato il pulsante manuale come fallback.<br /><strong>Nota:</strong> rimuovere il click manuale rimuove anche l\'azione esplicita con cui il visitatore accetta il cookie di verifica descritto sopra - valutalo se il tuo forum ha requisiti stringenti di consenso cookie.',
 
 	'BBGATEKEEPER_EXCLUDED_PATHS'         => 'Path esclusi',
-	'BBGATEKEEPER_EXCLUDED_PATHS_EXPLAIN' => 'Un path (o frammento di path) per riga. Ogni richiesta il cui percorso URI contiene uno di questi valori salta la sfida (la blacklist User-Agent e il logging restano attivi). Il confronto avviene solo sul percorso, non sulla query string.<br />Esempio: <code class="inline">/ext/vendor/extension-name/</code> esclude tutto il path dell\'estensione "@vendor-extension" in modo che non debba affrontare il challenge.',
+	'BBGATEKEEPER_EXCLUDED_PATHS_EXPLAIN' => 'Un path (o frammento di path) per riga. Ogni richiesta il cui percorso dello script PHP eseguito contiene uno di questi valori salta la sfida (la blacklist User-Agent e il logging restano attivi). Il confronto avviene solo sul percorso dello script, non sulla query string né su eventuali path info aggiuntive.<br />Esempio: <code class="inline">/ext/vendor/extension-name/</code> esclude tutto il path dell\'estensione "@vendor-extension" in modo che non debba affrontare il challenge.',
+
+	/* >=1.3.2 */
+	'BBGATEKEEPER_TRUSTED_PROXY_WARNING' => 'REMOTE_ADDR sembra un passaggio di proxy locale (127.0.0.x o ::1) mentre il Proxy fidato è disattivato: tutti i visitatori condividono lo stesso indirizzo per ban e log. Usa il pulsante qui sotto per vedere l\'indirizzo realmente ricevuto dal server, poi abilita il Proxy fidato e inserisci quel REMOTE_ADDR.',
+	'BBGATEKEEPER_PREPEND_NOT_ACTIVE' => 'I tre file sono al loro posto, ma il logger non è stato eseguito in questa richiesta, quindi il tuo forum al momento NON è protetto. Succede quando PHP gira come modulo Apache (mod_php), che ignora .user.ini: questa estensione richiede PHP in modalità CGI, FastCGI o PHP-FPM. Può succedere anche per qualche minuto dopo un deploy, finché PHP non aggiorna la sua cache di .user.ini.',
+	'BBGATEKEEPER_DEPLOY_MODAL_TITLE'   => 'Stai per modificare le impostazioni del tuo intero sito',
+	'BBGATEKEEPER_DEPLOY_MODAL_TEXT'    => 'Attenzione. Questa azione salva e genera i file di configurazione. <b>Questo influisce su TUTTO il tuo sito web, modificando il file "user.ini" nella cartella principale del tuo sito web</b>.<br /> Effettua un backup del file prima di proseguire, e sappi che per tornare indietro in maniera MANUALE, dovrai modificare il file user.ini togliendo la riga relativa ad "auto_prepend_file". Potrai usare anche il pulsante dedicato per cancellare i file installazione.<br />Assolutamente <b>non cancellare manualmente senza modificare il file "user.ini" o disinstallare mai solo l\'estensione</b> o il tuo sito non funzionerà.',
+	'BBGATEKEEPER_DEPLOY_MODAL_CONFIRM' => 'Letto e compreso: procedi',
+	'BBGATEKEEPER_RESET_MODAL_CONFIRM' => 'Letto e compreso: ripristina "user.ini" e cancella i files',
+
+	/* >=1.3.2 modalità manuale / automatica .user.ini */
+	'BBGATEKEEPER_INI_MANUAL_TITLE' => 'Attivazione: aggiungi una riga a .user.ini (predefinito)',
+	'BBGATEKEEPER_INI_MANUAL_EXPLAIN' => 'Per impostazione predefinita questa estensione NON modifica MAI il tuo .user.ini. Dopo "Salva impostazioni & genera file", aggiungi tu la riga qui sotto al file <strong>.user.ini</strong> nella <strong>cartella root del sito</strong> (la prima cartella che vedi collegandoti via FTP: non la cartella del forum, non ext/).<br />- Se un .user.ini esiste già: scaricalo e fanne un backup, poi aggiungi SOLO questa riga (o aggiorna la riga "auto_prepend_file" esistente), lasciando invariate tutte le altre.<br />- Se non esiste: crealo contenente solo questa riga.<br />PHP deve girare come CGI, FastCGI o PHP-FPM (non mod_php) e può impiegare qualche minuto (di solito fino a 5) per accorgersi della modifica.',
+	'BBGATEKEEPER_INI_LINE_COPY' => 'Copia riga',
+	'BBGATEKEEPER_INI_LINE_COPIED' => 'Copiata!',
+	'BBGATEKEEPER_INI_LINE_UNAVAILABLE' => 'Non è stato possibile ricavare automaticamente il percorso della riga. Usa il pacchetto di deploy manuale qui sotto: contiene un .user.ini già pronto.',
+	'BBGATEKEEPER_INI_MANUAL_REMINDER' => 'Ricorda: i file sono stati generati, ma il filtro funziona solo dopo che hai aggiunto la riga auto_prepend_file al tuo .user.ini (vedi il riquadro "Attivazione" in questa pagina).',
+	'BBGATEKEEPER_LOGGER_DEPLOY' => 'Creazione del file <strong>bbgatekeeper_logger.php</strong> nella cartella store/sebo-bbgatekeeper/bbgatekeeper',
+	'BBGATEKEEPER_INI_AUTO_TITLE' => 'Modalità automatica (facoltativa)',
+	'BBGATEKEEPER_INI_AUTO_EXPLAIN' => 'Permette all\'estensione di aggiungere, aggiornare e rimuovere da sola la riga "auto_prepend_file" nel .user.ini della root del sito (alla generazione dei file, alla loro cancellazione e quando l\'estensione viene disabilitata o eliminata). È DISATTIVATA di default e richiede un consenso esplicito: data, ora e amministratore vengono registrati. Finché non c\'è, il pulsante "Elimina i file generati" resta disabilitato e la modifica di ".user.ini" può avvenire solo manualmente.',
+	'BBGATEKEEPER_INI_AUTO_ENABLE_BTN' => 'Abilita modalità automatica...',
+	'BBGATEKEEPER_INI_AUTO_MODAL_TITLE' => 'Abilita la modalità automatica: modifica un file del tuo INTERO sito',
+	'BBGATEKEEPER_INI_AUTO_MODAL_TEXT' => 'Abilitando la modalità automatica consenti a questa estensione di <b>modificare il file ".user.ini" nella cartella principale del tuo sito</b>, e questo influisce sul tuo INTERO sito web, non solo sul forum.<br />- Fai un backup del file prima di proseguire.<br />- Per tornare indietro in modo MANUALE, modifica quel .user.ini (root del sito, non la cartella del forum) e togli la riga che contiene "auto_prepend_file".<br />- <b>Non</b> cancellare manualmente i file generati senza aver prima tolto quella riga, e non disinstallare mai solo l\'estensione, <u>o il tuo sito non funzionerà</u>. Usa invece il pulsante dedicato "Elimina i file generati".<br />- Il tuo consenso (data, ora e amministratore) verrà registrato.',
+	'BBGATEKEEPER_INI_AUTO_MODAL_ACK' => 'Ho letto e compreso, e autorizzo questa estensione a modificare il file .user.ini del mio sito',
+	'BBGATEKEEPER_INI_AUTO_MODAL_CONFIRM' => 'Abilita modalità automatica',
+	'BBGATEKEEPER_INI_AUTO_ACTIVE' => 'La modalità automatica è ABILITATA. Consenso dato il %1$s da %2$s.',
+	'BBGATEKEEPER_INI_AUTO_DISABLE_BTN' => 'Disabilita modalità automatica',
+	'BBGATEKEEPER_INI_AUTO_DISABLE_CONFIRM' => 'Tornare alla modalità manuale? La riga auto_prepend_file già presente nel tuo .user.ini NON verrà rimossa: toglila a mano se vuoi fermare il filtro. Il pulsante "Elimina i file generati" tornerà disabilitato.',
+	'BBGATEKEEPER_INI_AUTO_ENABLED_MSG' => 'Modalità automatica abilitata. Il tuo consenso è stato registrato.',
+	'BBGATEKEEPER_INI_AUTO_DISABLED_MSG' => 'Modalità automatica disabilitata: si torna alla modalità manuale. Il tuo .user.ini non è stato modificato.',
+	'BBGATEKEEPER_INI_AUTO_ACK_MISSING' => 'Consenso non dato: la modalità automatica NON è stata abilitata. Spunta la casella di conferma e riprova.',
+	'BBGATEKEEPER_RESET_DISABLED_HINT' => 'Disponibile solo dopo aver abilitato la modalità automatica: in modalità manuale la riga del .user.ini è tua, quindi toglila a mano e poi elimina i file.',
+	'BBGATEKEEPER_RESET_REFUSED' => 'Questa azione è disponibile solo in modalità automatica. In modalità manuale togli prima a mano la riga auto_prepend_file dal tuo .user.ini, poi elimina i file in store/sebo-bbgatekeeper/bbgatekeeper.',
+	'LOG_BBGATEKEEPER_INI_AUTO_ENABLED' => '<strong>Bad Bot Gatekeeper: modalità automatica .user.ini abilitata (consenso registrato)</strong>',
+	'LOG_BBGATEKEEPER_INI_AUTO_DISABLED' => '<strong>Bad Bot Gatekeeper: modalità automatica .user.ini disabilitata (ritorno alla modalità manuale)</strong>',
 
 ]);

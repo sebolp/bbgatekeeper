@@ -13,7 +13,7 @@ namespace sebo\bbgatekeeper\core;
 use phpbb\config\config;
 
 /**
-* Renders store/bbgatekeeper_config.php from the current phpBB config
+* Renders store/sebo-bbgatekeeper/bbgatekeeper/bbgatekeeper_config.php from the current phpBB config
 * values and the static template in templates/config.php.template.
 *
 * render() only builds the string in memory and never touches disk - it
@@ -79,13 +79,21 @@ class config_exporter
 			return null;
 		}
 
+		// Never render a runtime config with an empty cookie signing key:
+		// every verification cookie would be forgeable.
+		if ((string) ($this->config['bbgatekeeper_hcap_sign_secret'] ?? '') === '')
+		{
+			$this->last_error = $user->lang('BBGATEKEEPER_CONFIG_EMPTY_SIGN_SECRET');
+			return null;
+		}
+
 		$replacements = $this->build_replacements();
 
 		return str_replace(array_keys($replacements), array_values($replacements), $template);
 	}
 
 	/**
-	* Renders and writes store/bbgatekeeper_config.php.
+	* Renders and writes store/sebo-bbgatekeeper/bbgatekeeper/bbgatekeeper_config.php.
 	*
 	* @return bool true on success - check get_last_error() on failure
 	*/

@@ -1,4 +1,4 @@
-{% INCLUDE 'overall_header.html' %}
+{% include 'overall_header.html' %}
 {% INCLUDECSS '@sebo_bbgatekeeper/acp_css.css' %}
 {% INCLUDEJS '@sebo_bbgatekeeper/acp_popup.js' %}
 
@@ -13,10 +13,10 @@
 	<p>{{ lang('BBGATEKEEPER_FUNDAMENTAL_STEPS_EXPLAIN') }}</p>
 
 	<div class="bbgk-status-grid">
-		{% for check in fundamental_checks %}
+		{% for check in loops.fundamental_checks %}
 			<div class="bbgk-status-card">
 				{% if check.S_OK %}
-					<div class="successbox">
+					<div class="successbox {% if not S_INI_PREPEND_OK and S_INI_STATUS == 'ok' %}not-full-success{% endif %}">
 						<p><strong>{{ check.LABEL }}</strong><br />
 							{% if not S_INI_PREPEND_OK and S_INI_STATUS == 'ok' %}⚠️{% else %}✅{% endif %}
 							{{ lang('BBGATEKEEPER_FUNDAMENTAL_STEPS_ALL_OK') }}</p>
@@ -40,10 +40,46 @@
 	{% endif %}
 	{% if not S_INI_PREPEND_OK and S_INI_STATUS == 'ok' %}
 		<div class="errorbox notice">
-			<p>{{ lang('BBGATEKEEPER_INI_PREPEND_INCORRECT') }}</p>
+			<p>⚠️ <strong>{{ lang('BBGATEKEEPER_INI_PREPEND_INCORRECT') }}</strong></p>
+		</div>
+	{% endif %}
+	{% if DEPLOY_OK and not S_PREPEND_ACTIVE %}
+		<div class="errorbox notice">
+			<p>{{ lang('BBGATEKEEPER_PREPEND_NOT_ACTIVE') }}</p>
 		</div>
 	{% endif %}
 
+</fieldset>
+
+<fieldset>
+	<legend>📌 {{ lang('BBGATEKEEPER_INI_MANUAL_TITLE') }}</legend>
+	<p>{{ lang('BBGATEKEEPER_INI_MANUAL_EXPLAIN') }}</p>
+
+	{% if INI_LINE %}
+		<div class="bbgk-ini-line">
+			<input type="text" id="bbgatekeeper-ini-line" class="bbgk-ini-line-input" readonly="readonly" value="{{ INI_LINE|e('html_attr') }}" />
+			<input type="button" id="bbgatekeeper-ini-copy" class="button2" value="{{ lang('BBGATEKEEPER_INI_LINE_COPY') }}" data-copied="{{ lang('BBGATEKEEPER_INI_LINE_COPIED')|e('html_attr') }}" />
+		</div>
+	{% else %}
+		<div class="errorbox notice">
+			<p>{{ lang('BBGATEKEEPER_INI_LINE_UNAVAILABLE') }}</p>
+		</div>
+	{% endif %}
+</fieldset>
+
+<fieldset>
+	<legend>⚙️ {{ lang('BBGATEKEEPER_INI_AUTO_TITLE') }}</legend>
+	<p>{{ lang('BBGATEKEEPER_INI_AUTO_EXPLAIN') }}</p>
+
+	<form id="bbgatekeeper_ini_auto" method="post" action="{{ U_ACTION }}">
+		{{ S_FORM_TOKEN }}
+		{% if S_INI_AUTO %}
+			<p><strong class="text-success">{{ lang('BBGATEKEEPER_INI_AUTO_ACTIVE', INI_AUTO_CONSENT_TIME, INI_AUTO_CONSENT_USER) }}</strong></p>
+			<input class="button2 larger-button" type="submit" name="submit_ini_auto_disable" value="{{ lang('BBGATEKEEPER_INI_AUTO_DISABLE_BTN') }}" onclick="return confirm('{{ lang('BBGATEKEEPER_INI_AUTO_DISABLE_CONFIRM')|e('js') }}');" />
+		{% else %}
+			<input id="bbgatekeeper-ini-auto-btn" class="button1 larger-button" type="submit" name="submit_ini_auto_enable" value="{{ lang('BBGATEKEEPER_INI_AUTO_ENABLE_BTN') }}" />
+		{% endif %}
+	</form>
 </fieldset>
 
 <form id="bbgatekeeper_settings" method="post" action="{{ U_ACTION }}">
@@ -306,20 +342,85 @@
 		</div>
 	</fieldset>
 
-	<fieldset style="background-color: #ffe5ca;">
-		<legend>⚠️ {{ lang('BBGATEKEEPER_RESET') }}</legend>
-		<p>{{ lang('BBGATEKEEPER_RESET_EXPLAIN') }}</p>
-		<p><strong>{{ lang('BBGATEKEEPER_RESET_EXPLAIN_WARNING') }}</strong></p>
-	</fieldset>
+	{% if S_INI_AUTO %}
+		<fieldset style="background-color: #ffe5ca;">
+			<legend>⚠️ {{ lang('BBGATEKEEPER_RESET') }}</legend>
+			<p>{{ lang('BBGATEKEEPER_RESET_EXPLAIN') }}</p>
+			<p><strong>{{ lang('BBGATEKEEPER_RESET_EXPLAIN_WARNING') }}</strong></p>
+		</fieldset>
+	{% endif %}
 
 	<fieldset class="submit-buttons">
 		{{ S_FORM_TOKEN }}
 		<input id="bbgatekeeper-save-btn" class="button1 larger-button" type="submit" name="submit_save" value="{{ lang('BBGATEKEEPER_SAVE_CHANGES') }}" />
-		<input class="button2 larger-button" type="submit" name="submit_deploy" value="{{ lang('BBGATEKEEPER_GENERATE_DEPLOY') }}" />
-		<input class="button2 larger-button" type="submit" name="submit_reset" value="{{ lang('BBGATEKEEPER_RESET') }}" onclick="return confirm('{{ LA_CONFIRM_OPERATION }}');" />
+		{% if S_INI_AUTO %}
+			{# Automatic mode: the extension edits .user.ini, so deploy and reset ask for a confirmation first #}
+			<input id="bbgatekeeper-deploy-btn" class="button1 larger-button" type="submit" name="submit_deploy" value="{{ lang('BBGATEKEEPER_GENERATE_DEPLOY') }}" />
+			<input id="bbgatekeeper-reset-btn" class="button1 larger-button" type="submit" name="submit_reset" value="{{ lang('BBGATEKEEPER_RESET') }}" />
+		{% else %}
+			{# Manual mode: .user.ini is never touched, so reset stays disabled until the automatic mode consent is given #}
+			<input class="button1 larger-button" type="submit" name="submit_deploy" value="{{ lang('BBGATEKEEPER_GENERATE_DEPLOY') }}" />
+			<input class="button2 larger-button" type="submit" name="submit_reset" value="{{ lang('BBGATEKEEPER_RESET') }}" disabled="disabled" title="{{ lang('BBGATEKEEPER_RESET_DISABLED_HINT')|e('html_attr') }}" />
+			<p class="bbgk-hint">{{ lang('BBGATEKEEPER_RESET_DISABLED_HINT') }}</p>
+		{% endif %}
 	</fieldset>
 
 </form>
+
+{% if S_INI_AUTO %}
+<div id="bbgatekeeper-reset-modal" class="bbgatekeeper-modal-overlay" style="display:none;">
+	<div class="bbgatekeeper-modal-box submit-buttons">
+		<h3>{{ lang('BBGATEKEEPER_RESET') }}</h3>
+		<p>{{ lang('BBGATEKEEPER_RESET_EXPLAIN') }} {{ lang('BBGATEKEEPER_RESET_EXPLAIN_WARNING') }}</p>
+		<div class="bbgatekeeper-modal-actions">
+			<button type="button" id="bbgatekeeper-reset-modal-cancel" class="button2 larger-button">
+				{{ lang('CANCEL') }}
+			</button>
+			<button type="button" class="button1 larger-button" id="bbgatekeeper-reset-modal-confirm">
+				{{ lang('BBGATEKEEPER_RESET_MODAL_CONFIRM') }}
+			</button>
+		</div>
+	</div>
+</div>
+
+<div id="bbgatekeeper-deploy-modal" class="bbgatekeeper-modal-overlay" style="display:none;">
+	<div class="bbgatekeeper-modal-box submit-buttons">
+		<h3>{{ lang('BBGATEKEEPER_DEPLOY_MODAL_TITLE') }}</h3>
+		<p>{{ lang('BBGATEKEEPER_DEPLOY_MODAL_TEXT') }}</p>
+		<div class="bbgatekeeper-modal-actions">
+			<button type="button" id="bbgatekeeper-deploy-modal-cancel" class="button2 larger-button">
+				{{ lang('CANCEL') }}
+			</button>
+			<button type="button" class="button1 larger-button" id="bbgatekeeper-deploy-modal-confirm">
+				{{ lang('BBGATEKEEPER_DEPLOY_MODAL_CONFIRM') }}
+			</button>
+		</div>
+	</div>
+</div>
+
+{% else %}
+{# The checkbox belongs to the consent form through the "form" attribute; the server verifies it again #}
+<div id="bbgatekeeper-ini-auto-modal" class="bbgatekeeper-modal-overlay" style="display:none;">
+	<div class="bbgatekeeper-modal-box submit-buttons">
+		<h3>{{ lang('BBGATEKEEPER_INI_AUTO_MODAL_TITLE') }}</h3>
+		<p>{{ lang('BBGATEKEEPER_INI_AUTO_MODAL_TEXT') }}</p>
+		<p>
+			<label>
+				<input type="checkbox" id="bbgatekeeper-ini-auto-ack" name="ini_consent_ack" value="1" form="bbgatekeeper_ini_auto" />
+				<strong>{{ lang('BBGATEKEEPER_INI_AUTO_MODAL_ACK') }}</strong>
+			</label>
+		</p>
+		<div class="bbgatekeeper-modal-actions">
+			<button type="button" id="bbgatekeeper-ini-auto-modal-cancel" class="button2 larger-button">
+				{{ lang('CANCEL') }}
+			</button>
+			<button type="button" class="button1 larger-button" id="bbgatekeeper-ini-auto-modal-confirm" disabled="disabled">
+				{{ lang('BBGATEKEEPER_INI_AUTO_MODAL_CONFIRM') }}
+			</button>
+		</div>
+	</div>
+</div>
+{% endif %}
 
 <div id="bbgatekeeper-save-modal" class="bbgatekeeper-modal-overlay" style="display:none;">
 	<div class="bbgatekeeper-modal-box submit-buttons">
@@ -351,4 +452,4 @@
 	</div>
 </div>
 
-{% INCLUDE 'overall_footer.html' %}
+{% include 'overall_footer.html' %}

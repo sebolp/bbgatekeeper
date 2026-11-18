@@ -87,14 +87,65 @@ class main_module
 		$do_deploy = $request->is_set_post('submit_deploy');
 		$do_reset = $request->is_set_post('submit_reset');
 		$do_generate_secret = $request->is_set_post('submit_generate_secret');
+		$do_ini_auto_enable = $request->is_set_post('submit_ini_auto_enable');
+		$do_ini_auto_disable = $request->is_set_post('submit_ini_auto_disable');
 
-		if (($do_save || $do_deploy || $do_reset || $do_generate_secret) && !check_form_key('sebo_bbgatekeeper'))
+		// Automatic mode (the extension edits the website root .user.ini)
+		// only exists after an explicit, recorded consent.
+		$ini_auto = (bool) ($config['bbgatekeeper_ini_auto_enable'] ?? false);
+
+		// Every state changing request must carry a valid form token
+		if (($do_save || $do_deploy || $do_reset || $do_generate_secret || $do_ini_auto_enable || $do_ini_auto_disable) && !check_form_key('sebo_bbgatekeeper'))
 		{
 			trigger_error('FORM_INVALID' . adm_back_link($this->u_action), E_USER_WARNING);
 		}
 
+		if ($do_ini_auto_enable)
+		{
+			// The consent is verified here, server side, and not only in the
+			// browser: the acknowledgement checkbox must be part of this very POST.
+			if (!$request->variable('ini_consent_ack', false))
+			{
+				trigger_error($user->lang('BBGATEKEEPER_INI_AUTO_ACK_MISSING') . adm_back_link($this->u_action), E_USER_WARNING);
+			}
+
+			$config->set('bbgatekeeper_ini_auto_enable', '1');
+			$config->set('bbgatekeeper_ini_auto_consent_time', (string) time());
+			$config->set('bbgatekeeper_ini_auto_consent_user', (string) $user->data['username']);
+
+			/** @var \phpbb\log\log_interface $log */
+			$log = $phpbb_container->get('log');
+			$log->add('admin', $user->data['user_id'], $user->ip, 'LOG_BBGATEKEEPER_INI_AUTO_ENABLED', time(), []);
+
+			trigger_error($user->lang('BBGATEKEEPER_INI_AUTO_ENABLED_MSG') . adm_back_link($this->u_action), E_USER_NOTICE);
+		}
+
+		if ($do_ini_auto_disable)
+		{
+			// Back to manual mode: the consent record is cleared. The
+			// auto_prepend_file line (if any) is NOT touched here.
+			$config->set('bbgatekeeper_ini_auto_enable', '0');
+			$config->set('bbgatekeeper_ini_auto_consent_time', '0');
+			$config->set('bbgatekeeper_ini_auto_consent_user', '');
+
+			/** @var \phpbb\log\log_interface $log */
+			$log = $phpbb_container->get('log');
+			$log->add('admin', $user->data['user_id'], $user->ip, 'LOG_BBGATEKEEPER_INI_AUTO_DISABLED', time(), []);
+
+			trigger_error($user->lang('BBGATEKEEPER_INI_AUTO_DISABLED_MSG') . adm_back_link($this->u_action), E_USER_NOTICE);
+		}
+
 		if ($do_reset)
 		{
+			// Reset removes the .user.ini line and then the generated files:
+			// it only makes sense (and is only safe) in automatic mode. In
+			// manual mode the line was added by the admin, so deleting the
+			// files could leave auto_prepend_file pointing at nothing.
+			if (!$ini_auto)
+			{
+				trigger_error($user->lang('BBGATEKEEPER_RESET_REFUSED') . adm_back_link($this->u_action), E_USER_WARNING);
+			}
+
 			/** @var \sebo\bbgatekeeper\core\reset $reset */
 			$reset = $phpbb_container->get('sebo.bbgatekeeper.reset');
 			$success = $reset->reset();
@@ -147,7 +198,7 @@ class main_module
 			$results['export_config'] = $exporter->export();
 
 			// if export fails do not deploy bbgatekeeper_config.php
-			$results['deploy_logger'] = $results['export_config'] && $deployer->deploy();
+			$results['deploy_logger'] = $results['export_config'] && $deployer->deploy($ini_auto);
 
 			$success = $results['export_config'] && $results['deploy_logger'];
 
@@ -156,7 +207,7 @@ class main_module
 
 			$labels = [
 				'export_config' => $user->lang('BBGATEKEEPER_CONFIG_FILE_GENERATING'),
-				'deploy_logger' => $user->lang('BBGATEKEEPER_LOGGER_AND_INI_DEPLOY'),
+				'deploy_logger' => $user->lang($ini_auto ? 'BBGATEKEEPER_LOGGER_AND_INI_DEPLOY' : 'BBGATEKEEPER_LOGGER_DEPLOY'),
 			];
 
 			// Technical reason for each failed step, gathered from the
@@ -191,6 +242,10 @@ class main_module
 				$log->add('admin', $user->data['user_id'], $user->ip, 'LOG_BBGATEKEEPER_DEPLOY_FAILED', time(), [$reason_text]);
 
 				$lines[] = '<br>' . $user->lang('BBGATEKEEPER_DOWNLOAD_PACKAGE_HINT');
+			}
+			else if (!$ini_auto)
+			{
+				$lines[] = '<br>' . $user->lang('BBGATEKEEPER_INI_MANUAL_REMINDER');
 			}
 
 			trigger_error(
@@ -310,7 +365,7 @@ class main_module
 			'AUTOLOGIN_ENABLE'  => (bool) ($config['bbgatekeeper_autologin_enable'] ?? false),
 
 			// Toggle to enable/disable the access log write
-			// (store/logs/access.log) from the auto_prepend logger, to
+			// (store/sebo-bbgatekeeper/logs/access.log) from the auto_prepend logger, to
 			// save one write per request when it's not needed.
 			'ENABLE_ACCESS_LOG' => (bool) ($config['bbgatekeeper_enable_access_log'] ?? true),
 
@@ -320,8 +375,21 @@ class main_module
 			// Warn when REMOTE_ADDR still looks like a local proxy hop
 			// and Trusted Proxy isn't configured: means every visitor is
 			// currently sharing the same address for bans/logs.
-			'SHOW_TRUSTED_PROXY_WARNING' => (bool) preg_match('/^127\.0\.0\.\d+$/', (string) $request->server('REMOTE_ADDR'))
+			'SHOW_TRUSTED_PROXY_WARNING' => (bool) preg_match('/^(127\.0\.0\.\d+|::1)$/', (string) $request->server('REMOTE_ADDR'))
 				&& !(bool) ($config['bbgatekeeper_trusted_proxy_enable'] ?? false),
+
+			// True only when the logger really ran on this very request
+			// (false e.g. under mod_php, where .user.ini is ignored).
+			'S_PREPEND_ACTIVE'	=> $checker->is_prepend_active(),
+
+			// Manual mode: the exact line the admin has to add to .user.ini
+			// (escaped by the template). Empty if the path cannot be resolved.
+			'INI_LINE'				=> (string) $phpbb_container->get('sebo.bbgatekeeper.deployer')->render_ini_line(),
+
+			// Automatic mode (consent recorded server side)
+			'S_INI_AUTO'				=> $ini_auto,
+			'INI_AUTO_CONSENT_TIME'		=> $ini_auto ? $user->format_date((int) ($config['bbgatekeeper_ini_auto_consent_time'] ?? 0)) : '',
+			'INI_AUTO_CONSENT_USER'		=> $ini_auto ? htmlspecialchars((string) ($config['bbgatekeeper_ini_auto_consent_user'] ?? ''), ENT_COMPAT, 'UTF-8') : '',
 
 			// Static, always-reachable diagnostic file: shows $_SERVER
 			// exactly as the web server passes it, before phpBB (and
@@ -360,7 +428,16 @@ class main_module
 		// Field is fully visible/editable now; default to the current
 		// stored value so a missing POST field never blanks it out.
 		$current_sign_secret = (string) ($config['bbgatekeeper_hcap_sign_secret'] ?? '');
-		$config->set('bbgatekeeper_hcap_sign_secret', $request->variable('hcap_sign_secret', $current_sign_secret));
+		$sign_secret = trim($request->variable('hcap_sign_secret', $current_sign_secret));
+
+		// An empty signing key would make every verification cookie
+		// forgeable, so it is never stored: generate a fresh one instead.
+		if ($sign_secret === '')
+		{
+			$sign_secret = bin2hex(random_bytes(32));
+		}
+
+		$config->set('bbgatekeeper_hcap_sign_secret', $sign_secret);
 
 		$config->set('bbgatekeeper_cookie_name', $request->variable('cookie_name', 'fpc_verified_hcap'));
 		$config->set('bbgatekeeper_cookie_ttl', (string) max(60, $request->variable('cookie_ttl', 86400)));

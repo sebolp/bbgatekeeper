@@ -117,6 +117,26 @@ class deploy_status_checker
 	}
 
 	/**
+	* Proves that the prepended logger is actually running on the CURRENT
+	* request, instead of only trusting that the files exist.
+	*
+	* .user.ini is only honoured by the CGI, FastCGI and FPM SAPIs: under
+	* mod_php the files can all be in place and the logger still never runs.
+	* The logger defines BBGATEKEEPER_LOG_DIR as soon as it has loaded its
+	* config, so its presence means the prepend is live.
+	*
+	* Note: PHP-FPM caches .user.ini for user_ini.cache_ttl seconds
+	* (300s by default), so this can be false for a few minutes after a
+	* fresh deploy.
+	*
+	* @return bool
+	*/
+	public function is_prepend_active(): bool
+	{
+		return defined('BBGATEKEEPER_LOG_DIR');
+	}
+
+	/**
 	* Checks, via regex, whether .user.ini points auto_prepend_file at
 	* our generated bbgatekeeper_logger.php.
 	*

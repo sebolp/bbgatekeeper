@@ -13,7 +13,7 @@ namespace sebo\bbgatekeeper\core;
 /**
 * Resets the deployment without touching the settings saved in
 * phpbb_config: removes auto_prepend_file from .user.ini first, and only
-* if that succeeds, deletes store/runtime/ and store/logs/. This order is
+* if that succeeds, deletes store/sebo-bbgatekeeper/bbgatekeeper/. This order is
 * mandatory - removing store/ first while .user.ini still points at it
 * would take the whole site down on every request.
 */
